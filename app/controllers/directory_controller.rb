@@ -72,10 +72,62 @@ class DirectoryController < ApplicationController
     render :text=>return_data.to_json, :layout=>false
   end
 
-#  def rename
-#    newname = dir = (params[:newname] || 'newname')
+  def rename
+    newname = (params[:newname] || 'newname')
+    oldname = (params[:oldname] || 'oldname')
 
+    return_data = Object.new
+    if File.exist?(oldname) then
+      begin
+        File.rename(oldname, newname)
+        return_data = {:success => true}
+      rescue
+        ########################
+      end
+    else
+      return_data = {:success => false, :error => "Cannot rename file " + oldname + " to " + newname}
+    end
 
-#  end
+    render :text=>return_data.to_json, :layout=>false
+  end
+
+  def newdir
+    dir = (params[:dir] || 'dir')
+
+        return_data = Object.new
+    if File.exist?(dir) == false then
+      begin
+        Dir.mkdir(dir)
+        return_data = {:success => true}
+      rescue
+        ########################
+      end
+    else
+      return_data = {:success => false, :error => "Cannot create directory: " + dir}
+    end
+
+    render :text=>return_data.to_json, :layout=>false
+
+  end
+
+  def delete
+    file = (params[:file] || 'file')
+
+    return_data = Object.new
+    if File.exist?(file)  then
+      begin
+        File.delete(file)
+        return_data = {:success => true}
+      rescue
+        ########################
+      end
+    else
+      return_data = {:success => false, :error => "Cannot delete: " + file}
+    end
+
+    render :text=>return_data.to_json, :layout=>false
+
+  end
+
 
 end
