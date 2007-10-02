@@ -1,9 +1,9 @@
 # Directory method
 class DirectoryController < ApplicationController
+
   def list
     return_data = Hash.new()
-    #dir = (params[:dir] || 'dir')
-    dir = "/Users/papywarrior/ProjsPerso/lesotdudestinRubyDev/rged"
+    dir = (params[:dir] || 'dir')
 
     if dir == nil || dir == "" then
       dir = "."
@@ -23,7 +23,6 @@ class DirectoryController < ApplicationController
         }
       end
     end
-
     if (return_data[:Files] != nil) then
       return_data[:FilesCount] = return_data[:Files].length
     else
@@ -33,7 +32,6 @@ class DirectoryController < ApplicationController
   end
 
   def get
-    #    dir = "/Users/papywarrior/ProjsPerso/lesotdudestinRubyDev/rged/"
     dir = (params[:path] || 'path')
     if dir == nil || dir == "" then
       dir = "."
@@ -128,6 +126,8 @@ class DirectoryController < ApplicationController
     render :text=>return_data.to_json, :layout=>false
 
   end
+
+
 
 
 end
