@@ -1,0 +1,285 @@
+/* Ext.ux.FileTreePanel css file
+ *
+ * vim:sw=2:ts=2:fdc=4 
+ * $Id: filetree.css 68 2007-07-26 21:29:57Z jozo $ 
+ */
+
+.x-filetree-nodename {
+	font-weight: bold;
+	color: black;
+}
+.x-filetree-form-item {
+	font-size: 11px;
+}
+.x-filetree-form-item input {
+	border-color: transparent;
+	font-size: 11px;
+}
+.folder .x-tree-node-icon {
+	background-image: url(../extjs/resources/images/default/tree/folder.gif);
+	background-repeat: no-repeat;
+}
+.x-tree-node-expanded .x-tree-node-icon {
+	background-image: url(../extjs/resources/images/default/tree/folder-open.gif);
+	background-repeat: no-repeat;
+}
+.folder-uploading .x-tree-node-icon {
+	background-image: url(folder_upload.gif);
+	background-repeat: no-repeat;
+}
+.folder-uploading-expanded .x-tree-node-icon {
+	background-image: url(folder_upload_open.gif);
+	background-repeat: no-repeat;
+}
+.x-menu-sep {
+	font-size: 2px;
+}
+.x-pginfo {
+	border: 1px solid silver;
+	background: #f4f4ff;
+}
+.x-pg-ct {
+	margin: 4px;
+	width: 154px;
+}
+
+
+/* mime type icons */
+.file-pdf .x-tree-node-icon 
+, .file-ai .x-tree-node-icon 
+{
+	background-image: url(../img/icons/mime/pdf_document.png);
+}
+.file-txt .x-tree-node-icon {
+	background-image: url(../img/icons/mime/txt.png);
+}
+.file-bmp .x-tree-node-icon 
+, .file-cgm .x-tree-node-icon 
+, .file-dcm .x-tree-node-icon 
+, .file-dds .x-tree-node-icon 
+, .file-exr .x-tree-node-icon 
+, .file-gif .x-tree-node-icon 
+, .file-hdr .x-tree-node-icon 
+, .file-ico .x-tree-node-icon 
+, .file-jng .x-tree-node-icon 
+, .file-jp2 .x-tree-node-icon 
+, .file-jpeg .x-tree-node-icon 
+, .file-jpg .x-tree-node-icon 
+, .file-pbm .x-tree-node-icon 
+, .file-pbmraw .x-tree-node-icon 
+, .file-pcd .x-tree-node-icon 
+, .file-pcx .x-tree-node-icon 
+, .file-pgm .x-tree-node-icon 
+, .file-pgmraw .x-tree-node-icon 
+, .file-pic .x-tree-node-icon 
+, .file-png .x-tree-node-icon 
+, .file-pnm .x-tree-node-icon 
+, .file-psd .x-tree-node-icon 
+, .file-raw .x-tree-node-icon 
+, .file-rgb .x-tree-node-icon 
+, .file-rgba .x-tree-node-icon 
+, .file-tga .x-tree-node-icon 
+, .file-tif .x-tree-node-icon 
+, .file-tiff .x-tree-node-icon 
+, .file-xbm .x-tree-node-icon 
+, .file-xcf .x-tree-node-icon 
+, .file-xpm .x-tree-node-icon 
+{
+	background-image: url(../img/icons/mime/image.png);
+}
+.file-conf .x-tree-node-icon 
+, .file-vim .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/source.png);
+}
+.file-html .x-tree-node-icon 
+, .file-htm .x-tree-node-icon 
+, .file-sgml .x-tree-node-icon 
+, .file-xhtml .x-tree-node-icon 
+, .file-xml .x-tree-node-icon 
+{
+	background-image: url(../img/icons/mime/html.png);
+}
+.file-sh .x-tree-node-icon {
+	background-image: url(../img/icons/mime/shellscript.png);
+}
+.file-3g2 .x-tree-node-icon
+, .file-3gp .x-tree-node-icon
+, .file-asf .x-tree-node-icon
+, .file-asx .x-tree-node-icon 
+, .file-avi .x-tree-node-icon 
+, .file-flc .x-tree-node-icon
+, .file-fli .x-tree-node-icon
+, .file-flv .x-tree-node-icon
+, .file-mkv .x-tree-node-icon
+, .file-mng .x-tree-node-icon
+, .file-mp4 .x-tree-node-icon
+, .file-mpeg .x-tree-node-icon
+, .file-mpg .x-tree-node-icon
+, .file-ogm .x-tree-node-icon
+, .file-rv .x-tree-node-icon
+, .file-wmp .x-tree-node-icon
+, .file-wmv .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/video.png);
+}
+.file-ttf .x-tree-node-icon 
+, .file-otf .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/font_truetype.png);
+}
+.file-exe .x-tree-node-icon 
+, .file-dll .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/exec_wine.png);
+}
+.file-doc .x-tree-node-icon 
+, .file-odt .x-tree-node-icon
+, .file-rtf .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/wordprocessing.png);
+}
+.file-xls .x-tree-node-icon 
+, .file-ods .x-tree-node-icon
+, .file-xlc .x-tree-node-icon
+, .file-xll .x-tree-node-icon
+, .file-xlm .x-tree-node-icon
+, .file-xlw .x-tree-node-icon
+, .file-wpd .x-tree-node-icon
+, .file-abw .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/spreadsheet_document.png);
+}
+.file-js .x-tree-node-icon {
+	background-image: url(../img/icons/mime/source_j.png);
+}
+.file-css .x-tree-node-icon {
+	background-image: url(../img/icons/mime/source_c.png);
+}
+.file-php .x-tree-node-icon {
+	background-image: url(../img/icons/mime/source_php.png);
+}
+.file-7z .x-tree-node-icon
+, .file-a .x-tree-node-icon
+, .file-ace .x-tree-node-icon
+, .file-arj .x-tree-node-icon 
+, .file-bz .x-tree-node-icon
+, .file-bz2 .x-tree-node-icon
+, .file-cpio .x-tree-node-icon 
+, .file-gz .x-tree-node-icon
+, .file-rar .x-tree-node-icon
+, .file-tgz .x-tree-node-icon
+, .file-tnf .x-tree-node-icon
+, .file-z .x-tree-node-icon 
+, .file-zip .x-tree-node-icon 
+, .file-zoo .x-tree-node-icon 
+{
+	background-image: url(../img/icons/mime/zip.png);
+}
+.file-ppt .x-tree-node-icon 
+, .file-odp .x-tree-node-icon
+, .file-ppz .x-tree-node-icon
+, .file-ppt .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/pps.png);
+}
+.file-msg .x-tree-node-icon {
+	background-image: url(../img/icons/mime/message.png);
+}
+.file-dwg .x-tree-node-icon 
+, .file-sxd .x-tree-node-icon
+, .file-dhw .x-tree-node-icon
+, .file-svg .x-tree-node-icon
+, .file-ps .x-tree-node-icon
+, .file-eps .x-tree-node-icon
+, .file-wmf .x-tree-node-icon
+, .file-fig .x-tree-node-icon
+, .file-msod .x-tree-node-icon 
+, .file-qpic .x-tree-node-icon 
+{
+	background-image: url(../img/icons/mime/vectorgfx.png);
+}
+.file-ics .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/vcalendar.png);
+}
+.file-chm .x-tree-node-icon
+, .file-info .x-tree-node-icon
+, .file-hlp .x-tree-node-icon
+, .file-help .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/info.png);
+}
+.file-aac .x-tree-node-icon
+, .file-ac3 .x-tree-node-icon
+, .file-aifc .x-tree-node-icon
+, .file-aiff .x-tree-node-icon
+, .file-ape .x-tree-node-icon
+, .file-au .x-tree-node-icon
+, .file-flac .x-tree-node-icon
+, .file-m3u .x-tree-node-icon
+, .file-m4a .x-tree-node-icon
+, .file-mac .x-tree-node-icon
+, .file-mid .x-tree-node-icon
+, .file-midi .x-tree-node-icon
+, .file-mp2 .x-tree-node-icon
+, .file-mp3 .x-tree-node-icon
+, .file-ogg .x-tree-node-icon
+, .file-psid .x-tree-node-icon
+, .file-ra .x-tree-node-icon
+, .file-ram .x-tree-node-icon
+, .file-sf .x-tree-node-icon
+, .file-sid .x-tree-node-icon
+, .file-spx .x-tree-node-icon
+, .file-wav .x-tree-node-icon
+, .file-wma .x-tree-node-icon
+, .file-wv .x-tree-node-icon
+, .file-wvc .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/sound.png);
+}
+.file-asc .x-tree-node-icon
+, .file-cer .x-tree-node-icon
+, .file-cert .x-tree-node-icon
+, .file-crt .x-tree-node-icon
+, .file-der .x-tree-node-icon
+, .file-gpg .x-tree-node-icon
+, .file-gpg .x-tree-node-icon
+, .file-p10 .x-tree-node-icon
+, .file-p12 .x-tree-node-icon
+, .file-p7c .x-tree-node-icon
+, .file-p7m .x-tree-node-icon
+, .file-p7s .x-tree-node-icon
+, .file-pem .x-tree-node-icon
+, .file-sig .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/file_locked.png);
+}
+.file-bin .x-tree-node-icon
+, .file-cue .x-tree-node-icon
+, .file-img .x-tree-node-icon
+, .file-iso .x-tree-node-icon
+, .file-mdf .x-tree-node-icon
+, .file-nrg .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/cdimage.png);
+}
+.file-jar .x-tree-node-icon
+, .file-java .x-tree-node-icon
+, .file-class .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/java_src.png);
+}
+.file-sql .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/source_s.png);
+}
+.file-moov .x-tree-node-icon
+, .file-mov .x-tree-node-icon
+, .file-qt .x-tree-node-icon
+{
+	background-image: url(../img/icons/mime/quicktime.png);
+}
+
+
+/* end of file */
