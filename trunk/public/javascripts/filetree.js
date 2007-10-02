@@ -21,7 +21,7 @@ Ext.onReady(function() {
 	// tree in the panel
 	var tree = new Ext.ux.FileTreePanel('panel-tree', {
 		animate: true
-		, dataUrl: 'filetree.php'
+		, dataUrl: '/file/list/'
 		, readOnly: false
 		, containerScroll: true
 		, enableDD: true
@@ -30,8 +30,8 @@ Ext.onReady(function() {
 		, enableDelete: true
 		, enableNewDir: true
 		, uploadPosition: 'menu'
-//		, edit: true
-//		, sort: true
+		, edit: true
+		, sort: true
 		, maxFileSize: 1048575
 		, hrefPrefix: '/filetree/'
 		, pgCfg: {
