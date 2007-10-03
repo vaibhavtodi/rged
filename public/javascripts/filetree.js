@@ -13,11 +13,8 @@ Ext.BLANK_IMAGE_URL = '/javascripts/extjs/resources/images/default/s.gif';
 // run this function when document becomes ready
 Ext.onReady(function() {
 
-	var iconPath = '/javascripts/imgages/silk/icons/';
-
 	Ext.QuickTips.init();
 
-	
 	// tree in the panel
 	var tree = new Ext.ux.FileTreePanel('panel-tree', {
 		animate: true
@@ -53,7 +50,7 @@ Ext.onReady(function() {
 	tree.setRootNode(root);
 	tree.render();
 	root.expand();
-//	tree.on('beforerename', function(tree, node, oldname, newname) {debugger;return false});
+	//tree.on('click', function(tree, node, oldname, newname) {debugger;return false});
 //	tree.setReadOnly(true);
 //	tree.setReadOnly(false);
 	// }}}

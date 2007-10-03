@@ -3,7 +3,7 @@ class DirectoryController < ApplicationController
 
   def list
     return_data = Hash.new()
-    dir = (params[:dir] || 'dir')
+    dir = (params[:dir] || '/')
 
     if dir == nil || dir == "" then
       dir = "."
@@ -17,7 +17,11 @@ class DirectoryController < ApplicationController
         d.each{
           |filename|
           if filename != "." && filename != ".." then
-            return_data[:Files][i] = {:name => filename, :size => File.size(filename), :lastChange => File.atime(filename).asctime}
+            begin
+              return_data[:Files][i] = {:name => filename, :size => File.size(dir + filename), :lastChange => File.atime(dir + filename).asctime}
+            rescue
+              return_data[:Files][i] = {:name => 'Error with ' + filename + ' ', :size => 0, :lastChange => ''}
+            end
             i = i + 1
           end
         }
