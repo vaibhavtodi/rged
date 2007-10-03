@@ -16,19 +16,19 @@
 	font-size: 11px;
 }
 .folder .x-tree-node-icon {
-	background-image: url(../extjs/resources/images/default/tree/folder.gif);
+	background-image: url(../javascripts/extjs/resources/images/default/tree/folder.gif);
 	background-repeat: no-repeat;
 }
 .x-tree-node-expanded .x-tree-node-icon {
-	background-image: url(../extjs/resources/images/default/tree/folder-open.gif);
+	background-image: url(../javascripts/extjs/resources/images/default/tree/folder-open.gif);
 	background-repeat: no-repeat;
 }
 .folder-uploading .x-tree-node-icon {
-	background-image: url(folder_upload.gif);
+	background-image: url(../images/icons/folder_upload.gif);
 	background-repeat: no-repeat;
 }
 .folder-uploading-expanded .x-tree-node-icon {
-	background-image: url(folder_upload_open.gif);
+	background-image: url(../images/icons/folder_upload_open.gif);
 	background-repeat: no-repeat;
 }
 .x-menu-sep {
@@ -48,10 +48,10 @@
 .file-pdf .x-tree-node-icon 
 , .file-ai .x-tree-node-icon 
 {
-	background-image: url(../img/icons/mime/pdf_document.png);
+	background-image: url(../images/icons/mime/pdf_document.png);
 }
 .file-txt .x-tree-node-icon {
-	background-image: url(../img/icons/mime/txt.png);
+	background-image: url(../images/icons/mime/txt.png);
 }
 .file-bmp .x-tree-node-icon 
 , .file-cgm .x-tree-node-icon 
@@ -85,12 +85,12 @@
 , .file-xcf .x-tree-node-icon 
 , .file-xpm .x-tree-node-icon 
 {
-	background-image: url(../img/icons/mime/image.png);
+	background-image: url(../images/icons/mime/image.png);
 }
 .file-conf .x-tree-node-icon 
 , .file-vim .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/source.png);
+	background-image: url(../images/icons/mime/source.png);
 }
 .file-html .x-tree-node-icon 
 , .file-htm .x-tree-node-icon 
@@ -98,10 +98,10 @@
 , .file-xhtml .x-tree-node-icon 
 , .file-xml .x-tree-node-icon 
 {
-	background-image: url(../img/icons/mime/html.png);
+	background-image: url(../images/icons/mime/html.png);
 }
 .file-sh .x-tree-node-icon {
-	background-image: url(../img/icons/mime/shellscript.png);
+	background-image: url(../images/icons/mime/shellscript.png);
 }
 .file-3g2 .x-tree-node-icon
 , .file-3gp .x-tree-node-icon
@@ -121,23 +121,23 @@
 , .file-wmp .x-tree-node-icon
 , .file-wmv .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/video.png);
+	background-image: url(../images/icons/mime/video.png);
 }
 .file-ttf .x-tree-node-icon 
 , .file-otf .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/font_truetype.png);
+	background-image: url(../images/icons/mime/font_truetype.png);
 }
 .file-exe .x-tree-node-icon 
 , .file-dll .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/exec_wine.png);
+	background-image: url(../images/icons/mime/exec_wine.png);
 }
 .file-doc .x-tree-node-icon 
 , .file-odt .x-tree-node-icon
 , .file-rtf .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/wordprocessing.png);
+	background-image: url(../images/icons/mime/wordprocessing.png);
 }
 .file-xls .x-tree-node-icon 
 , .file-ods .x-tree-node-icon
@@ -148,16 +148,31 @@
 , .file-wpd .x-tree-node-icon
 , .file-abw .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/spreadsheet_document.png);
+	background-image: url(../images/icons/mime/spreadsheet_document.png);
 }
 .file-js .x-tree-node-icon {
-	background-image: url(../img/icons/mime/source_j.png);
+	background-image: url(../images/icons/mime/source_j.png);
 }
 .file-css .x-tree-node-icon {
-	background-image: url(../img/icons/mime/source_c.png);
+	background-image: url(../images/icons/mime/source_c.png);
 }
-.file-php .x-tree-node-icon {
-	background-image: url(../img/icons/mime/source_php.png);
+.file-c .x-tree-node-icon {
+	background-image: url(../images/icons/mime/source_c.png);
+}
+.file-h .x-tree-node-icon {
+	background-image: url(../images/icons/mime/source_h.png);
+}
+.file-php .x-tree-node-icon
+, .file-php5 .x-tree-node-icon
+, .file-php4 .x-tree-node-icon
+, .file-php3 .x-tree-node-icon
+, .file-phtml .x-tree-node-icon
+ {
+	background-image: url(../images/icons/mime/source_php.png);
+}
+.file-swf .x-tree-node-icon
+, .file-fla .x-tree-node-icon {
+	background-image: url(../images/icons/mime/source_flash.png);
 }
 .file-7z .x-tree-node-icon
 , .file-a .x-tree-node-icon
@@ -174,17 +189,17 @@
 , .file-zip .x-tree-node-icon 
 , .file-zoo .x-tree-node-icon 
 {
-	background-image: url(../img/icons/mime/zip.png);
+	background-image: url(../images/icons/mime/zip.png);
 }
 .file-ppt .x-tree-node-icon 
 , .file-odp .x-tree-node-icon
 , .file-ppz .x-tree-node-icon
 , .file-ppt .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/pps.png);
+	background-image: url(../images/icons/mime/pps.png);
 }
 .file-msg .x-tree-node-icon {
-	background-image: url(../img/icons/mime/message.png);
+	background-image: url(../images/icons/mime/message.png);
 }
 .file-dwg .x-tree-node-icon 
 , .file-sxd .x-tree-node-icon
@@ -197,18 +212,18 @@
 , .file-msod .x-tree-node-icon 
 , .file-qpic .x-tree-node-icon 
 {
-	background-image: url(../img/icons/mime/vectorgfx.png);
+	background-image: url(../images/icons/mime/vectorgfx.png);
 }
 .file-ics .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/vcalendar.png);
+	background-image: url(../images/icons/mime/vcalendar.png);
 }
 .file-chm .x-tree-node-icon
 , .file-info .x-tree-node-icon
 , .file-hlp .x-tree-node-icon
 , .file-help .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/info.png);
+	background-image: url(../images/icons/mime/info.png);
 }
 .file-aac .x-tree-node-icon
 , .file-ac3 .x-tree-node-icon
@@ -236,7 +251,7 @@
 , .file-wv .x-tree-node-icon
 , .file-wvc .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/sound.png);
+	background-image: url(../images/icons/mime/sound.png);
 }
 .file-asc .x-tree-node-icon
 , .file-cer .x-tree-node-icon
@@ -253,7 +268,7 @@
 , .file-pem .x-tree-node-icon
 , .file-sig .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/file_locked.png);
+	background-image: url(../images/icons/mime/file_locked.png);
 }
 .file-bin .x-tree-node-icon
 , .file-cue .x-tree-node-icon
@@ -262,23 +277,23 @@
 , .file-mdf .x-tree-node-icon
 , .file-nrg .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/cdimage.png);
+	background-image: url(../images/icons/mime/cdimage.png);
 }
 .file-jar .x-tree-node-icon
 , .file-java .x-tree-node-icon
 , .file-class .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/java_src.png);
+	background-image: url(../images/icons/mime/source_java.png);
 }
 .file-sql .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/source_s.png);
+	background-image: url(../images/icons/mime/source_sql.png);
 }
 .file-moov .x-tree-node-icon
 , .file-mov .x-tree-node-icon
 , .file-qt .x-tree-node-icon
 {
-	background-image: url(../img/icons/mime/quicktime.png);
+	background-image: url(../images/icons/mime/quicktime.png);
 }
 
 
