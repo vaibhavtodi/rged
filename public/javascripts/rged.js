@@ -31,7 +31,8 @@ var Rged= function() {
 		, readOnly: false
 		, containerScroll: true
 		, enableDD: true
-		, enableUpload: false
+                , ddGroup: 'TreeDD'
+		, enableUpload: true
 		, enableRename: true
 		, enableDelete: true
 		, enableNewDir: true
@@ -103,7 +104,12 @@ var Rged= function() {
            }
            });
        menu.addField(textBox);
- 
+       menu.addFill ();
+       menu.addButton({
+           text: 'Logout', cls: 'x-btn-text-icon logout', handler: function(o, e) {
+               window.location = '/account/logout/';
+           }
+       });
     }
     
     function init_layout () {
