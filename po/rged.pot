@@ -1,0 +1,147 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: rged\n"
+"POT-Creation-Date: 2007-10-04 18:19+0200\n"
+"PO-Revision-Date: 2007-10-04 16:50+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: app/controllers/account_controller.rb:26
+msgid "Logged in successfully"
+msgstr "Acces autorise"
+
+#: app/controllers/account_controller.rb:28
+msgid "Logged in failed"
+msgstr "Echec de l'identification"
+
+#: app/controllers/account_controller.rb:38
+msgid "Thanks for signing up!"
+msgstr "Merci de vous etre enregistre!!"
+
+#: app/controllers/account_controller.rb:50
+msgid "You have been logged out."
+msgstr "Vous avez ete deconnecte"
+
+#: app/controllers/directory_controller.rb:79
+msgid "folder"
+msgstr "dossier"
+
+#: app/controllers/directory_controller.rb:87
+msgid "file-"
+msgstr "fichier-"
+
+#: app/controllers/directory_controller.rb:113
+msgid "Cannot rename file "
+msgstr "Impossible de renommer le fichier"
+
+#: app/controllers/directory_controller.rb:113
+msgid " to "
+msgstr " en "
+
+#: app/controllers/directory_controller.rb:131
+msgid "Cannot create directory: "
+msgstr "Impossible de creer le dossier: "
+
+#: app/controllers/directory_controller.rb:150
+msgid "Cannot delete: "
+msgstr "Impossible de supprimer: "
+
+#: app/models/user.rb:-
+msgid "user"
+msgstr "utilisateur"
+
+#: app/models/user.rb:-
+msgid "User|Login"
+msgstr "Utilisateur|Identifiant"
+
+#: app/models/user.rb:-
+msgid "User|Email"
+msgstr "Utilisateur|Courriel"
+
+#: app/models/user.rb:-
+msgid "User|Crypted password"
+msgstr "Utilisateur|Mot de passe crypte"
+
+#: app/models/user.rb:-
+msgid "User|Salt"
+msgstr "Utilisateur|Amere"
+
+#: app/models/user.rb:-
+msgid "User|Created at"
+msgstr "Utilisateur|Cree"
+
+#: app/models/user.rb:-
+msgid "User|Updated at"
+msgstr "Utilisateur|Mis a jour"
+
+#: app/models/user.rb:-
+msgid "User|Remember token"
+msgstr "Utilisateur|Mot enregistre"
+
+#: app/models/user.rb:-
+msgid "User|Remember token expires at"
+msgstr "Utilisateur|Mot enregistre expire a"
+
+#: app/views/account/login.rhtml:5
+msgid "Login Page"
+msgstr "Page de connetion"
+
+#: app/views/account/login.rhtml:38 app/views/account/signup.rhtml:43
+msgid "Login"
+msgstr "Identifiant"
+
+#: app/views/account/login.rhtml:42
+msgid " Login"
+msgstr "Identifiant"
+
+#: app/views/account/login.rhtml:43
+msgid "login"
+msgstr "Identifiant"
+
+#: app/views/account/login.rhtml:46 app/views/account/signup.rhtml:49
+msgid "Password"
+msgstr "Mot de passe"
+
+#: app/views/account/login.rhtml:50
+msgid "Remember me"
+msgstr "Se souvenir de moi"
+
+#: app/views/account/login.rhtml:54
+msgid "Log in"
+msgstr "Connection"
+
+#: app/views/account/login.rhtml:58 app/views/account/signup.rhtml:38
+#: app/views/account/signup.rhtml:55
+msgid "Sign up"
+msgstr "Enregistrer vous"
+
+#: app/views/account/signup.rhtml:5
+#, fuzzy
+msgid "Sign up Page"
+msgstr "Enregistrer vous"
+
+#: app/views/account/signup.rhtml:46
+msgid "Email"
+msgstr "Courriel"
+
+#: app/views/account/signup.rhtml:52
+msgid "Confirm Password"
+msgstr "Confirmer le mot de passe"
+
+#: app/views/account/signup.rhtml:60
+msgid "Cancel"
+msgstr "Annuler"
+
+#: app/views/layouts/application.rhtml:3
+msgid "Rails Demonstration"
+msgstr "Demonstration de Rails"

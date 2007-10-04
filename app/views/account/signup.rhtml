@@ -1,16 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+	"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title> <%= _('Sign up Page') %> </title>
+
+	<link rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/ext-all.css">
+
+
+        <link rel="stylesheet" type="text/css" href="/stylesheets/rged.css">
+
+        <link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-default.css">
+
+
+<style type="text/css">
+#acc-ct {
+	width: 240px;
+	position: relative;
+}
+#acc-wrap {
+	border: 1px solid silver;
+	background-color: white;
+}
+#adsense-top, #adsense-bottom {
+	margin: 10px;
+}
+.x-dock-panel .x-dock-panel-body {
+	background-color: #ffffc8;
+}
+</style>
+</head>
+
+
+<body>
+<div style="width:300px;">
+    <div class="x-box-tl"><div class="x-box-tr"><div class="x-box-tc"></div></div></div>
+    <div class="x-box-ml"><div class="x-box-mr"><div class="x-box-mc">
+        <h3 align="center" style="margin-bottom:5px;"> <%= _('Sign up') %> </h3>
+        <div id="form-ct">
+
 <%= error_messages_for :user %>
 <% form_for :user do |f| -%>
-<p><label for="login">Login</label><br/>
+<p><label for="login"> <%= _('Login') %> </label><br/>
 <%= f.text_field :login %></p>
 
-<p><label for="email">Email</label><br/>
+<p><label for="email"> <%= _('Email') %> </label><br/>
 <%= f.text_field :email %></p>
 
-<p><label for="password">Password</label><br/>
+<p><label for="password"> <%= _('Password') %> </label><br/>
 <%= f.password_field :password %></p>
 
-<p><label for="password_confirmation">Confirm Password</label><br/>
+<p><label for="password_confirmation"> <%= _('Confirm Password') %> </label><br/>
 <%= f.password_field :password_confirmation %></p>
 
-<p><%= submit_tag 'Sign up' %></p>
+<p><%= submit_tag _('Sign up') %></p>
 <% end -%>
+
+<br>
+<form action = "/account/login" >
+<p><%= submit_tag _('Cancel') %></p>
+</form>
+
+        </div>
+    </div></div></div>
+    <div class="x-box-bl"><div class="x-box-br"><div class="x-box-bc"></div></div></div>
+</div>
+</body>
+</html>

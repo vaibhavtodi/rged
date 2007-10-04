@@ -1,62 +1,8 @@
-<!--
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 	"http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="keywords" content="extjs,ext,ux,javascript,library,web development,web design,dhtml,widget,webdev,component,control,tree,file,gui,interface,effect,example,demo,download,howto,yui-ext,theme,aero,vista,skin,animation">
-	<title>Rged</title>
-	<link rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/ext-all.css">
-
-
-        <link rel="stylesheet" type="text/css" href="/stylesheets/rged.css">
-
-        <link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-default.css">
-
-	<script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
-	<script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
-
-     <script type="text/javascript" src="/javascripts/login.js"></script>
-
-<style type="text/css">
-#acc-ct {
-	width: 240px;
-	position: relative;
-}
-#acc-wrap {
-	border: 1px solid silver;
-	background-color: white;
-}
-#adsense-top, #adsense-bottom {
-	margin: 10px;
-}
-.x-dock-panel .x-dock-panel-body {
-	background-color: #ffffc8;
-}
-</style>
-</head>
-
-<body>
-<div style="width:300px;">
-    <div class="x-box-tl"><div class="x-box-tr"><div class="x-box-tc"></div></div></div>
-    <div class="x-box-ml"><div class="x-box-mr"><div class="x-box-mc">
-        <h3 style="margin-bottom:5px;">Login</h3>
-        <div id="form-ct">
-
-        </div>
-    </div></div></div>
-    <div class="x-box-bl"><div class="x-box-br"><div class="x-box-bc"></div></div></div>
-</div>
-</body>
-</html>
--->
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-	"http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<title>Login Page</title>
+<title> <%= _('Login Page') %></title>
 
 	<link rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/ext-all.css">
 
@@ -89,26 +35,27 @@
 <div style="width:300px;">
     <div class="x-box-tl"><div class="x-box-tr"><div class="x-box-tc"></div></div></div>
     <div class="x-box-ml"><div class="x-box-mr"><div class="x-box-mc">
-        <h3 style="margin-bottom:5px;">Login</h3>
+        <h3 align="center" style="margin-bottom:5px;"> <%= _('Login') %> </h3>
         <div id="form-ct">
 
 <% form_tag do -%>
-<p><label for="login">Login</label><br/>
-<%= text_field_tag 'login' %></p>
+<p><label for="login"> <%= _(' Login') %> </label><br/>
+<%= text_field_tag _('login') %></p>
 <br>
-<p><label for="password">Password</label><br/>
+
+<p><label for="password"> <%= _('Password') %> </label><br/>
 <%= password_field_tag 'password' %></p>
 <br>
-<!-- Uncomment this if you want this functionality -->
-<p><label for="remember_me">Remember me:</label>
+
+<p><label for="remember_me"> <%= _('Remember me') %> :</label>
 <%= check_box_tag 'remember_me' %></p>
 <br>
 
-<p><%= submit_tag 'Log in' %></p>
+<p><%= submit_tag _('Log in') %></p>
 <% end -%>
 <br>
 <form action = "/account/signup" >
-<p><%= submit_tag 'Sign up' %></p>
+<p><%= submit_tag _('Sign up') %></p>
 </form>
 
         </div>
