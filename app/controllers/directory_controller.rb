@@ -1,5 +1,6 @@
 # Directory method
 class DirectoryController < ApplicationController
+  before_filter :login_required
 
   def list
     return_data = Hash.new()
@@ -22,16 +23,16 @@ class DirectoryController < ApplicationController
           if filename != "." && filename != ".." then
             begin
               return_data[:Files][i] = {
-                :name => filename, 
-                :size => File.size(dir + filename), 
-                :lastChange => File.atime(dir + filename).asctime, 
+                :name => filename,
+                :size => File.size(dir + filename),
+                :lastChange => File.atime(dir + filename).asctime,
                 :path => dir + filename,
                 :cls => ((File.directory?(dir + filename)) ? 'folder' : File.extname(filename).sub(".", 'file-'))
               }
             rescue
               return_data[:Files][i] = {
-                :name => 'Error with ' + filename + ' ', 
-                :size => 0, 
+                :name => 'Error with ' + filename + ' ',
+                :size => 0,
                 :lastChange => '',
                 :path => '',
                 :cls => ''
@@ -58,7 +59,7 @@ class DirectoryController < ApplicationController
     if !dir.ends_with?('/') then
       dir += '/'
     end
-    
+
     if File.exist?(dir) then
       i = 0
       return_data = Array.new
@@ -72,18 +73,18 @@ class DirectoryController < ApplicationController
           if filename != "." && filename != ".." then
             if File.directory?(dir + filename) then
               return_data[i] = {
-                :id => dir + filename, 
-                :text => filename, 
-                :cls => "folder", 
-                :disabled => readonly, 
+                :id => dir + filename,
+                :text => filename,
+                :cls => "folder",
+                :disabled => readonly,
                 :leaf => false
                 }
             else
               return_data[i] = {
-                :id => dir + filename, 
-                :text => filename, 
-                :cls => File.extname(filename).sub(".", 'file-'), 
-                :disabled => false, 
+                :id => dir + filename,
+                :text => filename,
+                :cls => File.extname(filename).sub(".", 'file-'),
+                :disabled => false,
                 :leaf => true
                 }
             end
