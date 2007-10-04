@@ -54,9 +54,6 @@ class DirectoryController < ApplicationController
 
   def get
     dir = (params[:path] || '')
-    if dir == nil || dir == "" then
-      dir = "./"
-    end
     if !dir.ends_with?('/') then
       dir += '/'
     end
