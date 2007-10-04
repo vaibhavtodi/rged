@@ -1,6 +1,7 @@
 # Directory method
 class DirectoryController < ApplicationController
-  before_filter :login_required
+
+    before_filter :login_from_cookie
 
   def list
     return_data = Hash.new()
@@ -75,7 +76,7 @@ class DirectoryController < ApplicationController
               return_data[i] = {
                 :id => dir + filename,
                 :text => filename,
-                :cls => "folder",
+                :cls => _("folder"),
                 :disabled => readonly,
                 :leaf => false
                 }
@@ -83,7 +84,7 @@ class DirectoryController < ApplicationController
               return_data[i] = {
                 :id => dir + filename,
                 :text => filename,
-                :cls => File.extname(filename).sub(".", 'file-'),
+                :cls => File.extname(filename).sub(".", _('file-')),
                 :disabled => false,
                 :leaf => true
                 }
@@ -109,7 +110,7 @@ class DirectoryController < ApplicationController
         ########################
       end
     else
-      return_data = {:success => false, :error => "Cannot rename file " + oldname + " to " + newname}
+      return_data = {:success => false, :error => _("Cannot rename file ") + oldname + _(" to ") + newname}
     end
 
     render :text=>return_data.to_json, :layout=>false
@@ -127,7 +128,7 @@ class DirectoryController < ApplicationController
         ########################
       end
     else
-      return_data = {:success => false, :error => "Cannot create directory: " + dir}
+      return_data = {:success => false, :error => _("Cannot create directory: ") + dir}
     end
 
     render :text=>return_data.to_json, :layout=>false
@@ -146,14 +147,11 @@ class DirectoryController < ApplicationController
         ########################
       end
     else
-      return_data = {:success => false, :error => "Cannot delete: " + file}
+      return_data = {:success => false, :error => _("Cannot delete: ") + file}
     end
 
     render :text=>return_data.to_json, :layout=>false
 
   end
-
-
-
 
 end
