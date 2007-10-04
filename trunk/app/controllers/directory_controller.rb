@@ -3,10 +3,13 @@ class DirectoryController < ApplicationController
 
   def list
     return_data = Hash.new()
-    dir = (params[:dir] || '/')
+    dir = (params[:path] || '')
 
     if dir == nil || dir == "" then
-      dir = "."
+      dir = "./"
+    end
+    if !dir.ends_with?('/') then
+      dir += '/'
     end
 
     if File.exist?(dir) then
@@ -18,9 +21,21 @@ class DirectoryController < ApplicationController
           |filename|
           if filename != "." && filename != ".." then
             begin
-              return_data[:Files][i] = {:name => filename, :size => File.size(dir + filename), :lastChange => File.atime(dir + filename).asctime}
+              return_data[:Files][i] = {
+                :name => filename, 
+                :size => File.size(dir + filename), 
+                :lastChange => File.atime(dir + filename).asctime, 
+                :path => dir + filename,
+                :cls => ((File.directory?(dir + filename)) ? 'folder' : File.extname(filename).sub(".", 'file-'))
+              }
             rescue
-              return_data[:Files][i] = {:name => 'Error with ' + filename + ' ', :size => 0, :lastChange => ''}
+              return_data[:Files][i] = {
+                :name => 'Error with ' + filename + ' ', 
+                :size => 0, 
+                :lastChange => '',
+                :path => '',
+                :cls => ''
+                }
             end
             i = i + 1
           end
@@ -36,11 +51,14 @@ class DirectoryController < ApplicationController
   end
 
   def get
-    dir = (params[:path] || 'path')
+    dir = (params[:path] || '')
     if dir == nil || dir == "" then
-      dir = "."
+      dir = "./"
     end
-
+    if !dir.ends_with?('/') then
+      dir += '/'
+    end
+    
     if File.exist?(dir) then
       i = 0
       return_data = Array.new
@@ -48,23 +66,26 @@ class DirectoryController < ApplicationController
         d = Dir.entries(dir)
         d.each{
           |filename|
-          if File.readable?(filename) && File.executable?(filename) == false && File.writable?(filename) == false then
+          if File.readable?(dir + filename) && File.executable?(dir + filename) == false && File.writable?(dir + filename) == false then
             readonly = true
           end
           if filename != "." && filename != ".." then
-            if File.directory?(filename) then
-              if readonly then
-                return_data[i] = {:text => filename, :cls => "folder", :disabled => true, :leaf => false}
-              else
-                return_data[i] = {:text => filename, :cls => "folder", :disabled => false, :leaf => false}
-              end
-
+            if File.directory?(dir + filename) then
+              return_data[i] = {
+                :id => dir + filename, 
+                :text => filename, 
+                :cls => "folder", 
+                :disabled => readonly, 
+                :leaf => false
+                }
             else
-              if readonly then
-                return_data[i] = {:text => filename, :cls => File.extname(filename).sub(".", 'file-'), :disabled => false, :leaf => true}
-              else
-                return_data[i] = {:text => filename, :cls => File.extname(filename).sub(".", 'file-'), :disabled => false, :leaf => true}
-              end
+              return_data[i] = {
+                :id => dir + filename, 
+                :text => filename, 
+                :cls => File.extname(filename).sub(".", 'file-'), 
+                :disabled => false, 
+                :leaf => true
+                }
             end
             i = i + 1
           end
@@ -96,7 +117,7 @@ class DirectoryController < ApplicationController
   def newdir
     dir = (params[:dir] || 'dir')
 
-        return_data = Object.new
+    return_data = Object.new
     if File.exist?(dir) == false then
       begin
         Dir.mkdir(dir)

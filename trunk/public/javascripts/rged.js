@@ -18,10 +18,8 @@ var Rged= function() {
     var grid;
     var textBox;
     
-    return {
-        init : function() {
-           Ext.QuickTips.init();
-           
+    function init_tree () {
+                   
            // tree in the panel
 	tree = new Ext.ux.FileTreePanel('tree', {
 		animate: true
@@ -59,29 +57,56 @@ var Rged= function() {
 	var root = new Ext.tree.AsyncTreeNode({text:'/', path:'/', allowDrag:false});
 	tree.setRootNode(root);
 	tree.render();
-        tree.on('click', function(node, elt) {textBox.setValue(tree.getPath(node))});
+        tree.on('click', function(node, elt) {
+                var path = '';
+                if (node.isLeaf())
+                    path = tree.getPath(node.parentNode);
+                else
+                    path = tree.getPath(node);
+                textBox.setValue(path);
+                ds.load({params: {path: path}});
+            });
 	root.expand();
-//	tree.on('beforerename', function(tree, node, oldname, newname) {debugger;return false});
-//	tree.setReadOnly(true);
-//	tree.setReadOnly(false);
-	// }}}
-            
+    }
+    
+    function init_menu () {
+                   
        menu = new Ext.Toolbar('menu');
        menu.addButton({
            text: 'Rename', cls: 'x-btn-text-icon scroll-bottom', handler: function(o, e) {
-               var iframeDoc = getIframeDocument('center-iframe');
-               iframeDoc.body.scrollTop = iframeDoc.body.scrollHeight;
+              
            }
        });
        menu.addButton({
            text: 'Delete', cls: 'x-btn-text-icon scroll-top', handler: function(o, e) {
-               var iframeDoc = getIframeDocument('center-iframe');
-               iframeDoc.body.scrollTop = 0;
+               
            }
        });
-       textBox = new Ext.form.TextField ();
-       textBox.on('change', function(field, newval, oldval) {ds.load ({params: {dir : newval}});});
+       textBox = new Ext.form.TextField ({cls : 'rged-adress', width: 500});
+       textBox.on('change', function(field, newval, oldval) {
+           ds.load ({params: {path : newval}});
+           var node = tree.getNodeById(newval);
+                if (node) {
+                    tree.getSelectionModel().select(node);
+                    node.expand ();
+                }
+           });
+       textBox.on('specialkey', function(field, e) {
+           if (e.getKey() == e.ENTER) {
+               var path = field.getValue ()
+                ds.load ({params: {path : path}});
+                var node = tree.getNodeById(path);
+                if (node) {
+                    tree.getSelectionModel().select(node);
+                    node.expand ();
+                }
+           }
+           });
        menu.addField(textBox);
+ 
+    }
+    
+    function init_layout () {
        var mainLayout = new Ext.BorderLayout(document.body, {
             north: {
                 split:false,
@@ -120,16 +145,21 @@ var Rged= function() {
             fitToFrame: true, autoScroll: true, resizeEl: grid, title: 'Files'
         })); 
         mainLayout.endUpdate();
-       
-        // Grid Data Store
+        
+    }
+    
+    function init_grid () {
+            // Grid Data Store
         ds = new Ext.data.Store({
             proxy: new Ext.data.HttpProxy({url: '/directory/list'}),
             reader: new Ext.data.JsonReader({
                 root: 'Files',
                 totalProperty: 'FilesCount',
-                id: 'id'
+                id: 'path'
             }, [
                 {name: 'name', mapping: 'name'},
+                {name: 'path', mapping: 'path'},
+                {name: 'cls', mapping: 'cls'},
                 {name: 'size', mapping: 'size', type: 'int'},
                 {name: 'lastChange', mapping: 'lastChange', type: 'date', dateFormat: 'Y-m-d'}
             ])
@@ -156,18 +186,23 @@ var Rged= function() {
             }
             return val;
         }
+        
+        function icon(val){
+            return '<img class="x-tree-node-icon' + val + '" width="16" height="18" src="/javascripts/extjs/resources/images/default/s.gif"/>';
+        }
 	// Column Model of the grid
         var colModel = new Ext.grid.ColumnModel([
+                        {id: 'icon', header: '<img src="/images/icons/arrow_up.png" width="16" height="18"/>', width: 20, sortable: false, renderer: icon, dataIndex: 'cls', fixed : true},
 			{id:'name',header: "Name", width: 160, sortable: true, locked:false, dataIndex: 'name'
                             , editor: new Ext.grid.GridEditor(new Ext.form.TextField({
                                 allowBlank: false}))},
 			{header: "Size", width: 75, sortable: true, renderer: size, dataIndex: 'size'},
-			{header: "Last Updated", width: 85, sortable: true, renderer: Ext.util.Format.dateRenderer('m/d/Y'), dataIndex: 'lastChange'}
+                        {header: "Last Updated", width: 85, sortable: true, renderer: Ext.util.Format.dateRenderer('m/d/Y'), dataIndex: 'lastChange'}
 		]);
 
 
         // create the Grid
-        var grid = new Ext.grid.EditorGrid('grid', {
+        var grid = new Ext.grid.Grid('grid', {
             ds: ds,
             cm: colModel,
             enableDragDrop : true,
@@ -175,9 +210,51 @@ var Rged= function() {
         });
         
         grid.render();
-        ds.load ({params: {dir : './'}});
+        grid.on('cellclick', function( grid, rowIndex, columnIndex, e ) 
+            {
+                var rec = grid.getDataSource().getAt(rowIndex);
+                var path = rec.get('path');
+                var folder = rec.get('cls');
+                if (folder == 'folder') {
+                    ds.load ({params: {path : path}});  
+                    textBox.setValue(path);
+                }
+                var node = tree.getNodeById(path);
+                if (node) {
+                    tree.getSelectionModel().select(node);
+                    node.expand ();
+                }
+            });
+        grid.on('cellcontextmenu', function( grid, rowIndex, columnIndex, e ) 
+            {
+                //Do Context menu
+            });
+        grid.on('headerclick', function( grid, columnIndex, e ) 
+        {
 
-        //grid.getSelectionModel().selectFirstRow();
+            if (grid.getColumnModel().getColumnId(columnIndex) == 'icon') {
+                var path = textBox.getValue();
+                ds.load ({params: {path : path + '/../'}});
+                textBox.setValue(path);
+            }
+        });
+    
+    }
+    
+    return {
+        init : function() {
+           Ext.QuickTips.init();
+           
+           init_tree();
+           init_menu ();
+           init_layout ();
+           init_grid ();
+           this.load_path ('./');
+        },
+        
+        load_path : function (path) {
+           ds.load ({params: {path: path}});
+           textBox.setValue(path);
         }
     };
 }();
