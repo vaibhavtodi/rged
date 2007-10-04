@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title> Démonstration de rails </title>
+  </head>
+  <body>
+    <% if logged_in? %>
+      <%= link_to 'logout', :controller => '/account', :action => 'logout' %>
+    <% end %>
+    <p style="color: green;"><%= flash[:notice] %></p>
+    <%= @content_for_layout %>
+  </body>
+</html>
