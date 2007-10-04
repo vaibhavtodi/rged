@@ -3,8 +3,8 @@
 
 class ApplicationController < ActionController::Base
   # Pick a unique cookie name to distinguish our session data from others'
-
-  #before_filter :login_from_cookie
+  # If you want "remember me" functionality, add this before_filter to Application Controller
+  before_filter :login_from_cookie
   include AuthenticatedSystem
 
   session :session_key => '_rged_session_id'
