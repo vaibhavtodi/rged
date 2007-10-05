@@ -1,21 +1,19 @@
 class AccountController < ApplicationController
   # Be sure to include AuthenticationSystem in Application Controller instead
 
-  # If you want "remember me" functionality, add this before_filter to Application Controller
- #  before_filter :login_from_cookie
-
   def default
     session[:return_to] ? redirect_to_url(session[:return_to]) : redirect_to(default)
     session[:return_to] = nil
   end
 
   # say something nice, you goof!  something sweet.
-  def index
-    redirect_to(:action => 'signup') unless logged_in? || User.count > 0
-  end
+#  def index
+#    redirect_to(:action => 'signup') unless logged_in? || User.count > 0
+#  end
 
   def login
     return unless request.post?
+
     self.current_user = User.authenticate(params[:login], params[:password])
     if current_user
       if params[:remember_me] == "1"

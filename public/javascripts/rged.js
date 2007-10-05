@@ -28,7 +28,7 @@ Ext.override(Ext.ux.FileTreePanel, {
                 //newName = this.getPath(d) +  "/" + elt.data.name;
                 s = this.getNodeById(elt.id);
                 e.dropNode = s;
-                
+
             }
             if (s) {
                 if (s.parentNode === d) {
@@ -49,7 +49,7 @@ Ext.override(Ext.ux.FileTreePanel, {
                 oldName = elt.id;
                 newName = this.getPath(d) +  "/" + elt.data.name;
             }
-            
+
             if (false === this.fireEvent("beforerename", this, s, oldName, newName)) {
                 return false;
             }
@@ -69,17 +69,17 @@ var Rged = function() {
     this.grid = null;
     this.textBox = null;
     this.ds = null;
-    
+
     }
-    
+
 Rged.prototype =  {
     path: '',
-    
+
     // Initialize the Tree
     init_tree: function() {
-                   
+
            // tree in the panel
-           
+
 	this.tree = new Ext.ux.FileTreePanel('tree', {
 		animate: true
 		, dataUrl: '/directory/get'
@@ -113,7 +113,7 @@ Rged.prototype =  {
 		}
 	});
         //tree = new Ext.Rged.TreeFile ('tree', {readOnly: false});
-	
+
 	// {{{
 	var root = new Ext.tree.AsyncTreeNode({text:'/', path: this.path, id: '/', allowDrag:false});
 	this.tree.setRootNode(root);
@@ -121,7 +121,7 @@ Rged.prototype =  {
         this.tree.on('click', this.tree_onClick, this);
 	root.expand();
     },
-    
+
     tree_onClick: function (node, elt) {
         var path = '';
         if (node.isLeaf())
@@ -131,7 +131,7 @@ Rged.prototype =  {
         this.load_path(path);
         node.select ();
     },
-    
+
     // When the user press the key enter
     menu_onSpecialKey: function(field, e) {
        if (e.getKey() == e.ENTER) {
@@ -139,7 +139,7 @@ Rged.prototype =  {
            this.load_path(path);
        }
     },
-    
+
     // When the TextBox in the menu change
     menu_onChange: function(field, newval, oldval) {
        this.load_path(newval);
@@ -147,16 +147,16 @@ Rged.prototype =  {
 
     // Initialize the menu
     init_menu: function () {
-                   
+
        this.menu = new Ext.Toolbar('menu');
        this.menu.addButton({
            text: 'Rename', cls: 'x-btn-text-icon scroll-bottom', handler: function(o, e) {
-              
+
            }
        });
        this.menu.addButton({
            text: 'Delete', cls: 'x-btn-text-icon scroll-top', handler: function(o, e) {
-               
+
            }
        });
        this.textBox = new Ext.form.TextField ({cls : 'rged-adress', width: 500});
@@ -170,7 +170,7 @@ Rged.prototype =  {
            }
        });
     },
-    
+
     // Initilize the global layout
     init_layout: function () {
        var mainLayout = new Ext.BorderLayout(document.body, {
@@ -200,19 +200,19 @@ Rged.prototype =  {
             }
         });
         mainLayout.beginUpdate();
-        mainLayout.add('north', this.northPanel = new Ext.ContentPanel('menu', { 
-            fitToFrame: true, closable: false 
+        mainLayout.add('north', this.northPanel = new Ext.ContentPanel('menu', {
+            fitToFrame: true, closable: false
         }));
-        mainLayout.add('west', this.westPanel = new Ext.ContentPanel('tree', { 
+        mainLayout.add('west', this.westPanel = new Ext.ContentPanel('tree', {
             fitToFrame: true, closable: false, title: 'Folders'
         }));
-        mainLayout.add('center', this.centerPanel = new Ext.ContentPanel('grid', { 
+        mainLayout.add('center', this.centerPanel = new Ext.ContentPanel('grid', {
             fitToFrame: true, autoScroll: true, resizeEl: this.grid, title: 'Files'
-        })); 
+        }));
         mainLayout.endUpdate();
-        
+
     },
-    
+
     // Initilize the Grid view
     init_grid: function () {
             // Grid Data Store
@@ -230,7 +230,7 @@ Rged.prototype =  {
                 {name: 'lastChange', mapping: 'lastChange', type: 'date', dateFormat: 'D M  j h:i:s Y'}
             ])
         });
-	
+
         // Convert a file size in Kilo/Mega/Giga Octet
         function size(val){
             if(val < 1024){
@@ -252,7 +252,7 @@ Rged.prototype =  {
             }
             return val;
         }
-        
+
         // Display the icon for file type
         function icon(val){
             if (val == 'folder')
@@ -281,31 +281,31 @@ Rged.prototype =  {
             autoExpandColumn: 'name',
             loadMask: true
         });
-        
+
         this.grid.render();
         this.grid.on('celldblclick', this.grid_onCellClick, this);
         this.grid.on('cellcontextmenu', this.grid_onCellContextMenu, this);
         this.grid.on('headerdblclick', this.grid_onHeaderClick, this);
         this.grid.on('startdrag', this.grid_onStartDrag, this);
     },
-    
+
     grid_onStartDrag: function( grid, dd, e ) {
         e.data.ddel.innerHTML = 'toto';
         e.toto.yoy = 0;
     },
     //When the user click on the arrox up in the first column
-    grid_onHeaderClick: function( grid, columnIndex, e ) 
+    grid_onHeaderClick: function( grid, columnIndex, e )
     {
         if (grid.getColumnModel().getColumnId(columnIndex) == 'icon') {
             var pos = this.path.lastIndexOf('/');
             if (pos >= 0) {
-                var path = this.path.substr(0, pos);                
+                var path = this.path.substr(0, pos);
                 this.load_path(path);
             }
         }
     },
     // On right click
-    grid_onCellContextMenu: function( grid, rowIndex, columnIndex, e ) 
+    grid_onCellContextMenu: function( grid, rowIndex, columnIndex, e )
     {
 
             e.stopEvent();
@@ -337,7 +337,7 @@ Rged.prototype =  {
                                     }
                             ]
                     });
-            }        
+            }
             var sel = this.grid.selModel.getSelected();
             // save current node to context menu and open submenu
             var menu = this.contextMenu;
@@ -349,7 +349,7 @@ Rged.prototype =  {
 
             menu.showAt(menu.getEl().getAlignToXY(e.target, 'tl-tl?', [0, 18]));
             itemNodename.container.setStyle('opacity', 1);
-            
+
 	},
 	// }}}
 	// {{{
@@ -377,19 +377,19 @@ Rged.prototype =  {
                             this.deleteFile(sel);
                     break;
                     // }}}
-                    
+
              }; // end of switch(item.id)
     },
-    
+
     renameFile: function(sel) {
-        
+
     },
-    
+
     deleteFile: function(sel) {
 
         // display confirmation message
         Ext.Msg.confirm(this.tree.deleteText
-                , this.tree.reallyWantText + ' ' + this.tree.deleteText.toLowerCase() + ' <b>' + sel.get('name') + '</b>?'  
+                , this.tree.reallyWantText + ' ' + this.tree.deleteText.toLowerCase() + ' <b>' + sel.get('name') + '</b>?'
                 , function(response) {
 
                         var conn;
@@ -425,8 +425,8 @@ Rged.prototype =  {
         var msgdlg = Ext.Msg.getDialog();
         msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
     },
-    
-    grid_onCellClick: function( grid, rowIndex, columnIndex, e ) 
+
+    grid_onCellClick: function( grid, rowIndex, columnIndex, e )
     {
         var rec = grid.getDataSource().getAt(rowIndex);
         var path = rec.get('path');
@@ -436,12 +436,12 @@ Rged.prototype =  {
         }
         this.tree.expandPath(path, 'text', function (success, node) { if (success) node.select()});
     },
-    
+
     // Manage browser history
     init_history: function () {
         var bookmarkedSection = Ext.ux.History.getBookmarkedState( "dir" );
         var init = bookmarkedSection || '/';
-       
+
         Ext.ux.History.register( "dir", init, function( state ) {
         // This is called after calling YAHOO.util.History.navigate, or after the user
         // has trigerred the back/forward button. We cannot discrminate between
@@ -450,20 +450,20 @@ Rged.prototype =  {
             if (cur != state)
                 this.change_path(path);
         }, this, true );
-        
+
         Ext.ux.History.initialize();
         //this.load_path (init);
     },
-    
+
     init : function() {
        Ext.QuickTips.init();
-       
+
        this.init_tree();
        this.init_menu ();
        this.init_layout ();
        this.init_grid ();
        //this.init_history ();
-       this.load_path ('/home/patou');
+       this.load_path ('/Users/papywarrior');
     },
 
     load_path : function (path) {
@@ -474,7 +474,7 @@ Rged.prototype =  {
             this.change_path(path);
         }
     },
-    
+
     change_path: function (path) {
         this.path = path;
         this.ds.load ({params: {path: path}});

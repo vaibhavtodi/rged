@@ -1,0 +1,30 @@
+		######################
+		# Projet de formation#
+		######################
+
+
+CONFIGURATION
+
+
+1) Outils à installer:
+
+- ruby
+- rails (version 1.2.3, pour une version antérieur modifier
+le fichier config/environnement.rb)
+- rubygems
+- rake
+- mongrel
+- gem_plugin
+- gettext
+- activerecord
+- mysql
+
+2)Configuration de l'application rails
+
+	a) Créer les bases de données référencer dans config/database.yml.
+	b) Dans le fichier public/javascript/rged.js, remplacer "/Users/papywarrior"
+par "$HOME".
+
+3)Lancement
+	a)ruby script/server webrick
+	b)Ouvrir un navigateur à l'addresse: http://localhost:3000/

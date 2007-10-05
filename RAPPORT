@@ -1,0 +1,25 @@
+	###################################
+	# RApport du développement de Rged#
+	###################################
+
+1)Difficultées rencontées
+
+	a)Gérer les installations des différents outils, leur
+configuration et de leurs dépendences.
+	b)Savoir par quel "bout" commencer, exemple: il aurait
+fallut configurer Apache et Mongrel dès le début.
+
+2)Plugins utilisé:
+
+- Act_as_authenticated
+
+3)Ce qui reste A faire
+     a)Débugguer gettext qui ne fonctionne pas, les fichiers *.mo
+ne sont pas générer.
+     b)Configurer Apache et mongrel.
+     c)Dans le fichier public/javascript/rged.js, ligne 466, identifier le répertoir
+de l'utilisateur de façon automatique.
+     d)Corriger l'upload et la suppression de fichiers.
+     e)Améliorer l'apparence des pages qui gère l'authentification
+     d)Avoir une barre de défilement dans l'arborescence
+     e)Corriger le drag and drop
