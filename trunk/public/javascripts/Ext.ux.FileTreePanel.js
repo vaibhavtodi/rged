@@ -579,7 +579,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 				items: [
 						// node name we're working with placeholder
 					  { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
-					, {
+					/*, {
 						id: 'open'
 						, text: this.openText + ' (Enter)'
 						, icon: this.openIcon
@@ -607,7 +607,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 							}
 							]
 						}
-					}
+					}*/
 
 					, new Ext.menu.Separator({id:'sep-open'})
 					, {	id:'reload'
@@ -691,7 +691,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 		// save current node to context menu and open submenu
 		var menu = this.contextMenu;
 		menu.node = node;
-		menu.items.get('open').menu.node = node;
+		//menu.items.get('open').menu.node = node;
 
 		// set menu item text to node text
 		var itemNodename = menu.items.get('nodename');
@@ -710,7 +710,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 		menu.items.get('reload').setDisabled(node.isLeaf());
 		menu.items.get('expand').setDisabled(node.isLeaf());
 		menu.items.get('collapse').setDisabled(node.isLeaf());
-		menu.items.get('open').setDisabled(!node.isLeaf());
+		//menu.items.get('open').setDisabled(!node.isLeaf());
 		if(!this.uploadForm.uploading) {
 			this.uploadForm.setDisabled(node.isLeaf() ? node.parentNode.disabled : node.disabled, true);
 		}
@@ -1385,7 +1385,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 
 			// {{{
 			// open
-			{ 
+			/*{ 
 				key: Ext.EventObject.ENTER // F2 key = edit
 				, scope: this
 				, fn: function(key, e) {
@@ -1394,11 +1394,11 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 					if(node && 0 !== node.getDepth() && node.isLeaf()) {
 						this.openNode(node);
 					}
-			}}
+			}}*/
 			// }}}
 			// {{{
 			// edit
-			, { 
+		       { 
 				key: 113 // F2 key = edit
 				, scope: this
 				, fn: function(key, e) {
