@@ -50,6 +50,7 @@ class User < ActiveRecord::Base
     save(false)
   end
 
+  
   protected
     # before filter 
     def encrypt_password
@@ -61,4 +62,5 @@ class User < ActiveRecord::Base
     def password_required?
       crypted_password.blank? || !password.blank?
     end
+   
 end

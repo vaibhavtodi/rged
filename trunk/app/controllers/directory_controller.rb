@@ -1,15 +1,99 @@
+module Platform
+
+   if RUBY_PLATFORM =~ /darwin/i
+      OS = :unix
+      IMPL = :macosx
+   elsif RUBY_PLATFORM =~ /linux/i
+      OS = :unix
+      IMPL = :linux
+   elsif RUBY_PLATFORM =~ /freebsd/i
+      OS = :unix
+      IMPL = :freebsd
+   elsif RUBY_PLATFORM =~ /netbsd/i
+      OS = :unix
+      IMPL = :netbsd
+   elsif RUBY_PLATFORM =~ /mswin/i
+      OS = :win32
+      IMPL = :mswin
+   elsif RUBY_PLATFORM =~ /cygwin/i
+      OS = :unix
+      IMPL = :cygwin
+   elsif RUBY_PLATFORM =~ /mingw/i
+      OS = :win32
+      IMPL = :mingw
+   elsif RUBY_PLATFORM =~ /bccwin/i
+      OS = :win32
+      IMPL = :bccwin
+   elsif RUBY_PLATFORM =~ /wince/i
+      OS = :win32
+      IMPL = :wince
+   elsif RUBY_PLATFORM =~ /vms/i
+      OS = :vms
+      IMPL = :vms
+   elsif RUBY_PLATFORM =~ /os2/i
+      OS = :os2
+      IMPL = :os2 # maybe there is some better choice here?
+   elsif RUBY_PLATFORM =~ /solaris/i # tnx to Hugh Sasse
+      OS = :unix
+      IMPL = :solaris
+   elsif RUBY_PLATFORM =~ /irix/i # i.e. mips-irix6.5
+      OS = :unix
+      IMPL = :irix
+   else
+      OS = :unknown
+      IMPL = :unknown
+   end
+
+   # whither AIX, SOLARIS, and the other unixen?
+
+   if RUBY_PLATFORM =~ /(i\d86)/i
+      ARCH = :x86
+   elsif RUBY_PLATFORM =~ /ia64/i
+      ARCH = :ia64
+   elsif RUBY_PLATFORM =~ /powerpc/i
+      ARCH = :powerpc
+   elsif RUBY_PLATFORM =~ /alpha/i
+      ARCH = :alpha
+   elsif RUBY_PLATFORM =~ /sparc/i
+      ARCH = :sparc
+   elsif RUBY_PLATFORM =~ /mips/i
+      ARCH = :mips # is actually a Silicon Graphics Indigo. How should that be represented ? 
+   else
+      ARCH = :unknown
+   end
+
+   # What about AMD, Turion, Motorola, etc..?
+
+end
+
+
 # Directory method
+
 class DirectoryController < ApplicationController
 
-    before_filter :login_from_cookie
+ before_filter :login_from_cookie
 
-  def list
-    return_data = Hash.new()
-    dir = (params[:path] || '')
-
-    if dir == nil || dir == "" then
-      dir = "./"
+ def home
+    os = Platform::OS
+    impl = Platform::IMPL   
+    #puts "\033[33m #{os}  \033[m"
+    #puts "\033[33m #{impl} \033[m"  
+    user = current_user
+    #puts  "\033[33m # avant condition  \033[m"
+    if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
+      #puts  "\033[33m # dans condition  \033[m"
+      return "/Users/#{user.login}/" 
+    else
+      return "/home/#{user.login}/"
     end
+  end
+  
+  
+  def list
+     
+    return_data = Hash.new()
+    dir = (self.home + params[:path] || '')
+
     if !dir.ends_with?('/') then
       dir += '/'
     end
@@ -27,7 +111,7 @@ class DirectoryController < ApplicationController
                 :name => filename,
                 :size => File.size(dir + filename),
                 :lastChange => File.atime(dir + filename).asctime,
-                :path => dir + filename,
+                :path => dir.sub(self.home, '') + filename,
                 :cls => ((File.directory?(dir + filename)) ? 'folder' : File.extname(filename).sub(".", 'file-'))
               }
             rescue
@@ -53,7 +137,7 @@ class DirectoryController < ApplicationController
   end
 
   def get
-    dir = (params[:path] || '')
+    dir = (self.home + params[:path] || '')
     if !dir.ends_with?('/') then
       dir += '/'
     end
@@ -71,7 +155,7 @@ class DirectoryController < ApplicationController
           if filename != "." && filename != ".." then
             if File.directory?(dir + filename) then
               return_data[i] = {
-                :id => dir + filename,
+                :id => dir.sub(self.home, '') + filename,
                 :text => filename,
                 :cls => _("folder"),
                 :disabled => readonly,
@@ -79,7 +163,7 @@ class DirectoryController < ApplicationController
                 }
             else
               return_data[i] = {
-                :id => dir + filename,
+                :id => dir.sub(self.home, '') + filename,
                 :text => filename,
                 :cls => File.extname(filename).sub(".", _('file-')),
                 :disabled => false,
@@ -95,8 +179,8 @@ class DirectoryController < ApplicationController
   end
 
   def rename
-    newname = (params[:newname] || 'newname')
-    oldname = (params[:oldname] || 'oldname')
+    newname = (self.home + params[:newname] || 'newname')
+    oldname = (self.home + params[:oldname] || 'oldname')
 
     return_data = Object.new
     if File.exist?(oldname) then
@@ -107,14 +191,15 @@ class DirectoryController < ApplicationController
         ########################
       end
     else
-      return_data = {:success => false, :error => _("Cannot rename file ") + oldname + _(" to ") + newname}
+      return_data = {:success => false, :error => _("Cannot rename file ") + oldname.sub(self.home, '') + _(" to ") + newname.sub(self.home, '')}
     end
 
     render :text=>return_data.to_json, :layout=>false
   end
 
   def newdir
-    dir = (params[:dir] || 'dir')
+    
+    dir = (self.home + params[:dir] || 'dir')
 
     return_data = Object.new
     if File.exist?(dir) == false then
@@ -125,7 +210,7 @@ class DirectoryController < ApplicationController
         ########################
       end
     else
-      return_data = {:success => false, :error => _("Cannot create directory: ") + dir}
+      return_data = {:success => false, :error => _("Cannot create directory: ") + dir.sub(self.home, '')}
     end
 
     render :text=>return_data.to_json, :layout=>false
@@ -133,8 +218,7 @@ class DirectoryController < ApplicationController
   end
 
   def delete
-    file = (params[:file] || 'file')
-
+    file = (self.home + params[:file] || 'file')
     return_data = Object.new
     if File.exist?(file)  then
       begin
@@ -144,11 +228,25 @@ class DirectoryController < ApplicationController
         ########################
       end
     else
-      return_data = {:success => false, :error => _("Cannot delete: ") + file}
+      return_data = {:success => false, :error => _("Cannot delete: ") + file.sub(self.home, '')}
     end
 
     render :text=>return_data.to_json, :layout=>false
 
+  end
+  
+  def create
+    file = "#{self.home}#{params[:filename]}"
+    if File.exist?(file)  then
+      begin
+        File.open(file, "w") { |f| f.write(file.read) }
+        return_data = {:success => true}
+      rescue
+        #####################
+      end
+    else
+      return_data = {:success => false, :error => _("Cannot create: ") + file.sub(self.home, '')}
+    end
   end
 
 end

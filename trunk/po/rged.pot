@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rged\n"
-"POT-Creation-Date: 2007-10-04 18:19+0200\n"
+"POT-Creation-Date: 2007-10-05 22:20+0200\n"
 "PO-Revision-Date: 2007-10-04 16:50+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,44 +16,49 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: app/controllers/account_controller.rb:26
+#: app/controllers/account_controller.rb:24
 msgid "Logged in successfully"
 msgstr "Acces autorise"
 
-#: app/controllers/account_controller.rb:28
+#: app/controllers/account_controller.rb:26
 msgid "Logged in failed"
 msgstr "Echec de l'identification"
 
-#: app/controllers/account_controller.rb:38
+#: app/controllers/account_controller.rb:36
 msgid "Thanks for signing up!"
 msgstr "Merci de vous etre enregistre!!"
 
-#: app/controllers/account_controller.rb:50
+#: app/controllers/account_controller.rb:48
 msgid "You have been logged out."
 msgstr "Vous avez ete deconnecte"
 
-#: app/controllers/directory_controller.rb:79
+#: app/controllers/directory_controller.rb:160
 msgid "folder"
 msgstr "dossier"
 
-#: app/controllers/directory_controller.rb:87
+#: app/controllers/directory_controller.rb:168
 msgid "file-"
 msgstr "fichier-"
 
-#: app/controllers/directory_controller.rb:113
+#: app/controllers/directory_controller.rb:194
 msgid "Cannot rename file "
 msgstr "Impossible de renommer le fichier"
 
-#: app/controllers/directory_controller.rb:113
+#: app/controllers/directory_controller.rb:194
 msgid " to "
 msgstr " en "
 
-#: app/controllers/directory_controller.rb:131
+#: app/controllers/directory_controller.rb:213
 msgid "Cannot create directory: "
 msgstr "Impossible de creer le dossier: "
 
-#: app/controllers/directory_controller.rb:150
+#: app/controllers/directory_controller.rb:231
 msgid "Cannot delete: "
+msgstr "Impossible de supprimer: "
+
+#: app/controllers/directory_controller.rb:248
+#, fuzzy
+msgid "Cannot create: "
 msgstr "Impossible de supprimer: "
 
 #: app/models/user.rb:-
@@ -100,27 +105,27 @@ msgstr "Page de connetion"
 msgid "Login"
 msgstr "Identifiant"
 
-#: app/views/account/login.rhtml:42
+#: app/views/account/login.rhtml:43
 msgid " Login"
 msgstr "Identifiant"
 
-#: app/views/account/login.rhtml:43
+#: app/views/account/login.rhtml:44
 msgid "login"
 msgstr "Identifiant"
 
-#: app/views/account/login.rhtml:46 app/views/account/signup.rhtml:49
+#: app/views/account/login.rhtml:47 app/views/account/signup.rhtml:49
 msgid "Password"
 msgstr "Mot de passe"
 
-#: app/views/account/login.rhtml:50
+#: app/views/account/login.rhtml:51
 msgid "Remember me"
 msgstr "Se souvenir de moi"
 
-#: app/views/account/login.rhtml:54
+#: app/views/account/login.rhtml:55
 msgid "Log in"
 msgstr "Connection"
 
-#: app/views/account/login.rhtml:58 app/views/account/signup.rhtml:38
+#: app/views/account/login.rhtml:59 app/views/account/signup.rhtml:38
 #: app/views/account/signup.rhtml:55
 msgid "Sign up"
 msgstr "Enregistrer vous"
