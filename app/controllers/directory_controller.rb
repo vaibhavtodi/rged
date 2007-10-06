@@ -88,12 +88,17 @@ class DirectoryController < ApplicationController
     end
   end
   
+  def protect_dir(dir)
+    if dir =~ /\.\./ then
+      raise "Protect dir"
+    end
+  end
   
   def list
      
     return_data = Hash.new()
     dir = (self.home + params[:path] || '')
-
+    protect_dir(dir)
     if !dir.ends_with?('/') then
       dir += '/'
     end
@@ -105,7 +110,7 @@ class DirectoryController < ApplicationController
         d = Dir.entries(dir)
         d.each{
           |filename|
-          if filename != "." && filename != ".." then
+          if filename[0,1] != '.' then
             begin
               return_data[:Files][i] = {
                 :name => filename,
@@ -141,54 +146,55 @@ class DirectoryController < ApplicationController
     if !dir.ends_with?('/') then
       dir += '/'
     end
-
-    if File.exist?(dir) then
-      i = 0
-      return_data = Array.new
-      if File.directory?(dir) then
-        d = Dir.entries(dir)
-        d.each{
-          |filename|
-          if File.readable?(dir + filename) && File.executable?(dir + filename) == false && File.writable?(dir + filename) == false then
-            readonly = true
+    protect_dir(dir)
+    i = 0
+    return_data = Array.new
+    if File.directory?(dir) then
+      d = Dir.entries(dir)
+      d.each{
+        |filename|
+        if File.readable?(dir + filename) && File.executable?(dir + filename) == false && File.writable?(dir + filename) == false then
+          readonly = true
+        end
+        if filename[0,1] != '.' then
+          if File.directory?(dir + filename) then
+            return_data[i] = {
+              :id => dir.sub(self.home, '') + filename,
+              :text => filename,
+              :path => filename,
+              :cls => "folder",
+              :disabled => readonly,
+              :leaf => false
+              }
+          else
+            return_data[i] = {
+              :id => dir.sub(self.home, '') + filename,
+              :text => filename,
+              :path => filename,
+              :cls => File.extname(filename).sub(".", 'file-'),
+              :disabled => false,
+              :leaf => true
+              }
           end
-          if filename != "." && filename != ".." then
-            if File.directory?(dir + filename) then
-              return_data[i] = {
-                :id => dir.sub(self.home, '') + filename,
-                :text => filename,
-                :cls => _("folder"),
-                :disabled => readonly,
-                :leaf => false
-                }
-            else
-              return_data[i] = {
-                :id => dir.sub(self.home, '') + filename,
-                :text => filename,
-                :cls => File.extname(filename).sub(".", _('file-')),
-                :disabled => false,
-                :leaf => true
-                }
-            end
-            i = i + 1
-          end
-        }
-      end
+          i = i + 1
+        end
+      }
     end
     render :text=>return_data.to_json, :layout=>false
   end
 
   def rename
-    newname = (self.home + params[:newname] || 'newname')
-    oldname = (self.home + params[:oldname] || 'oldname')
-
+    newname = self.home + params[:newname]
+    oldname = self.home + params[:oldname]
+    protect_dir(newname)
+    protect_dir(oldname)
     return_data = Object.new
     if File.exist?(oldname) then
       begin
         File.rename(oldname, newname)
         return_data = {:success => true}
       rescue
-        ########################
+        return_data = {:success => false, :error => _("Cannot rename file ") + oldname.sub(self.home, '') + _(" to ") + newname.sub(self.home, '')}
       end
     else
       return_data = {:success => false, :error => _("Cannot rename file ") + oldname.sub(self.home, '') + _(" to ") + newname.sub(self.home, '')}
@@ -200,7 +206,7 @@ class DirectoryController < ApplicationController
   def newdir
     
     dir = (self.home + params[:dir] || 'dir')
-
+    protect_dir(dir)
     return_data = Object.new
     if File.exist?(dir) == false then
       begin
@@ -218,14 +224,19 @@ class DirectoryController < ApplicationController
   end
 
   def delete
-    file = (self.home + params[:file] || 'file')
+    file = (self.home + params[:file])
+    protect_dir(file)
     return_data = Object.new
     if File.exist?(file)  then
       begin
-        File.delete(file)
+        if File.directory?(file) then
+          Dir.delete(file)
+        else
+          File.delete(file)
+        end
         return_data = {:success => true}
       rescue
-        ########################
+        return_data = {:success => false, :error => _("Cannot delete: ") + file.sub(self.home, '')}
       end
     else
       return_data = {:success => false, :error => _("Cannot delete: ") + file.sub(self.home, '')}
@@ -237,6 +248,7 @@ class DirectoryController < ApplicationController
   
   def create
     file = "#{self.home}#{params[:filename]}"
+    protect_dir(file)
     if File.exist?(file)  then
       begin
         File.open(file, "w") { |f| f.write(file.read) }
