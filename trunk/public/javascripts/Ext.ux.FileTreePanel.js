@@ -171,7 +171,7 @@ Ext.ux.FileTreePanel = function(el, config) {
 	this.on({
 		contextmenu: {scope:this, fn:this.onContextMenu}
 		, beforenodedrop: {scope:this, fn:this.onBeforeNodeDrop}
-		, dblclick: {scope:this, fn:this.openNode}
+		//, dblclick: {scope:this, fn:this.openNode}
 		, nodedrop: {scope:this, fn:this.onNodeDrop}
 		, nodedragover: {scope:this, fn:this.onNodeDragOver}
 		, render: {scope:this, fn:function() {

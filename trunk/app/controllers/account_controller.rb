@@ -20,7 +20,7 @@ class AccountController < ApplicationController
         self.current_user.remember_me
         cookies[:auth_token] = { :value => self.current_user.remember_token , :expires => self.current_user.remember_token_expires_at }
       end
-      redirect_back_or_default(:controller => '/index/', :action => 'index')
+      redirect_back_or_default(:controller => 'index', :action => 'index')
       flash[:notice] = _("Logged in successfully")
     else
       flash[:notice] = _("Logged in failed")
@@ -32,7 +32,7 @@ class AccountController < ApplicationController
     return unless request.post?
     if @user.save!
       self.current_user = @user
-      redirect_back_or_default(:controller => '/index', :action => 'index')
+      redirect_back_or_default(:controller => 'index', :action => 'index')
       flash[:notice] = _("Thanks for signing up!")
     else
       flash[:notice] = @user.errors.full_messages.join("<br />")

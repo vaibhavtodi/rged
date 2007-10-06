@@ -24,11 +24,8 @@ Ext.override(Ext.ux.FileTreePanel, {
             var newName = '';
             if (!s) {
                 var elt = e.data.selections[0];
-                //oldName = ;
-                //newName = this.getPath(d) +  "/" + elt.data.name;
                 s = this.getNodeById(elt.id);
                 e.dropNode = s;
-
             }
             if (s) {
                 if (s.parentNode === d) {
@@ -46,8 +43,6 @@ Ext.override(Ext.ux.FileTreePanel, {
             else {
                 return false;
                 var elt = e.data.selections[0];
-                oldName = elt.id;
-                newName = this.getPath(d) +  "/" + elt.data.name;
             }
 
             if (false === this.fireEvent("beforerename", this, s, oldName, newName)) {
@@ -86,6 +81,7 @@ Rged.prototype =  {
                 , renameUrl: '/directory/rename'
                 , deleteUrl: '/directory/delete'
                 , newdirUrl: '/directory/newdir'
+                , uploadUrl: '/directory/create'
                 , iconPath: '../images/icons/'
 		, readOnly: false
 		, containerScroll: true
@@ -99,7 +95,7 @@ Rged.prototype =  {
 		, edit: true
 		, maxFileSize: 1048575
 		, hrefPrefix: '/filetree/'
-		, pgCfg: {
+		/*, pgCfg: {
 			uploadIdName: 'UPLOAD_IDENTIFIER'
 			, uploadIdValue: 'auto'
 			, progressBar: false
@@ -107,15 +103,15 @@ Rged.prototype =  {
 			, maxPgErrors: 10
 			, interval: 1000
 			, options: {
-				url: '../uploadform/progress.php'
+				url: '/directory/create'
 				, method: 'post'
 			}
-		}
+		}*/
 	});
         //tree = new Ext.Rged.TreeFile ('tree', {readOnly: false});
 
 	// {{{
-	var root = new Ext.tree.AsyncTreeNode({text:'/', path: this.path, id: '/', allowDrag:false});
+	var root = new Ext.tree.AsyncTreeNode({text:'root', path: '/', id: '/', allowDrag:false});
 	this.tree.setRootNode(root);
 	this.tree.render();
         this.tree.on('click', this.tree_onClick, this);
@@ -123,11 +119,11 @@ Rged.prototype =  {
     },
 
     tree_onClick: function (node, elt) {
-        var path = '';
+        var path = '/';
         if (node.isLeaf())
-            path = this.tree.getPath(node.parentNode);
+            path += this.tree.getPath(node.parentNode, 'path');
         else
-            path = this.tree.getPath(node);
+            path += this.tree.getPath(node, 'path');
         this.load_path(path);
         node.select ();
     },
@@ -145,20 +141,27 @@ Rged.prototype =  {
        this.load_path(newval);
     },
 
+    menu_onRename: function(o, e) {
+        var sel = this.grid.selModel.getSelected();
+        this.renameFile(sel);
+    },
+    menu_onDelete: function(o, e) {
+        var sel = this.grid.selModel.getSelected();
+        this.deleteFile(sel);
+    },
+    menu_onRefresh: function(o, e) {
+        this.change_path(this.path);
+    },
     // Initialize the menu
     init_menu: function () {
 
        this.menu = new Ext.Toolbar('menu');
        this.menu.addButton({
-           text: 'Rename', cls: 'x-btn-text-icon scroll-bottom', handler: function(o, e) {
-
-           }
-       });
+           text: 'Rename', cls: 'x-btn-text-icon scroll-bottom', handler: this.menu_onRename, scope: this});
        this.menu.addButton({
-           text: 'Delete', cls: 'x-btn-text-icon scroll-top', handler: function(o, e) {
-
-           }
-       });
+           text: 'Delete', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onDelete, scope: this});
+       this.menu.addButton({
+           text: 'Refresh', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onRefresh, scope: this});
        this.textBox = new Ext.form.TextField ({cls : 'rged-adress', width: 500});
        this.textBox.on('change', this.menu_onChange, this);
        this.textBox.on('specialkey', this.menu_onSpecialKey, this);
@@ -187,7 +190,8 @@ Rged.prototype =  {
                 titlebar: true,
                 collapsible: true,
                 animate: true,
-                useShim:true,
+                useShim: true,
+                autoScroll: true,
                 cmargins: {top:2,bottom:2,right:2,left:2}
             },
             center: {
@@ -286,13 +290,8 @@ Rged.prototype =  {
         this.grid.on('celldblclick', this.grid_onCellClick, this);
         this.grid.on('cellcontextmenu', this.grid_onCellContextMenu, this);
         this.grid.on('headerdblclick', this.grid_onHeaderClick, this);
-        this.grid.on('startdrag', this.grid_onStartDrag, this);
     },
 
-    grid_onStartDrag: function( grid, dd, e ) {
-        e.data.ddel.innerHTML = 'toto';
-        e.toto.yoy = 0;
-    },
     //When the user click on the arrox up in the first column
     grid_onHeaderClick: function( grid, columnIndex, e )
     {
@@ -307,113 +306,102 @@ Rged.prototype =  {
     // On right click
     grid_onCellContextMenu: function( grid, rowIndex, columnIndex, e )
     {
+        e.stopEvent();
+        e.preventDefault();
 
-            e.stopEvent();
-            e.preventDefault();
+        // {{{
+        // lazy create upload form
+        //this.createUploadForm();
+        // }}}
+        // {{{
+        // lazy create context menu
+        if(!this.contextMenu) {
+                this.contextMenu = new Ext.menu.Menu({
+                        items: [
+                                        // node name we're working with placeholder
+                                  { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
+                                , new Ext.menu.Separator({id:'sep-open'})
+                                , {	id:'rename'
+                                        , text:this.tree.renameText + ' (F2)'
+                                        , icon:this.tree.renameIcon
+                                        , scope:this
+                                        , handler:this.onContextMenuItem
+                                }
+                                , {	id:'delete'
+                                        , text:this.tree.deleteText + ' (' + this.tree.deleteKeyName + ')'
+                                        , icon:this.tree.deleteIcon
+                                        , scope:this
+                                        , handler:this.onContextMenuItem
+                                }
+                        ]
+                });
+        }
+        var sel = this.grid.selModel.getSelected();
+        // save current node to context menu and open submenu
+        var menu = this.contextMenu;
+        menu.item = sel;
 
-            // {{{
-            // lazy create upload form
-            //this.createUploadForm();
-            // }}}
-            // {{{
-            // lazy create context menu
-            if(!this.contextMenu) {
-                    this.contextMenu = new Ext.menu.Menu({
-                            items: [
-                                            // node name we're working with placeholder
-                                      { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
-                                    , new Ext.menu.Separator({id:'sep-open'})
-                                    , {	id:'rename'
-                                            , text:this.tree.renameText + ' (F2)'
-                                            , icon:this.tree.renameIcon
-                                            , scope:this
-                                            , handler:this.onContextMenuItem
-                                    }
-                                    , {	id:'delete'
-                                            , text:this.tree.deleteText + ' (' + this.tree.deleteKeyName + ')'
-                                            , icon:this.tree.deleteIcon
-                                            , scope:this
-                                            , handler:this.onContextMenuItem
-                                    }
-                            ]
-                    });
-            }
-            var sel = this.grid.selModel.getSelected();
-            // save current node to context menu and open submenu
-            var menu = this.contextMenu;
-            menu.item = sel;
+        // set menu item text to node text
+        var itemNodename = menu.items.get('nodename');
+        itemNodename.setText(Ext.util.Format.ellipsis(sel.get('name'), 25));
 
-            // set menu item text to node text
-            var itemNodename = menu.items.get('nodename');
-            itemNodename.setText(Ext.util.Format.ellipsis(sel.get('name'), 25));
+        menu.showAt(menu.getEl().getAlignToXY(e.target, 'tl-tl?', [0, 18]));
+        itemNodename.container.setStyle('opacity', 1);
 
-            menu.showAt(menu.getEl().getAlignToXY(e.target, 'tl-tl?', [0, 18]));
-            itemNodename.container.setStyle('opacity', 1);
-
-	},
-	// }}}
-	// {{{
-	/**
+    },
+    // }}}
+    // {{{
+    /**
 		* context menu item click handler
 		* @param {MenuItem} item
 		* @param {Event} e event
 		*/
-	onContextMenuItem: function(item, e) {
+    onContextMenuItem: function(item, e) {
 
-            // get node for before event
-            var sel = item.parentMenu.item;
-            var node = this.tree.getNodeById(sel.id);
+        // get node for before event
+        var sel = item.parentMenu.item;
+        var node = this.tree.getNodeById(sel.id);
 
-            // menu item switch
-            switch(item.id) {
+        // menu item switch
+        switch(item.id) {
 
-                    // {{{
-                    case 'rename':
-                            this.renameFile(sel);
-                    break;
-                    // }}}
-                    // {{{
-                    case 'delete':
-                            this.deleteFile(sel);
-                    break;
-                    // }}}
+                // {{{
+                case 'rename':
+                        this.renameFile(sel);
+                break;
+                // }}}
+                // {{{
+                case 'delete':
+                        this.deleteFile(sel);
+                break;
+                // }}}
 
-             }; // end of switch(item.id)
+         }; // end of switch(item.id)
     },
 
     renameFile: function(sel) {
-
-    },
-
-    deleteFile: function(sel) {
-
-        // display confirmation message
-        Ext.Msg.confirm(this.tree.deleteText
-                , this.tree.reallyWantText + ' ' + this.tree.deleteText.toLowerCase() + ' <b>' + sel.get('name') + '</b>?'
-                , function(response) {
-
+        Ext.Msg.prompt(this.tree.renameText
+                , this.tree.renameText + ' <b>' + sel.get('name') + '</b> to ?'
+                , function(response, newname) {
                         var conn;
                         // do nothing if answer is not yes
-                        if('yes' !== response) {
+                        if('ok' !== response) {
                                 return;
                         }
-
                         // answer is yes
                         else {
-
                                 // setup request options
                                 options = {
-                                        url: this.tree.deleteUrl || this.tree.dataUrl
+                                        url: this.tree.renameUrl || this.tree.dataUrl
                                         , method: this.tree.method
                                         , scope: this
-                                        , callback: this.tree.cmdCallback
-                                        , node: node
+                                        , callback: this.cmdCallback
                                         , params: {
-                                                cmd: 'delete'
-                                                , file: sel.get('id')
+                                                cmd: 'rename'
+                                                , oldname: sel.get('path')
+                                                , newname: this.path + newname
                                         }
                                 };
-
                                 // send request
                                 conn = new Ext.data.Connection().request(options);
                         }
@@ -426,6 +414,55 @@ Rged.prototype =  {
         msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
     },
 
+    deleteFile: function(sel) {
+        // display confirmation message
+        Ext.Msg.confirm(this.tree.deleteText
+                , this.tree.reallyWantText + ' ' + this.tree.deleteText.toLowerCase() + ' <b>' + sel.get('name') + '</b>?'
+                , function(response) {
+                        var conn;
+                        // do nothing if answer is not yes
+                        if('yes' !== response) {
+                                return;
+                        }
+                        // answer is yes
+                        else {
+                                // setup request options
+                                options = {
+                                        url: this.tree.deleteUrl || this.tree.dataUrl
+                                        , method: this.tree.method
+                                        , scope: this
+                                        , callback: this.cmdCallback
+                                        , params: {
+                                                cmd: 'delete'
+                                                , file: sel.get('path')
+                                        }
+                                };
+                                // send request
+                                conn = new Ext.data.Connection().request(options);
+                        }
+                }
+                , this
+        );
+
+        // set focus to no button to avoid accidental deletions
+        var msgdlg = Ext.Msg.getDialog();
+        msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
+    },
+
+    cmdCallback: function (options, bSuccess, response) {
+        var i, o, node;
+        var showMsg = true;
+        if (true === bSuccess) {
+            o = Ext.decode(response.responseText);
+            if (true === o.success) {
+                Ext.Msg.alert('Success', 'OK');
+                this.change_path(this.path);
+            } else {
+                    Ext.Msg.alert(this.errorText, o.error);
+            }
+        }
+    },
+
     grid_onCellClick: function( grid, rowIndex, columnIndex, e )
     {
         var rec = grid.getDataSource().getAt(rowIndex);
@@ -434,13 +471,13 @@ Rged.prototype =  {
         if (folder == 'folder') {
             this.load_path(path);
         }
-        this.tree.expandPath(path, 'text', function (success, node) { if (success) node.select()});
+        //this.tree.expandPath(path.substrsub, 'path', function (success, node) { if (success) node.select()});
     },
 
     // Manage browser history
     init_history: function () {
         var bookmarkedSection = Ext.ux.History.getBookmarkedState( "dir" );
-        var init = bookmarkedSection || '/';
+        var init = bookmarkedSection || '';
 
         Ext.ux.History.register( "dir", init, function( state ) {
         // This is called after calling YAHOO.util.History.navigate, or after the user
@@ -463,13 +500,13 @@ Rged.prototype =  {
        this.init_layout ();
        this.init_grid ();
        //this.init_history ();
-       this.load_path ('/Users/papywarrior');
+       this.load_path ('/');
     },
 
     load_path : function (path) {
         if (this.path != path) {
             if (path == '')
-                path = '/';
+                path = '';
             //Ext.ux.History.navigate( "dir", path );
             this.change_path(path);
         }
@@ -478,8 +515,11 @@ Rged.prototype =  {
     change_path: function (path) {
         this.path = path;
         this.ds.load ({params: {path: path}});
-        this.textBox.setValue(path);
-        this.tree.expandPath(path.substr(1), 'text', function (success, node) { if (success) node.select()});
+        var p = "/root" + path;
+        if (p.substr(p.length - 1, 1) == '/')
+            p = p.substr(0, p.length - 1)
+        this.textBox.setValue(p.substr(5, p.length - 5));
+        this.tree.selectPath(p, 'text', function (success, node) { if (success) node.expand() });
     }
 };
 
