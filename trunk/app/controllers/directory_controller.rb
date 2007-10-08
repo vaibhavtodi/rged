@@ -82,9 +82,9 @@ class DirectoryController < ApplicationController
     impl = Platform::IMPL   
     user = current_user
     if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
-      return "/Users/#{user.login}/" 
+      return "/Users/#{user.login}" 
     else
-      return "/home/#{user.login}/"
+      return "/home/#{user.login}"
     end
   end
   
@@ -94,15 +94,21 @@ class DirectoryController < ApplicationController
     end
   end
   
-  def list
-     
-    return_data = Hash.new()
-    dir = (self.home + params[:path] || '')
-    protect_dir(dir)
-    if !dir.ends_with?('/') then
-      dir += '/'
+  def get_dir(name, rep = true)
+    dir = (params[name] || '')
+    dir = '/' + dir unless dir.starts_with?('/')
+    if rep == true then
+      dir += '/' unless dir.ends_with?('/')
     end
-
+    dir = self.home + dir
+    protect_dir(dir)
+    return dir
+  end
+  
+  def list
+    dir = get_dir(:path)
+    return_data = Hash.new()
+    
     if File.exist?(dir) then
       i = 0
       return_data[:Files] = Array.new
@@ -142,11 +148,8 @@ class DirectoryController < ApplicationController
   end
 
   def get
-    dir = (self.home + params[:path] || '')
-    if !dir.ends_with?('/') then
-      dir += '/'
-    end
-    protect_dir(dir)
+    dir = get_dir(:path)
+    puts dir
     i = 0
     return_data = Array.new
     if File.directory?(dir) then
@@ -184,10 +187,8 @@ class DirectoryController < ApplicationController
   end
 
   def rename
-    newname = self.home + params[:newname]
-    oldname = self.home + params[:oldname]
-    protect_dir(newname)
-    protect_dir(oldname)
+    newname = get_dir(:newname, false) 
+    oldname = get_dir(:oldname, false)
     return_data = Object.new
     if File.exist?(oldname) then
       begin
@@ -205,8 +206,7 @@ class DirectoryController < ApplicationController
 
   def newdir
     
-    dir = (self.home + params[:dir] || 'dir')
-    protect_dir(dir)
+    dir = get_dir(:dir) 
     return_data = Object.new
     if File.exist?(dir) == false then
       begin
@@ -224,8 +224,7 @@ class DirectoryController < ApplicationController
   end
 
   def delete
-    file = (self.home + params[:file])
-    protect_dir(file)
+    file = get_dir(:file, false)
     return_data = Object.new
     if File.exist?(file)  then
       begin
@@ -247,30 +246,27 @@ class DirectoryController < ApplicationController
   end
   
   def download
-    file = (self.home + params[:file].sub("/", ''))
-    protect_dir(file)
+    file = get_dir(:file, false)
     if File.exist?(file)  then
       begin
         if File.directory?(file) then
           folder = true
-          archive = file + ".zip"
-          Zip::ZipFile.open(archive, Zip::ZipFile::CREATE){
+          archive = File.basename(file)
+          Zip::ZipFile.open(archive + ".zip", Zip::ZipFile::CREATE){
             |zipfile|
             Find.find(file) do
               |f|
-              if f[0,1] != '.' then
-                zipfile.add(f.sub(self.home, ''), f)
+              name = File.basename(f)
+              puts name, f
+              if name[0,1] != '.' && f != file then
+                zipfile.add(archive + "/" + name, f)
               end
             end
             }
-          file = archive
+          file = archive + ".zip"
         end
-        send_file(file,
-                  :filename       =>  file.sub(self.home, ''),
-                  :type           =>  File.ftype(file),
-                  :disposition    =>  'attachment',
-                  :stream         =>  false)
-        if folder then
+        send_file(file)
+     if folder then
           File.delete(file)
         end
       end
@@ -278,11 +274,7 @@ class DirectoryController < ApplicationController
   end
   
   def upload
-    dir = self.home + (params[:path] || '')
-    if !dir.ends_with?('/') then
-      dir += '/'
-    end
-    protect_dir(dir)
+    dir = get_dir(:path)
     return_data = Hash.new
     return_data[:success] = true;
     params.each {

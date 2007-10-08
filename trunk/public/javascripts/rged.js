@@ -98,7 +98,7 @@ Rged.prototype =  {
 		, edit: true
 		, maxFileSize: 1048575
 		, hrefPrefix: '/filetree/'
-		/*, pgCfg: {
+		, pgCfg: {
 			uploadIdName: 'UPLOAD_IDENTIFIER'
 			, uploadIdValue: 'auto'
 			, progressBar: true
@@ -109,7 +109,7 @@ Rged.prototype =  {
 				url: '/directory/upload'
 				, method: 'post'
 			}
-		}*/
+		}
 	});
         //tree = new Ext.Rged.TreeFile ('tree', {readOnly: false});
 
@@ -118,9 +118,11 @@ Rged.prototype =  {
 	this.tree.setRootNode(root);
 	this.tree.render();
         this.tree.on('click', this.tree_onClick, this);
-	root.expand();
+        this.tree.on('renamesuccess', function(tree, node, newname, oldname) { this.change_path(this.path)}, this);
+        this.tree.on('beforeopen', function(tree, node, mode) { return false; }, this);
+        root.expand();
     },
-
+ 
     tree_onClick: function (node, elt) {
         var path = '/';
         if (node.isLeaf())
