@@ -119,10 +119,15 @@ Rged.prototype =  {
 	this.tree.render();
         this.tree.on('click', this.tree_onClick, this);
         this.tree.on('renamesuccess', function(tree, node, newname, oldname) { this.change_path(this.path)}, this);
-        this.tree.on('beforeopen', function(tree, node, mode) { return false; }, this);
+        this.tree.on('beforeopen', this.tree_onDownload, this);
         root.expand();
     },
  
+    tree_onDownload: function(tree, node, mode) {
+        window.location = '/directory/download/?file=' + node.id;
+        return false;
+    },
+    
     tree_onClick: function (node, elt) {
         var path = '/';
         if (node.isLeaf())
