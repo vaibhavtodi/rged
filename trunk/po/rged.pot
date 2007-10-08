@@ -6,8 +6,8 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: rged\n"
-"POT-Creation-Date: 2007-10-05 22:20+0200\n"
+"Project-Id-Version: app\n"
+"POT-Creation-Date: 2007-10-08 12:05+0200\n"
 "PO-Revision-Date: 2007-10-04 16:50+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,33 +32,28 @@ msgstr "Merci de vous etre enregistre!!"
 msgid "You have been logged out."
 msgstr "Vous avez ete deconnecte"
 
-#: app/controllers/directory_controller.rb:160
-msgid "folder"
-msgstr "dossier"
-
-#: app/controllers/directory_controller.rb:168
-msgid "file-"
-msgstr "fichier-"
-
-#: app/controllers/directory_controller.rb:194
+#: app/controllers/directory_controller.rb:197
+#: app/controllers/directory_controller.rb:200
 msgid "Cannot rename file "
 msgstr "Impossible de renommer le fichier"
 
-#: app/controllers/directory_controller.rb:194
+#: app/controllers/directory_controller.rb:197
+#: app/controllers/directory_controller.rb:200
 msgid " to "
 msgstr " en "
 
-#: app/controllers/directory_controller.rb:213
+#: app/controllers/directory_controller.rb:219
 msgid "Cannot create directory: "
 msgstr "Impossible de creer le dossier: "
 
-#: app/controllers/directory_controller.rb:231
+#: app/controllers/directory_controller.rb:239
+#: app/controllers/directory_controller.rb:242
 msgid "Cannot delete: "
 msgstr "Impossible de supprimer: "
 
-#: app/controllers/directory_controller.rb:248
+#: app/controllers/directory_controller.rb:257
 #, fuzzy
-msgid "Cannot create: "
+msgid "Cannot download: "
 msgstr "Impossible de supprimer: "
 
 #: app/models/user.rb:-
@@ -150,3 +145,13 @@ msgstr "Annuler"
 #: app/views/layouts/application.rhtml:3
 msgid "Rails Demonstration"
 msgstr "Demonstration de Rails"
+
+#~ msgid "folder"
+#~ msgstr "dossier"
+
+#~ msgid "file-"
+#~ msgstr "fichier-"
+
+#, fuzzy
+#~ msgid "Cannot create: "
+#~ msgstr "Impossible de supprimer: "
