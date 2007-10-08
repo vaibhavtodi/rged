@@ -247,21 +247,36 @@ class DirectoryController < ApplicationController
   end
   
   def upload
-    puts  "\033[33m # IIIIIIICIIIIIIIIIIIIIIII  \033[m"
-    $stdout << params[:filename]
-    file = "#{self.home}#{params[:path]}"
-    protect_dir(file)
-    return_data = Object.new
-    if File.exist?(file)  then
-      begin
-        File.open(file, "w") { |f| f.write(file.read) }
-        return_data = {:success => true}
-      rescue
-        #####################
-      end
-    else
-      return_data = {:success => false, :errors => {:'ext-gen524' => "File upload error."} }
+    
+    dir = self.home + (params[:path] || '')
+    if !dir.ends_with?('/') then
+      dir += '/'
     end
+    protect_dir(dir)
+    return_data = Hash.new
+    return_data[:success] = true;
+    params.each {
+      |key, value|
+      if key =~ /ext-gen([0-9]*)/ && value != "" then
+        file = dir + (value.original_filename || key)
+        puts file
+        if File.exist?(file) then
+          return_data[:success] = false;
+          return_data[:errors] = Hash.new unless return_data[:errors]
+          return_data[:errors][key] = "File " + file.sub(self.home, '') + ' allready exist'
+        else
+          begin
+            File.open(file, "w") { |f| f.write(value.read) }
+          rescue
+            return_data[:success] = false;
+            return_data[:errors] = Hash.new unless return_data[:errors]
+            return_data[:errors][key] = "File " + file.sub(self.home, '') + " can't be uploaded"
+          end
+        end
+      end
+    }
+    response.headers['Content-type'] = 'text/html, charset=utf-8'
+    render :text=>return_data.to_json, :layout=>false
   end
 
 end

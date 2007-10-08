@@ -81,7 +81,7 @@ Rged.prototype =  {
                 , renameUrl: '/directory/rename'
                 , deleteUrl: '/directory/delete'
                 , newdirUrl: '/directory/newdir'
-                , uploadUrl: '/directory/create'
+                , uploadUrl: '/directory/upload'
                 , iconPath: '../images/icons/'
 		, readOnly: false
 		, containerScroll: true
@@ -98,12 +98,12 @@ Rged.prototype =  {
 		/*, pgCfg: {
 			uploadIdName: 'UPLOAD_IDENTIFIER'
 			, uploadIdValue: 'auto'
-			, progressBar: false
+			, progressBar: true
 			, progressTarget: 'qtip'
 			, maxPgErrors: 10
 			, interval: 1000
 			, options: {
-				url: '/directory/create'
+				url: '/directory/upload'
 				, method: 'post'
 			}
 		}*/
