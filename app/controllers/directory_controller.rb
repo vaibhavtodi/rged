@@ -1,3 +1,7 @@
+require 'zip/zip'
+require 'zip/zipfilesystem'
+require 'find'
+
 module Platform
 
    if RUBY_PLATFORM =~ /darwin/i
@@ -76,12 +80,8 @@ class DirectoryController < ApplicationController
  def home
     os = Platform::OS
     impl = Platform::IMPL   
-    #puts "\033[33m #{os}  \033[m"
-    #puts "\033[33m #{impl} \033[m"  
     user = current_user
-    #puts  "\033[33m # avant condition  \033[m"
     if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
-      #puts  "\033[33m # dans condition  \033[m"
       return "/Users/#{user.login}/" 
     else
       return "/home/#{user.login}/"
@@ -246,8 +246,38 @@ class DirectoryController < ApplicationController
 
   end
   
+  def download
+    file = (self.home + params[:file].sub("/", ''))
+    protect_dir(file)
+    if File.exist?(file)  then
+      begin
+        if File.directory?(file) then
+          folder = true
+          archive = file + ".zip"
+          Zip::ZipFile.open(archive, Zip::ZipFile::CREATE){
+            |zipfile|
+            Find.find(file) do
+              |f|
+              if f[0,1] != '.' then
+                zipfile.add(f.sub(self.home, ''), f)
+              end
+            end
+            }
+          file = archive
+        end
+        send_file(file,
+                  :filename       =>  file.sub(self.home, ''),
+                  :type           =>  File.ftype(file),
+                  :disposition    =>  'attachment',
+                  :stream         =>  false)
+        if folder then
+          File.delete(file)
+        end
+      end
+    end 
+  end
+  
   def upload
-    
     dir = self.home + (params[:path] || '')
     if !dir.ends_with?('/') then
       dir += '/'

@@ -80,6 +80,8 @@ Rged.prototype =  {
 		, dataUrl: '/directory/get'
                 , renameUrl: '/directory/rename'
                 , deleteUrl: '/directory/delete'
+                , downloadUrl: '/directory/download'
+                , downloadText: 'Download'
                 , newdirUrl: '/directory/newdir'
                 , uploadUrl: '/directory/upload'
                 , iconPath: '../images/icons/'
@@ -90,6 +92,7 @@ Rged.prototype =  {
 		, enableUpload: true
 		, enableRename: true
 		, enableDelete: true
+                , enableDownload: true
 		, enableNewDir: true
 		, uploadPosition: 'menu'
 		, edit: true
@@ -149,6 +152,10 @@ Rged.prototype =  {
         var sel = this.grid.selModel.getSelected();
         this.deleteFile(sel);
     },
+    menu_onDownload: function(o, e) {
+        var sel = this.grid.selModel.getSelected();
+        this.downloadFile(sel);
+    },
     menu_onRefresh: function(o, e) {
         this.change_path(this.path);
     },
@@ -160,6 +167,8 @@ Rged.prototype =  {
            text: 'Rename', cls: 'x-btn-text-icon scroll-bottom', handler: this.menu_onRename, scope: this});
        this.menu.addButton({
            text: 'Delete', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onDelete, scope: this});
+       this.menu.addButton({
+           text: 'Download', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onDownload, scope: this});
        this.menu.addButton({
            text: 'Refresh', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onRefresh, scope: this});
        this.textBox = new Ext.form.TextField ({cls : 'rged-adress', width: 500});
@@ -333,6 +342,12 @@ Rged.prototype =  {
                                         , scope:this
                                         , handler:this.onContextMenuItem
                                 }
+                                , {	id:'download'
+                                        , text:this.tree.downloadText + ' (' + this.tree.openKeyName + ')'
+                                        , icon:this.tree.openIcon
+                                        , scope:this
+                                        , handler:this.onContextMenuItem
+                                }
                         ]
                 });
         }
@@ -373,6 +388,11 @@ Rged.prototype =  {
                 // {{{
                 case 'delete':
                         this.deleteFile(sel);
+                break;
+                // }}}
+                // {{{
+                case 'download':
+                        this.downloadFile(sel);
                 break;
                 // }}}
 
@@ -447,6 +467,10 @@ Rged.prototype =  {
         // set focus to no button to avoid accidental deletions
         var msgdlg = Ext.Msg.getDialog();
         msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
+    },
+    
+    downloadFile: function(sel) {
+        window.location = '/directory/download/?file=' + sel.get('path');
     },
 
     cmdCallback: function (options, bSuccess, response) {
