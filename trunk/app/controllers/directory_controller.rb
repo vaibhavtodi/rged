@@ -246,9 +246,12 @@ class DirectoryController < ApplicationController
 
   end
   
-  def create
-    file = "#{self.home}#{params[:filename]}"
+  def upload
+    puts  "\033[33m # IIIIIIICIIIIIIIIIIIIIIII  \033[m"
+    $stdout << params[:filename]
+    file = "#{self.home}#{params[:path]}"
     protect_dir(file)
+    return_data = Object.new
     if File.exist?(file)  then
       begin
         File.open(file, "w") { |f| f.write(file.read) }
@@ -257,7 +260,7 @@ class DirectoryController < ApplicationController
         #####################
       end
     else
-      return_data = {:success => false, :error => _("Cannot create: ") + file.sub(self.home, '')}
+      return_data = {:success => false, :errors => {:'ext-gen524' => "File upload error."} }
     end
   end
 
