@@ -579,13 +579,13 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 				items: [
 						// node name we're working with placeholder
 					  { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
-					/*, {
+					, {
 						id: 'open'
-						, text: this.openText + ' (Enter)'
+						, text: this.downloadText + ' (Enter)'
 						, icon: this.openIcon
 						, scope: this
 						, handler: this.onContextMenuItem
-						, menu: {
+					/*	, menu: {
 							items: [
 							  { id: 'open-self'
 								, text: this.openSelfText
@@ -606,8 +606,8 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 								, handler: this.onContextMenuItem
 							}
 							]
-						}
-					}*/
+						}*/
+					}
 
 					, new Ext.menu.Separator({id:'sep-open'})
 					, {	id:'reload'
