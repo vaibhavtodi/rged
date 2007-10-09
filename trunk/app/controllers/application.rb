@@ -1,9 +1,10 @@
+
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 
 class ApplicationController < ActionController::Base
 
-  before_init_gettext :set_languages
+#  before_init_gettext :set_languages
   init_gettext "rged"
 
   def set_languages
@@ -39,7 +40,7 @@ class ApplicationController < ActionController::Base
       #Si il n'en existe toujours pas, la langue est celle utilisée par default, dans la configuration de l'application
       if session[:lang].nil?
         session[:lang] = LANG
-      end
+     end
       #Réglage final de la langue
       set_locale session[:lang]
     end

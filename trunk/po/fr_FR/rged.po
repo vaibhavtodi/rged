@@ -1,105 +1,87 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: rged\n"
-"POT-Creation-Date: 2007-10-09 10:55+0200\n"
-"PO-Revision-Date: 2007-10-09 10:36+0200\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-
 #: app/controllers/account_controller.rb:24
 msgid "Logged in successfully"
-msgstr ""
+msgstr "Authentification reussie"
 
 #: app/controllers/account_controller.rb:26
 msgid "Logged in failed"
-msgstr ""
+msgstr "Echec de l'authentification"
 
 #: app/controllers/account_controller.rb:36
 msgid "Thanks for signing up!"
-msgstr ""
+msgstr "Merci de vous etre enregistre"
 
 #: app/controllers/account_controller.rb:48
 msgid "You have been logged out."
-msgstr ""
+msgstr "Vous avez ete deconnecte"
 
 #: app/controllers/directory_controller.rb:197
 #: app/controllers/directory_controller.rb:200
 msgid "Cannot rename file "
-msgstr ""
+msgstr "Impossible de renomer le fichier"
 
 #: app/controllers/directory_controller.rb:197
 #: app/controllers/directory_controller.rb:200
 msgid " to "
-msgstr ""
+msgstr " en "
 
 #: app/controllers/directory_controller.rb:219
 msgid "Cannot create directory: "
-msgstr ""
+msgstr "Impossible de cree le dossier"
 
 #: app/controllers/directory_controller.rb:239
 #: app/controllers/directory_controller.rb:242
 msgid "Cannot delete: "
-msgstr ""
+msgstr "Impossible de supprimer: "
 
 #: app/views/account/login.rhtml:5
 msgid "Login Page"
-msgstr ""
+msgstr "Page d'authentification"
 
 #: app/views/account/login.rhtml:38 app/views/account/signup.rhtml:43
 msgid "Login"
-msgstr ""
+msgstr "Identifiant"
 
 #: app/views/account/login.rhtml:43
 msgid " Login"
-msgstr ""
+msgstr " Identifiant"
 
 #: app/views/account/login.rhtml:44
 msgid "login"
-msgstr ""
+msgstr "identifiant"
 
 #: app/views/account/login.rhtml:47 app/views/account/signup.rhtml:49
 msgid "Password"
-msgstr ""
+msgstr "Mot de passe"
 
 #: app/views/account/login.rhtml:51
 msgid "Remember me"
-msgstr ""
+msgstr "Se souvenir de moi"
 
 #: app/views/account/login.rhtml:55
 msgid "Log in"
-msgstr ""
+msgstr "Connection"
 
 #: app/views/account/login.rhtml:59 app/views/account/signup.rhtml:38
 #: app/views/account/signup.rhtml:55
 msgid "Sign up"
-msgstr ""
+msgstr "Enregistrement"
 
 #: app/views/account/signup.rhtml:5
 msgid "Sign up Page"
-msgstr ""
+msgstr "Page d'enregistrement"
 
 #: app/views/account/signup.rhtml:46
 msgid "Email"
-msgstr ""
+msgstr "Courriel"
 
 #: app/views/account/signup.rhtml:52
 msgid "Confirm Password"
-msgstr ""
+msgstr "Confirmer le mot de passe"
 
 #: app/views/account/signup.rhtml:60
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 #: app/views/layouts/application.rhtml:3
 msgid "Rails Demonstration"
-msgstr ""
+msgstr "Demonstration de Rails"
