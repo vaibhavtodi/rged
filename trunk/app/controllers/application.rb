@@ -1,11 +1,11 @@
-
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
+require 'gettext/rails'
 
 class ApplicationController < ActionController::Base
 
 #  before_init_gettext :set_languages
-  init_gettext "rged"
+  init_gettext "rged","UTF-8","text/html" # <= Also you can set charset and content_type.
 
   def set_languages
     #Règlage la langue
@@ -26,9 +26,9 @@ class ApplicationController < ActionController::Base
       set_locale session[:lang]
     rescue
       #Si le navigateur envoi des informations sur la langue
-      if !@request.env['HTTP_ACCEPT_LANGUAGE'].nil?
+      if !request.env['HTTP_ACCEPT_LANGUAGE'].nil?
         #recherche de la langue du client
-        langs = @request.env['HTTP_ACCEPT_LANGUAGE'].gsub(/;q=[0-1]\.[0-9]/, '').split(',')
+        langs = request.env['HTTP_ACCEPT_LANGUAGE'].gsub(/;q=[0-1]\.[0-9]/, '').split(',')
         langs.each do |i|
           #si elle n'existe pas, les langues secondaires sont étudiés
           if File.exist?(RAILS_ROOT+'/po/'+i) || File.exist?(RAILS_ROOT+'/po/'+i+'_'+i.upcase)
@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
       #Si il n'en existe toujours pas, la langue est celle utilisée par default, dans la configuration de l'application
       if session[:lang].nil?
         session[:lang] = LANG
-     end
+      end
       #Réglage final de la langue
       set_locale session[:lang]
     end
