@@ -1,3 +1,15 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: rged\n"
+"POT-Creation-Date: 2007-10-09 13:25+0200\n"
+"PO-Revision-Date: 2003-04-03 10:49--500\n"
+"Last-Translator: Alastair Brunton <alastair@brunton.com>\n"
+"Language-Team: fr_FR <langteam@langteam.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
 #: app/controllers/account_controller.rb:24
 msgid "Logged in successfully"
 msgstr "Authentification reussie"
@@ -37,32 +49,32 @@ msgstr "Impossible de supprimer: "
 msgid "Login Page"
 msgstr "Page d'authentification"
 
-#: app/views/account/login.rhtml:38 app/views/account/signup.rhtml:43
+#: app/views/account/login.rhtml:31 app/views/account/signup.rhtml:41
 msgid "Login"
 msgstr "Identifiant"
 
-#: app/views/account/login.rhtml:43
+#: app/views/account/login.rhtml:36
 msgid " Login"
 msgstr " Identifiant"
 
-#: app/views/account/login.rhtml:44
+#: app/views/account/login.rhtml:37
 msgid "login"
 msgstr "identifiant"
 
-#: app/views/account/login.rhtml:47 app/views/account/signup.rhtml:49
+#: app/views/account/login.rhtml:40 app/views/account/signup.rhtml:47
 msgid "Password"
 msgstr "Mot de passe"
 
-#: app/views/account/login.rhtml:51
+#: app/views/account/login.rhtml:44
 msgid "Remember me"
 msgstr "Se souvenir de moi"
 
-#: app/views/account/login.rhtml:55
+#: app/views/account/login.rhtml:48
 msgid "Log in"
 msgstr "Connection"
 
-#: app/views/account/login.rhtml:59 app/views/account/signup.rhtml:38
-#: app/views/account/signup.rhtml:55
+#: app/views/account/login.rhtml:52 app/views/account/signup.rhtml:36
+#: app/views/account/signup.rhtml:53
 msgid "Sign up"
 msgstr "Enregistrement"
 
@@ -70,18 +82,18 @@ msgstr "Enregistrement"
 msgid "Sign up Page"
 msgstr "Page d'enregistrement"
 
-#: app/views/account/signup.rhtml:46
+#: app/views/account/signup.rhtml:44
 msgid "Email"
 msgstr "Courriel"
 
-#: app/views/account/signup.rhtml:52
+#: app/views/account/signup.rhtml:50
 msgid "Confirm Password"
 msgstr "Confirmer le mot de passe"
 
-#: app/views/account/signup.rhtml:60
+#: app/views/account/signup.rhtml:58
 msgid "Cancel"
 msgstr "Annuler"
 
-#: app/views/layouts/application.rhtml:3
+#: app/views/layouts/application.rhtml:5
 msgid "Rails Demonstration"
 msgstr "Demonstration de Rails"
