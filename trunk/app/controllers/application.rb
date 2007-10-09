@@ -51,20 +51,6 @@ class ApplicationController < ActionController::Base
   # Pick a unique cookie name to distinguish our session data from others'
   # If you want "remember me" functionality, add this before_filter to Application Controller
   before_filter :login_from_cookie
-
-
-#  def login_from_cookie
-#    return unless cookies[:auth_token] && current_user.nil?
-#    user = User.find_by_remember_token(cookies[:auth_token])
-#    if user && !user.remember_token_expires.nil? && Time.now < user.remember_token_expires
-#      user.remember_me
-#      self.current_user = user
-#      cookies[:auth_token] = { :value => self.current_user.remember_token , :expires => self.current_user.remember_token_expires }
-#      flash[:notice] = _("Logged in successfully")
-#      redirect_back_or_default(:controller => '/index', :action => 'index')
-#    end
-#  end
-
   session :session_key => '_rged_session_id'
 
 end
