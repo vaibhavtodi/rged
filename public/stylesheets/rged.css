@@ -10,3 +10,22 @@ rged-adress {
     width: 500px;
 }
 
+.menu-rename .x-btn-text { 
+    background-image: url(../images/icons/pencil.png); 
+} 
+        
+.menu-delete .x-btn-text { 
+    background-image: url(../images/icons/cross.png); 
+} 
+
+.menu-refresh .x-btn-text { 
+    background-image: url(../images/icons/arrow_refresh.png); 
+} 
+        
+.menu-download .x-btn-text { 
+    background-image: url(../images/icons/arrow_down.png); 
+} 
+
+.menu-logout .x-btn-text { 
+    background-image: url(../images/icons/application_go.png); 
+} 

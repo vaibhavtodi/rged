@@ -171,20 +171,20 @@ Rged.prototype =  {
 
        this.menu = new Ext.Toolbar('menu');
        this.menu.addButton({
-           text: 'Rename', cls: 'x-btn-text-icon scroll-bottom', handler: this.menu_onRename, scope: this});
+           text: 'Rename', cls: 'x-btn-text-icon menu-rename', handler: this.menu_onRename, scope: this});
        this.menu.addButton({
-           text: 'Delete', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onDelete, scope: this});
+           text: 'Delete', cls: 'x-btn-text-icon menu-delete', handler: this.menu_onDelete, scope: this});
        this.menu.addButton({
-           text: 'Download', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onDownload, scope: this});
+           text: 'Download', cls: 'x-btn-text-icon menu-download', handler: this.menu_onDownload, scope: this});
        this.menu.addButton({
-           text: 'Refresh', cls: 'x-btn-text-icon scroll-top', handler: this.menu_onRefresh, scope: this});
+           text: 'Refresh', cls: 'x-btn-text-icon menu-refresh', handler: this.menu_onRefresh, scope: this});
        this.textBox = new Ext.form.TextField ({cls : 'rged-adress', width: 500});
        this.textBox.on('change', this.menu_onChange, this);
        this.textBox.on('specialkey', this.menu_onSpecialKey, this);
        this.menu.addField(this.textBox);
        this.menu.addFill ();
        this.menu.addButton({
-           text: 'Logout', cls: 'x-btn-text-icon logout', handler: function(o, e) {
+           text: 'Logout', cls: 'x-btn-text-icon menu-logout', handler: function(o, e) {
                window.location = '/account/logout/';
            }
        });
@@ -303,11 +303,34 @@ Rged.prototype =  {
         });
 
         this.grid.render();
-        this.grid.on('celldblclick', this.grid_onCellClick, this);
+        this.grid.on('celldblclick', this.grid_onCellDblClick, this);
+        this.grid.on('cellclick', this.grid_onCellClick, this);
         this.grid.on('cellcontextmenu', this.grid_onCellContextMenu, this);
         this.grid.on('headerdblclick', this.grid_onHeaderClick, this);
+        this.grid_installKeyMap();
     },
 
+    grid_onCellDblClick: function( grid, rowIndex, columnIndex, e )
+    {
+        var rec = grid.getDataSource().getAt(rowIndex);
+        var path = rec.get('path');
+        var folder = rec.get('cls');
+        if (folder == 'folder') {
+            this.load_path(path);
+        }
+        //this.tree.expandPath(path.substrsub, 'path', function (success, node) { if (success) node.select()});
+    },
+    
+    
+    grid_onCellClick: function( grid, rowIndex, columnIndex, e )
+    {
+        var rec = grid.getDataSource().getAt(rowIndex);
+        var p = "/root" + rec.get('path');
+        if (p.substr(p.length - 1, 1) == '/')
+            p = p.substr(0, p.length - 1)
+        this.tree.selectPath(p, 'text', function (success, node) { if (success) node.expand() });
+    },
+    
     //When the user click on the arrox up in the first column
     grid_onHeaderClick: function( grid, columnIndex, e )
     {
@@ -350,7 +373,7 @@ Rged.prototype =  {
                                         , handler:this.onContextMenuItem
                                 }
                                 , {	id:'download'
-                                        , text:this.tree.downloadText + ' (' + this.tree.openKeyName + ')'
+                                        , text:this.tree.downloadText + ' (Enter)'
                                         , icon:this.tree.openIcon
                                         , scope:this
                                         , handler:this.onContextMenuItem
@@ -494,15 +517,50 @@ Rged.prototype =  {
         }
     },
 
-    grid_onCellClick: function( grid, rowIndex, columnIndex, e )
-    {
-        var rec = grid.getDataSource().getAt(rowIndex);
-        var path = rec.get('path');
-        var folder = rec.get('cls');
-        if (folder == 'folder') {
-            this.load_path(path);
-        }
-        //this.tree.expandPath(path.substrsub, 'path', function (success, node) { if (success) node.select()});
+    grid_installKeyMap: function() {
+
+            // install keymap
+            var keymap = new Ext.KeyMap(this.grid.getGridEl(), [
+
+
+                    // open
+                    { 
+                            key: Ext.EventObject.ENTER // F2 key = edit
+                            , scope: this
+                            , fn: function(key, e) {
+                                    var sel = this.grid.selModel.getSelected();
+                                    this.downloadFile(sel);
+                    }}
+
+                    // edit
+                   , { 
+                            key: 113 // F2 key = edit
+                            , scope: this
+                            , fn: function(key, e) {
+                                    var sel = this.grid.selModel.getSelected();
+                                    this.renameFile(sel);
+                    }}
+
+                    // delete
+                    , {
+                            key: 46 // Delete key
+                            , stopEvent: true
+                            , scope: this
+                            , fn: function(key, e) {
+                                    var sel = this.grid.selModel.getSelected();
+                                    this.deleteFile(sel);
+                    }}
+
+                    // reload
+                    , {
+                            key: 69 // Ctrl + E = reload
+                            , ctrl: true
+                            , stopEvent: true
+                            , scope: this
+                            , fn: function(key, e) {
+                                    this.change_path(this.path);
+                    }}
+            ]);
     },
 
     // Manage browser history
