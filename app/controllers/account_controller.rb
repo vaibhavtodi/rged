@@ -7,9 +7,9 @@ class AccountController < ApplicationController
   end
 
   # say something nice, you goof!  something sweet.
-#  def index
-#    redirect_to(:action => 'signup') unless logged_in? || User.count > 0
-#  end
+  #  def index
+  #    redirect_to(:action => 'signup') unless logged_in? || User.count > 0
+  #  end
 
   def login
     return unless request.post?
@@ -19,7 +19,7 @@ class AccountController < ApplicationController
         self.current_user.remember_me
         cookies[:auth_token] = { :value => self.current_user.remember_token , :expires => self.current_user.remember_token_expires_at }
       end
-      redirect_back_or_default(:controller => '/index', :action => 'index')
+      redirect_back_or_default(:controller => 'index', :action => 'index')
       flash[:notice] = _("Logged in successfully")
     else
       flash[:notice] = _("Logged in failed")

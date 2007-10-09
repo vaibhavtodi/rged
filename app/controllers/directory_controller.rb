@@ -61,7 +61,7 @@ module Platform
    elsif RUBY_PLATFORM =~ /sparc/i
       ARCH = :sparc
    elsif RUBY_PLATFORM =~ /mips/i
-      ARCH = :mips # is actually a Silicon Graphics Indigo. How should that be represented ? 
+      ARCH = :mips # is actually a Silicon Graphics Indigo. How should that be represented ?
    else
       ARCH = :unknown
    end
@@ -75,25 +75,25 @@ end
 
 class DirectoryController < ApplicationController
 
- before_filter :login_from_cookie
+# before_filter :login_from_cookie
 
  def home
     os = Platform::OS
-    impl = Platform::IMPL   
+    impl = Platform::IMPL
     user = current_user
     if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
-      return "/Users/#{user.login}" 
+      return "/Users/#{user.login}"
     else
       return "/home/#{user.login}"
     end
   end
-  
+
   def protect_dir(dir)
     if dir =~ /\.\./ then
       raise "Protect dir"
     end
   end
-  
+
   def get_dir(name, rep = true)
     dir = (params[name] || '')
     dir = '/' + dir unless dir.starts_with?('/')
@@ -104,11 +104,11 @@ class DirectoryController < ApplicationController
     protect_dir(dir)
     return dir
   end
-  
+
   def list
     dir = get_dir(:path)
     return_data = Hash.new()
-    
+
     if File.exist?(dir) then
       i = 0
       return_data[:Files] = Array.new
@@ -187,7 +187,7 @@ class DirectoryController < ApplicationController
   end
 
   def rename
-    newname = get_dir(:newname, false) 
+    newname = get_dir(:newname, false)
     oldname = get_dir(:oldname, false)
     return_data = Object.new
     if File.exist?(oldname) then
@@ -205,8 +205,8 @@ class DirectoryController < ApplicationController
   end
 
   def newdir
-    
-    dir = get_dir(:dir) 
+
+    dir = get_dir(:dir)
     return_data = Object.new
     if File.exist?(dir) == false then
       begin
@@ -244,7 +244,7 @@ class DirectoryController < ApplicationController
     render :text=>return_data.to_json, :layout=>false
 
   end
-  
+
   def download
     file = get_dir(:file, false)
     if File.exist?(file)  then
@@ -270,9 +270,9 @@ class DirectoryController < ApplicationController
           File.delete(file)
         end
       end
-    end 
+    end
   end
-  
+
   def upload
     dir = get_dir(:path)
     return_data = Hash.new
