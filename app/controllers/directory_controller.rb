@@ -88,12 +88,13 @@ class DirectoryController < ApplicationController
     end
   end
 
-  def protect_dir(dir)
+ def protect_dir(dir)
     if dir =~ /\.\./ then
       raise "Protect dir"
     end
   end
 
+  
   def get_dir(name, rep = true)
     dir = (params[name] || '')
     dir = '/' + dir unless dir.starts_with?('/')

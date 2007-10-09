@@ -9,9 +9,9 @@ class ApplicationController < ActionController::Base
   init_gettext "rged"  # <= Also you can set charset and content_type.
 
   def set_languages
-    #Règlage la langue
+    #Rï¿½glage la langue
     if !params[:lang].nil?
-      #Si il y a un paramètre pour changer la langue, vérification de l'existence de la  langue
+      #Si il y a un paramï¿½tre pour changer la langue, vï¿½rification de l'existence de la  langue
       if File.exist?(RAILS_ROOT + '/po/'+params[:lang]) || File.exist?(RAILS_ROOT + '/po/'+params[:lang]+'_'+params[:lang].upcase)
         session[:lang] = params[:lang]
       else
@@ -19,11 +19,11 @@ class ApplicationController < ActionController::Base
       end
     end
     begin
-      #Si la langue choisie n'existe pas, ou si c'est la première visite
+      #Si la langue choisie n'existe pas, ou si c'est la premiï¿½re visite
       if session[:lang].nil?
         break
       end
-      #Si non, on règle simplement la langue
+      #Si non, on rï¿½gle simplement la langue
       set_locale session[:lang]
     rescue
       #Si le navigateur envoi des informations sur la langue
@@ -31,18 +31,18 @@ class ApplicationController < ActionController::Base
         #recherche de la langue du client
         langs = request.env['HTTP_ACCEPT_LANGUAGE'].gsub(/;q=[0-1]\.[0-9]/, '').split(',')
         langs.each do |i|
-          #si elle n'existe pas, les langues secondaires sont étudiés
+          #si elle n'existe pas, les langues secondaires sont ï¿½tudiï¿½s
           if File.exist?(RAILS_ROOT+'/po/'+i) || File.exist?(RAILS_ROOT+'/po/'+i+'_'+i.upcase)
             session[:lang] = i
             break
           end
         end
       end
-      #Si il n'en existe toujours pas, la langue est celle utilisée par default, dans la configuration de l'application
+      #Si il n'en existe toujours pas, la langue est celle utilisï¿½e par default, dans la configuration de l'application
       if session[:lang].nil?
         session[:lang] = LANG
       end
-      #Réglage final de la langue
+      #Rï¿½glage final de la langue
       set_locale session[:lang]
     end
   end
