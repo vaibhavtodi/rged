@@ -1385,7 +1385,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 
 			// {{{
 			// open
-			/*{ 
+			{ 
 				key: Ext.EventObject.ENTER // F2 key = edit
 				, scope: this
 				, fn: function(key, e) {
@@ -1394,11 +1394,11 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 					if(node && 0 !== node.getDepth() && node.isLeaf()) {
 						this.openNode(node);
 					}
-			}}*/
+			}}
 			// }}}
 			// {{{
 			// edit
-		       { 
+		       , { 
 				key: 113 // F2 key = edit
 				, scope: this
 				, fn: function(key, e) {
