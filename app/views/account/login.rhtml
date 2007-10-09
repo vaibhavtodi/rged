@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 	"http://www.w3.org/TR/html4/loose.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<%= Locale.get %>" lang="<%= Locale.get %>">
+<html>
 <head>
 <title> <%= _('Login Page') %></title>
 	<link rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/ext-all.css">
@@ -34,16 +34,18 @@
 
 <% form_tag do -%>
 <p><label for="login"> <%= _(' Login') %> </label><br/>
-<%= text_field_tag _('login') %></p>
+<%= text_field_tag 'login' %></p>
 <br>
 
 <p><label for="password"> <%= _('Password') %> </label><br/>
 <%= password_field_tag 'password' %></p>
 <br>
 
+
 <p><label for="remember_me"> <%= _('Remember me') %> :</label>
 <%= check_box_tag 'remember_me' %></p>
 <br>
+
 
 <p><%= submit_tag _('Log in') %></p>
 <% end -%>

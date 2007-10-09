@@ -1,6 +1,5 @@
 class AccountController < ApplicationController
   # Be sure to include AuthenticationSystem in Application Controller instead
-
   def default
     session[:return_to] ? redirect_to_url(session[:return_to]) : redirect_to(default)
     session[:return_to] = nil
@@ -41,7 +40,6 @@ class AccountController < ApplicationController
   end
 
   def logout
-    self.current_user.forget_me if current_user
     self.current_user = nil
     cookies.delete :auth_token
     reset_session

@@ -75,7 +75,7 @@ end
 
 class DirectoryController < ApplicationController
 
-# before_filter :login_from_cookie
+ before_filter :login_from_cookie
 
  def home
     os = Platform::OS
@@ -94,7 +94,7 @@ class DirectoryController < ApplicationController
     end
   end
 
-  
+
   def get_dir(name, rep = true)
     dir = (params[name] || '')
     dir = '/' + dir unless dir.starts_with?('/')
