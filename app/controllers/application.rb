@@ -3,9 +3,10 @@
 require 'gettext/rails'
 
 class ApplicationController < ActionController::Base
+  include AuthenticatedSystem
 
-#  before_init_gettext :set_languages
-  init_gettext "rged","UTF-8","text/html" # <= Also you can set charset and content_type.
+  before_init_gettext :set_languages
+  init_gettext "rged"  # <= Also you can set charset and content_type.
 
   def set_languages
     #Règlage la langue
@@ -50,7 +51,20 @@ class ApplicationController < ActionController::Base
   # Pick a unique cookie name to distinguish our session data from others'
   # If you want "remember me" functionality, add this before_filter to Application Controller
   before_filter :login_from_cookie
-  include AuthenticatedSystem
+
+
+#  def login_from_cookie
+#    return unless cookies[:auth_token] && current_user.nil?
+#    user = User.find_by_remember_token(cookies[:auth_token])
+#    if user && !user.remember_token_expires.nil? && Time.now < user.remember_token_expires
+#      user.remember_me
+#      self.current_user = user
+#      cookies[:auth_token] = { :value => self.current_user.remember_token , :expires => self.current_user.remember_token_expires }
+#      flash[:notice] = _("Logged in successfully")
+#      redirect_back_or_default(:controller => '/index', :action => 'index')
+#    end
+#  end
 
   session :session_key => '_rged_session_id'
+
 end

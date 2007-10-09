@@ -13,14 +13,13 @@ class AccountController < ApplicationController
 
   def login
     return unless request.post?
-
     self.current_user = User.authenticate(params[:login], params[:password])
     if current_user
       if params[:remember_me] == "1"
         self.current_user.remember_me
         cookies[:auth_token] = { :value => self.current_user.remember_token , :expires => self.current_user.remember_token_expires_at }
       end
-      redirect_back_or_default(:controller => 'index', :action => 'index')
+      redirect_back_or_default(:controller => '/index', :action => 'index')
       flash[:notice] = _("Logged in successfully")
     else
       flash[:notice] = _("Logged in failed")
@@ -42,6 +41,7 @@ class AccountController < ApplicationController
   end
 
   def logout
+    self.current_user.forget_me if current_user
     self.current_user = nil
     cookies.delete :auth_token
     reset_session
