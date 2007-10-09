@@ -111,9 +111,7 @@ Rged.prototype =  {
 			}
 		}
 	});
-        //tree = new Ext.Rged.TreeFile ('tree', {readOnly: false});
 
-	// {{{
 	var root = new Ext.tree.AsyncTreeNode({text:'root', path: '/', id: '/', allowDrag:false});
 	this.tree.setRootNode(root);
 	this.tree.render();
@@ -166,17 +164,36 @@ Rged.prototype =  {
     menu_onRefresh: function(o, e) {
         this.change_path(this.path);
     },
+    
+    menu_DropDelete: function(n, dd, e, data){
+       if (e.selections)
+           this.deleteFile(e.selections[0]);
+       else
+           this.tree.deleteNode(e.node);
+   },
+   
+   menu_DropRename: function(n, dd, e, data){
+       if (e.selections)
+           this.renameFile(e.selections[0]);
+   },
+   
+   menu_DropDownload: function(n, dd, e, data){
+       if (e.selections)
+           this.downloadFile(e.selections[0]);
+       else
+           this.tree.openNode(e.node);
+   },
     // Initialize the menu
     init_menu: function () {
 
        this.menu = new Ext.Toolbar('menu');
-       this.menu.addButton({
+       this.menu.addButton({id: 'rename',
            text: 'Rename', cls: 'x-btn-text-icon menu-rename', handler: this.menu_onRename, scope: this});
-       this.menu.addButton({
+       this.menu.addButton({id: 'delete',
            text: 'Delete', cls: 'x-btn-text-icon menu-delete', handler: this.menu_onDelete, scope: this});
-       this.menu.addButton({
+       this.menu.addButton({id: 'download',
            text: 'Download', cls: 'x-btn-text-icon menu-download', handler: this.menu_onDownload, scope: this});
-       this.menu.addButton({
+       this.menu.addButton({id: 'refresh',
            text: 'Refresh', cls: 'x-btn-text-icon menu-refresh', handler: this.menu_onRefresh, scope: this});
        this.textBox = new Ext.form.TextField ({cls : 'rged-adress', width: 500});
        this.textBox.on('change', this.menu_onChange, this);
@@ -348,12 +365,6 @@ Rged.prototype =  {
         e.stopEvent();
         e.preventDefault();
 
-        // {{{
-        // lazy create upload form
-        //this.createUploadForm();
-        // }}}
-        // {{{
-        // lazy create context menu
         if(!this.contextMenu) {
                 this.contextMenu = new Ext.menu.Menu({
                         items: [
@@ -573,31 +584,48 @@ Rged.prototype =  {
         // has trigerred the back/forward button. We cannot discrminate between
         // these two situations.
             var cur = Ext.ux.History.getCurrentState ("dir");
-            if (cur != state)
-                this.change_path(path);
+            //if (cur != state)
+                //this.change_path(path);
         }, this, true );
 
         Ext.ux.History.initialize();
         //this.load_path (init);
     },
 
+    init_drop: function() {
+        ddel = new Ext.dd.DropZone('delete', {ddGroup: 'TreeDD'});
+       var rged = this;
+       ddel.notifyDrop = function(n, dd, e, data){
+          rged.menu_DropDelete.apply(rged, arguments);
+       };
+       var ddren = new Ext.dd.DropZone('rename', {ddGroup: 'TreeDD'});
+       ddren.notifyDrop = function(n, dd, e, data){
+          rged.menu_DropRename.apply(rged, arguments);
+       };
+       var ddown = new Ext.dd.DropZone('download', {ddGroup: 'TreeDD'});
+       ddown.notifyDrop = function(n, dd, e, data){
+          rged.menu_DropDownload.apply(rged, arguments);
+       };
+    },
     init : function() {
        Ext.QuickTips.init();
-
        this.init_tree();
        this.init_menu ();
        this.init_layout ();
        this.init_grid ();
-       //this.init_history ();
-       this.load_path ('/');
+       this.init_drop ();
+       var local = this;
+       unFocus.History.addEventListener('historyChange', function(path) {local.change_path(path);});
+       var path = unFocus.History.getCurrent() || '/';
+       this.change_path (path);
     },
 
     load_path : function (path) {
         if (this.path != path) {
             if (path == '')
-                path = '';
-            //Ext.ux.History.navigate( "dir", path );
-            this.change_path(path);
+                path = '/';
+            unFocus.History.addHistory(path);
+            //this.change_path(path);
         }
     },
 
