@@ -1,0 +1,98 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2007-10-09 13:25+0200\n"
+"PO-Revision-Date: 2007-10-09 10:36+0200\n"
+"Last-Translator: Alastair Brunton <alastair@brunton.com>\n"
+"Language-Team: fr_FR <langteam@langteam.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: app/controllers/account_controller.rb:24
+msgid "Logged in successfully"
+msgstr "Logged in successfully"
+
+#: app/controllers/account_controller.rb:26
+msgid "Logged in failed"
+msgstr "Logged in failed"
+
+#: app/controllers/account_controller.rb:36
+msgid "Thanks for signing up!"
+msgstr "Thanks for signing up!"
+
+#: app/controllers/account_controller.rb:48
+msgid "You have been logged out."
+msgstr "You have been logged out."
+
+#: app/controllers/directory_controller.rb:197
+#: app/controllers/directory_controller.rb:200
+msgid "Cannot rename file "
+msgstr "Cannot rename file "
+
+#: app/controllers/directory_controller.rb:197
+#: app/controllers/directory_controller.rb:200
+msgid " to "
+msgstr " to "
+
+#: app/controllers/directory_controller.rb:219
+msgid "Cannot create directory: "
+msgstr "Cannot create directory: "
+
+#: app/controllers/directory_controller.rb:239
+#: app/controllers/directory_controller.rb:242
+msgid "Cannot delete: "
+msgstr "Cannot delete: "
+
+#: app/views/account/login.rhtml:5
+msgid "Login Page"
+msgstr "Login Page"
+
+#: app/views/account/login.rhtml:31 app/views/account/signup.rhtml:41
+msgid "Login"
+msgstr "Login"
+
+#: app/views/account/login.rhtml:36
+msgid " Login"
+msgstr " Login"
+
+#: app/views/account/login.rhtml:37
+msgid "login"
+msgstr "login"
+
+#: app/views/account/login.rhtml:40 app/views/account/signup.rhtml:47
+msgid "Password"
+msgstr "Password"
+
+#: app/views/account/login.rhtml:44
+msgid "Remember me"
+msgstr "Remember me"
+
+#: app/views/account/login.rhtml:48
+msgid "Log in"
+msgstr "Log in"
+
+#: app/views/account/login.rhtml:52 app/views/account/signup.rhtml:36
+#: app/views/account/signup.rhtml:53
+msgid "Sign up"
+msgstr "Sign up"
+
+#: app/views/account/signup.rhtml:5
+msgid "Sign up Page"
+msgstr "Sign up Page"
+
+#: app/views/account/signup.rhtml:44
+msgid "Email"
+msgstr "Email"
+
+#: app/views/account/signup.rhtml:50
+msgid "Confirm Password"
+msgstr "Confirm Password"
+
+#: app/views/account/signup.rhtml:58
+msgid "Cancel"
+msgstr "Cancel"
+
+#: app/views/layouts/application.rhtml:5
+msgid "Rails Demonstration"
+msgstr "Rails Demonstration"
