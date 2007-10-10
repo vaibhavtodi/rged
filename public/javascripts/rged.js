@@ -451,20 +451,7 @@ Rged.prototype =  {
                         }
                         // answer is yes
                         else {
-                                // setup request options
-                                options = {
-                                        url: this.tree.renameUrl || this.tree.dataUrl
-                                        , method: this.tree.method
-                                        , scope: this
-                                        , callback: this.cmdCallback
-                                        , params: {
-                                                cmd: 'rename'
-                                                , oldname: sel.get('path')
-                                                , newname: this.path + newname
-                                        }
-                                };
-                                // send request
-                                conn = new Ext.data.Connection().request(options);
+                               this.rename(this.path + newname, sel.get('path'));
                         }
                 }
                 , this
@@ -475,6 +462,22 @@ Rged.prototype =  {
         msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
     },
 
+    rename: function (newname, oldname) {
+     // setup request options
+        options = {
+                url: this.tree.renameUrl || this.tree.dataUrl
+                , method: this.tree.method
+                , scope: this
+                , callback: this.cmdCallback
+                , params: {
+                        cmd: 'rename'
+                        , oldname: oldname
+                        , newname: newname
+                }
+        };
+        // send request
+        conn = new Ext.data.Connection().request(options);
+    },
     deleteFile: function(sel) {
         // display confirmation message
         Ext.Msg.confirm(this.tree.deleteText
@@ -593,20 +596,50 @@ Rged.prototype =  {
     },
 
     init_drop: function() {
-        ddel = new Ext.dd.DropZone('delete', {ddGroup: 'TreeDD'});
+        ddel = new Ext.dd.DropZone('delete', {ddGroup: 'TreeDD', notifyOver: function(dd, e, data)
+           {
+              return 'x-dd-drop-ok';
+           }});
        var rged = this;
        ddel.notifyDrop = function(n, dd, e, data){
           rged.menu_DropDelete.apply(rged, arguments);
        };
-       var ddren = new Ext.dd.DropZone('rename', {ddGroup: 'TreeDD'});
+       var ddren = new Ext.dd.DropZone('rename', {ddGroup: 'TreeDD', notifyOver: function(dd, e, data)
+           {
+              return 'x-dd-drop-ok';
+           }});
        ddren.notifyDrop = function(n, dd, e, data){
           rged.menu_DropRename.apply(rged, arguments);
        };
-       var ddown = new Ext.dd.DropZone('download', {ddGroup: 'TreeDD'});
+       var ddown = new Ext.dd.DropZone('download', {ddGroup: 'TreeDD', notifyOver: function(dd, e, data)
+           {
+              return 'x-dd-drop-ok';
+           }});
        ddown.notifyDrop = function(n, dd, e, data){
           rged.menu_DropDownload.apply(rged, arguments);
        };
+       var ddgrid = new Ext.dd.DropTarget(this.grid.getView().mainBody, {
+           ddGroup: 'TreeDD',
+           notifyDrop: function(dd, e, data) 
+           { 
+               rged.grid_notifyDrop.apply(rged, arguments);
+           },
+
+           notifyOver: function(dd, e, data)
+           {
+              var drop=dd.getDragData(e).selections[0];
+              return (drop.data.cls == 'folder')?'x-dd-drop-ok-add':'x-dd-drop-nodrop';
+           } });       
     },
+    
+   grid_notifyDrop: function(dd, e, data) 
+   { 
+      var drop=dd.getDragData(e).selections[0];
+      var drag=data.selections[0];
+      if (drop.data.cls == 'folder')
+        this.rename(drop.id + "/" + drag.data.name, drag.id);
+   },
+    
     init : function() {
        Ext.QuickTips.init();
        this.init_tree();
