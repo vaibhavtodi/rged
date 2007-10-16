@@ -43,6 +43,9 @@ module Platform
    elsif RUBY_PLATFORM =~ /irix/i # i.e. mips-irix6.5
       OS = :unix
       IMPL = :irix
+   elsif RUBY_PLATFORM =~ /java/i # jruby
+      OS = :java
+      IMPL = :java
    else
       OS = :unknown
       IMPL = :unknown
@@ -78,16 +81,27 @@ class DirectoryController < ApplicationController
  before_filter :login_required
 
  def home
-#   os = Platform::OS
-#   impl = Platform::IMPL
+   os = Platform::OS
+   impl = Platform::IMPL
    user = current_user
 
-#   if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
-#     return "/Users/#{user.login}"
-#   else
-#     return "/home/#{user.login}"
-#   end
-   return "#{ENV['HOME'].sub(ENV['USER'], '')}#{user.login}"
+   if "#{os}" != "java"
+     if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
+       return "/Users/#{user.login}"
+     else
+       return "/home/#{user.login}"
+     end
+   else
+     require 'java'
+     include_class 'java.lang.System'
+     home = "#{System.getenv("HOME")}"
+     user_tmp = "#{System.getenv("USER")}"
+     home = home.sub(user_tmp, '')
+#     puts home
+     return home + user.login
+#     return "#{System.getenv("HOME").sub(System.getenv("USER"))}"
+     # true in RUBY return "#{ENV['HOME'].sub(ENV['USER'], '')}#{user.login}"
+   end
  end
 
  def protect_dir(dir)
