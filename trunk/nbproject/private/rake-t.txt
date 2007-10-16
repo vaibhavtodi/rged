@@ -1,4 +1,4 @@
-(in /home/patou/projet/rged)
+(in /Users/papywarrior/ProjsPerso/lesotdudestinRubyDev/rged)
 rake db:fixtures:load          # Load fixtures into the current environment's database.  Load specific fixtures using FIXTURES=x,y
 rake db:migrate                # Migrate the database through scripts in db/migrate. Target specific version with VERSION=x
 rake db:schema:dump            # Create a db/schema.rb file that can be portably used against any DB supported by AR

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2007-10-09 23:10+0200\n"
+"POT-Creation-Date: 2007-10-16 15:09+0100\n"
 "PO-Revision-Date: 2007-10-09 10:36+0200\n"
 "Last-Translator: Alastair Brunton <alastair@brunton.com>\n"
 "Language-Team: fr_FR <langteam@langteam.com>\n"
@@ -9,19 +9,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: app/controllers/account_controller.rb:22
+#: app/controllers/account_controller.rb:28
 msgid "Logged in successfully"
 msgstr "Logged in successfully"
 
-#: app/controllers/account_controller.rb:24
+#: app/controllers/account_controller.rb:30
 msgid "Logged in failed"
 msgstr "Logged in failed"
 
-#: app/controllers/account_controller.rb:34
+#: app/controllers/account_controller.rb:40
 msgid "Thanks for signing up!"
 msgstr "Thanks for signing up!"
 
-#: app/controllers/account_controller.rb:46
+#: app/controllers/account_controller.rb:52
 msgid "You have been logged out."
 msgstr "You have been logged out."
 
