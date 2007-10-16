@@ -1,7 +1,7 @@
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 require 'gettext/rails'
-#require 'authenticated_system'
+require 'authenticated_system'
 
 class ApplicationController < ActionController::Base
   before_init_gettext :set_languages

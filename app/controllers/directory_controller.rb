@@ -75,25 +75,26 @@ end
 
 class DirectoryController < ApplicationController
 
- before_filter :login_from_cookie
+ before_filter :login_required
 
  def home
-    os = Platform::OS
-    impl = Platform::IMPL
-    user = current_user
-    if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
-      return "/Users/#{user.login}"
-    else
-      return "/home/#{user.login}"
-    end
-  end
+#   os = Platform::OS
+#   impl = Platform::IMPL
+   user = current_user
+
+#   if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
+#     return "/Users/#{user.login}"
+#   else
+#     return "/home/#{user.login}"
+#   end
+   return "#{ENV['HOME'].sub(ENV['USER'], '')}#{user.login}"
+ end
 
  def protect_dir(dir)
     if dir =~ /\.\./ then
       raise "Protect dir"
     end
   end
-
 
   def get_dir(name, rep = true)
     dir = (params[name] || '')
@@ -150,7 +151,6 @@ class DirectoryController < ApplicationController
 
   def get
     dir = get_dir(:path)
-    puts dir
     i = 0
     return_data = Array.new
     if File.directory?(dir) then

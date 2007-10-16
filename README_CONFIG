@@ -22,8 +22,6 @@ le fichier config/environnement.rb)
 2)Configuration de l'application rails
 
 	a) Créer les bases de données référencer dans config/database.yml.
-	b) Dans le fichier public/javascript/rged.js, remplacer "/Users/papywarrior"
-par "$HOME".
 
 3)Lancement
 	a)ruby script/server webrick
