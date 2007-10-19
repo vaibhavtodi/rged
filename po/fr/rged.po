@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rged\n"
-"POT-Creation-Date: 2007-10-16 15:09+0100\n"
+"POT-Creation-Date: 2007-10-19 18:05+0200\n"
 "PO-Revision-Date: 2003-04-03 10:49--500\n"
 "Last-Translator: Alastair Brunton <alastair@brunton.com>\n"
 "Language-Team: fr_FR <langteam@langteam.com>\n"
@@ -20,76 +20,163 @@ msgstr "Echec de l'authentification"
 
 #: app/controllers/account_controller.rb:40
 msgid "Thanks for signing up!"
-msgstr "Merci de vous etre enregistre"
+msgstr "Merci de vous etre enregistre!"
 
 #: app/controllers/account_controller.rb:52
 msgid "You have been logged out."
-msgstr "Vous avez ete deconnecte"
+msgstr "Vous avez ete deconnecte."
 
-#: app/controllers/directory_controller.rb:199
-#: app/controllers/directory_controller.rb:202
+#: app/controllers/departments_controller.rb:25
+#: app/controllers/departments_controller.rb:37
+#: app/controllers/departments_controller.rb:52
+#: app/controllers/departments_controller.rb:67
+msgid "Department "
+msgstr "Departement"
+
+#: app/controllers/departments_controller.rb:25
+msgid " can not be created."
+msgstr " ne peux pas etre cree."
+
+#: app/controllers/departments_controller.rb:37
+msgid " can not be moved."
+msgstr " ne peux pas etre deplace."
+
+#: app/controllers/departments_controller.rb:50
+msgid "Admin Department can not be rename."
+msgstr "Le Departement admin ne peut pas etre renomme."
+
+#: app/controllers/departments_controller.rb:52
+msgid " can not be rename to "
+msgstr " ne peux pas etre renomme en "
+
+#: app/controllers/departments_controller.rb:65
+msgid "Admin Department can not be deleted."
+msgstr "Le Departement admin ne peut pas etre supprimer."
+
+#: app/controllers/departments_controller.rb:67
+msgid " can not be deleted."
+msgstr " ne peux pas etre supprime."
+
+#: app/controllers/directory_controller.rb:213
+#: app/controllers/directory_controller.rb:216
 msgid "Cannot rename file "
-msgstr "Impossible de renomer le fichier"
+msgstr "Impossible de renomer le fichier "
 
-#: app/controllers/directory_controller.rb:199
-#: app/controllers/directory_controller.rb:202
+#: app/controllers/directory_controller.rb:213
+#: app/controllers/directory_controller.rb:216
 msgid " to "
 msgstr " en "
 
-#: app/controllers/directory_controller.rb:220
+#: app/controllers/directory_controller.rb:234
 msgid "Cannot create directory: "
 msgstr "Impossible de cree le dossier"
 
-#: app/controllers/directory_controller.rb:239
-#: app/controllers/directory_controller.rb:242
+#: app/controllers/directory_controller.rb:253
+#: app/controllers/directory_controller.rb:256
 msgid "Cannot delete: "
 msgstr "Impossible de supprimer: "
 
-#: app/views/account/login.rhtml:5
+#: app/controllers/directory_controller.rb:303
+#: app/controllers/directory_controller.rb:310
+msgid "File "
+msgstr "Fichier "
+
+#: app/controllers/directory_controller.rb:303
+msgid " allready exist"
+msgstr " existe deja"
+
+#: app/controllers/directory_controller.rb:310
+msgid " can't be uploaded"
+msgstr " ne peux pas etre mis a jour"
+
+#: app/views/account/login.rhtml:1
 msgid "Login Page"
 msgstr "Page d'authentification"
 
-#: app/views/account/login.rhtml:31 app/views/account/signup.rhtml:36
-msgid "Login"
-msgstr "Identifiant"
-
-#: app/views/account/login.rhtml:36
+#: app/views/account/login.rhtml:4
 msgid " Login"
 msgstr " Identifiant"
 
-#: app/views/account/login.rhtml:40 app/views/account/signup.rhtml:42
+#: app/views/account/login.rhtml:8 app/views/account/signup.rhtml:11
 msgid "Password"
 msgstr "Mot de passe"
 
-#: app/views/account/login.rhtml:45
+#: app/views/account/login.rhtml:13
 msgid "Remember me"
 msgstr "Se souvenir de moi"
 
-#: app/views/account/login.rhtml:50
+#: app/views/account/login.rhtml:18
 msgid "Log in"
 msgstr "Connection"
 
-#: app/views/account/login.rhtml:54 app/views/account/signup.rhtml:31
-#: app/views/account/signup.rhtml:48
+#: app/views/account/login.rhtml:22 app/views/account/signup.rhtml:17
 msgid "Sign up"
 msgstr "Enregistrement"
 
-#: app/views/account/signup.rhtml:5
+#: app/views/account/signup.rhtml:1
 msgid "Sign up Page"
 msgstr "Page d'enregistrement"
 
-#: app/views/account/signup.rhtml:39
+#: app/views/account/signup.rhtml:5
+msgid "Login"
+msgstr "Identifiant"
+
+#: app/views/account/signup.rhtml:8
 msgid "Email"
 msgstr "Courriel"
 
-#: app/views/account/signup.rhtml:45
+#: app/views/account/signup.rhtml:14
 msgid "Confirm Password"
 msgstr "Confirmer le mot de passe"
 
-#: app/views/account/signup.rhtml:53
+#: app/views/account/signup.rhtml:22
 msgid "Cancel"
 msgstr "Annuler"
 
-#: app/views/layouts/application.rhtml:3
-msgid "Rails Demonstration"
-msgstr "Demonstration de Rails"
+#: app/views/departments/_form.rhtml:5
+msgid "Department Name"
+msgstr "Nom du Departement"
+
+#: app/views/departments/list.rhtml:72
+msgid "Remove"
+msgstr "Deplacer"
+
+#: app/views/departments/list.rhtml:73
+msgid "Do you really want delete: "
+msgstr "Voulez-vous reelement supprimer: "
+
+#: app/views/departments/list.rhtml:101 app/views/departments/list.rhtml:216
+msgid "Rename"
+msgstr "Renommer"
+
+#: app/views/departments/list.rhtml:102
+msgid "Rename "
+msgstr "Renommer "
+
+#: app/views/departments/list.rhtml:142
+msgid "New Department"
+msgstr "Nouveau Departement"
+
+#: app/views/departments/list.rhtml:143
+msgid "New Department name ?"
+msgstr "Nouveau nom du Departement ?"
+
+#: app/views/departments/list.rhtml:222
+msgid "Delete"
+msgstr "Supprimer"
+
+#: app/views/departments/list.rhtml:227
+msgid "New"
+msgstr "Nouveau"
+
+#: app/views/departments/list.rhtml:268
+msgid "Departments List"
+msgstr "Liste des Departements"
+
+#: app/views/layouts/application.rhtml:6
+msgid "Rails Demonstration: "
+msgstr "Demonstration de Rails: "
+
+#: app/views/layouts/departments.rhtml:7
+msgid "Departments: "
+msgstr "Departements: "

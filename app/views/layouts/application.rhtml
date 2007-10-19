@@ -1,12 +1,41 @@
-<html>
-  <head>
-    <title> <%= _('Rails Demonstration') %> </title>
-  </head>
-  <body>
-    <% if logged_in? %>
-      <%= link_to 'logout', :controller => '/account', :action => 'logout' %>
-    <% end %>
-    <p style="color: green;"><%= flash[:notice] %></p>
-    <%= @content_for_layout %>
-  </body>
-</html>
+  <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+          "http://www.w3.org/TR/html4/loose.dtd">
+  <html>
+
+    <head>
+      <title> <%= _('Rails Demonstration: ') + controller.action_name %> </title>
+          <link rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/ext-all.css">
+          <link rel="stylesheet" type="text/css" href="/stylesheets/rged.css">
+      <style type="text/css">
+      #acc-ct {
+          width: 240px;
+          position: relative;
+      }
+      #acc-wrap {
+          border: 1px solid silver;
+          background-color: white;
+      }
+      #adsense-top, #adsense-bottom {
+          margin: 10px;
+      }
+      .x-dock-panel .x-dock-panel-body {
+          background-color: #ffffc8;
+      }
+  </style>
+    </head>
+      <body>
+       <div style="width:300px;">
+        <div class="x-box-tl"><div class="x-box-tr"><div class="x-box-tc"></div></div></div>
+        <div class="x-box-ml"><div class="x-box-mr"><div class="x-box-mc">
+            <div id="form-ct">
+          <% if logged_in? %>
+            <%= link_to 'logout', :controller => '/account', :action => 'logout' %>
+          <% end %>
+      <p style="color: green;"><%= flash[:notice] %></p>
+      <%= @content_for_layout %>
+              </div>
+    </div></div></div>
+    <div class="x-box-bl"><div class="x-box-br"><div class="x-box-bc"></div></div></div>
+</div>
+    </body>
+  </html>

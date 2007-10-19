@@ -15,7 +15,7 @@ development:
 <% if RUBY_PLATFORM =~ /java/ %>
   adapter: jdbc
   driver: com.mysql.jdbc.Driver
-  url: jdbc:mysql://localhost/rged
+  url: jdbc:mysql://localhost/rged_development
   database: rged_development
   username: root
   password:
@@ -36,7 +36,7 @@ test:
 <% if RUBY_PLATFORM =~ /java/ %>
   adapter: jdbc
   driver: com.mysql.jdbc.Driver
-  url: jdbc:mysql://localhost/rged
+  url: jdbc:mysql://localhost/rged_test
   database: rged_test
   username: root
   password:
@@ -54,7 +54,7 @@ production:
 <% if RUBY_PLATFORM =~ /java/ %>
   adapter: jdbc
   driver: com.mysql.jdbc.Driver
-  url: jdbc:mysql://localhost/rged
+  url: jdbc:mysql://localhost/rged_production
   database: rged_production
   username: root
   password:

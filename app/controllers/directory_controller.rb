@@ -1,6 +1,7 @@
 require 'zip/zip'
 require 'zip/zipfilesystem'
 require 'find'
+require 'authenticated_system'
 
 module Platform
 
@@ -300,14 +301,14 @@ class DirectoryController < ApplicationController
         if File.exist?(file) then
           return_data[:success] = false;
           return_data[:errors] = Hash.new unless return_data[:errors]
-          return_data[:errors][key] = "File " + file.sub(self.home, '') + ' allready exist'
+          return_data[:errors][key] = _("File ") + file.sub(self.home, '') + _(" allready exist")
         else
           begin
             File.open(file, "w") { |f| f.write(value.read) }
           rescue
             return_data[:success] = false;
             return_data[:errors] = Hash.new unless return_data[:errors]
-            return_data[:errors][key] = "File " + file.sub(self.home, '') + " can't be uploaded"
+            return_data[:errors][key] = _("File ") + file.sub(self.home, '') + _(" can't be uploaded")
           end
         end
       end

@@ -26,9 +26,9 @@ class ApplicationController < ActionController::Base
       set_locale session[:lang]
     rescue
       #Si le navigateur envoi des informations sur la langue
-      if !@request.env['HTTP_ACCEPT_LANGUAGE'].nil?
+      if !request.env['HTTP_ACCEPT_LANGUAGE'].nil?
         #recherche de la langue du client
-        langs = @request.env['HTTP_ACCEPT_LANGUAGE'].gsub(/;q=[0-1]\.[0-9]/, '').split(',')
+        langs = request.env['HTTP_ACCEPT_LANGUAGE'].gsub(/;q=[0-1]\.[0-9]/, '').split(',')
         langs.each do |i|
           #si elle n'existe pas, les langues secondaires sont etudie
           if File.exist?(RAILS_ROOT+'/po/'+i) || File.exist?(RAILS_ROOT+'/po/'+i+'_'+i.upcase)
