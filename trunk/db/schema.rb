@@ -4,6 +4,13 @@
 
 ActiveRecord::Schema.define(:version => 2) do
 
+  create_table "departments", :force => true do |t|
+    t.column "parent_id", :integer
+    t.column "lft",       :integer
+    t.column "rgt",       :integer
+    t.column "name",      :string
+  end
+
   create_table "users", :force => true do |t|
     t.column "login",                     :string
     t.column "email",                     :string
