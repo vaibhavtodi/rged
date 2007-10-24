@@ -1,7 +1,6 @@
 require 'zip/zip'
 require 'zip/zipfilesystem'
 require 'find'
-require 'authenticated_system'
 
 module Platform
 
@@ -79,7 +78,7 @@ end
 
 class DirectoryController < ApplicationController
 
- before_filter :login_required
+before_filter :login_required
 
  def home
    os = Platform::OS
@@ -98,10 +97,7 @@ class DirectoryController < ApplicationController
      home = "#{System.getenv("HOME")}"
      user_tmp = "#{System.getenv("USER")}"
      home = home.sub(user_tmp, '')
-#     puts home
      return home + user.login
-#     return "#{System.getenv("HOME").sub(System.getenv("USER"))}"
-     # true in RUBY return "#{ENV['HOME'].sub(ENV['USER'], '')}#{user.login}"
    end
  end
 
@@ -273,7 +269,6 @@ class DirectoryController < ApplicationController
             Find.find(file) do
               |f|
               name = File.basename(f)
-              puts name, f
               if name[0,1] != '.' && f != file then
                 zipfile.add(archive + "/" + name, f)
               end
@@ -297,7 +292,6 @@ class DirectoryController < ApplicationController
       |key, value|
       if key =~ /ext-gen([0-9]*)/ && value != "" then
         file = dir + (value.original_filename || key)
-        puts file
         if File.exist?(file) then
           return_data[:success] = false;
           return_data[:errors] = Hash.new unless return_data[:errors]

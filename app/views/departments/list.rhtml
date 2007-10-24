@@ -1,0 +1,342 @@
+<link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-aero.css">
+<script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
+<script type="text/javascript">
+Ext.onReady(function() {
+Ext.QuickTips.init();
+var tree = new Ext.tree.TreePanel('tree-div', {
+        animate:true,
+        enableDD:true,
+        containerScroll: true
+ //       rootVisible: false
+      //  loader:new Ext.tree.TreeLoader()
+    });
+
+var tree_editor = new Ext.tree.TreeEditor(tree, {
+    autosize:true
+});
+
+var cmdCallback= function (options, bSuccess, response) {
+            var o;
+            var showMsg = true;
+            if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                } else {
+                        Ext.Msg.alert(this.errorText, o.error);
+                }
+            }
+        };
+
+var OnBeforeNodeDrop = function(event) {
+      var options = {
+              url: '/departments/move'
+              , method: 'post'
+              , callback: cmdCallback
+              , params: {
+                      id_child: event.data.node.id
+                      , id_father: event.target.id
+              }
+      };
+    if (node.id !== "-1")                                
+      conn = new Ext.data.Connection().request(options);
+    };
+
+var TextChange = function (node, newtext, oldtext) {
+      var options = {
+              url: '/departments/rename'
+              , method: 'post'
+              , callback: cmdCallback
+              , params: {
+                      id_node: node.id
+                      , old_name: oldtext
+                      , new_name: newtext
+              }
+      };
+      if (newtext !== oldtext && node.id !== "-1") {
+          conn = new Ext.data.Connection().request(options);
+      }
+    };
+
+var Remove = function (node) {
+    var cmdCallback2  = function (options, bSuccess, response) {
+            var o;
+            var showMsg = true;
+            if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    var n = tree.getNodeById(node.id);
+                    n.parentNode.removeChild(n);
+                } else {
+                        Ext.Msg.alert(this.errorText, o.error);
+                }
+            }
+        };
+    Ext.Msg.confirm('<%= _("Remove") %>'
+                , '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
+                , function(response) {
+                        var conn;
+                        // do nothing if answer is not yes
+                        if('yes' !== response) {
+                                return;
+                        }
+                        // answer is yes
+                        else {
+                                // setup request options
+                                options = {
+                                        url: '/departments/delete'
+                                        , method: 'post'
+                                        , callback: cmdCallback2
+                                        , params: {
+                                                id:node.id
+                                                , name:node.text
+                                        }
+                                };
+                                // send request
+                                if (node.id !== "-1")                                  
+                                  conn = new Ext.data.Connection().request(options);
+                        }
+                }
+                , tree
+        );
+    };
+
+var DeleteOne = function (node) {
+    var cmdCallback2  = function (options, bSuccess, response) {
+            var o;
+            var showMsg = true;
+            if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    var n = tree.getNodeById(node.id);
+                    n.parentNode.removeChild(n);
+                } else {
+                        Ext.Msg.alert(this.errorText, o.error);
+                }
+            }
+        };
+    Ext.Msg.confirm('<%= _("Remove") %>'
+                , '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
+                , function(response) {
+                        var conn;
+                        // do nothing if answer is not yes
+                        if('yes' !== response) {
+                                return;
+                        }
+                        // answer is yes
+                        else {
+                                var n = tree.getNodeById(node.id);
+                                var t = n.childNodes.length;
+                                var f = 0;
+                                var s = 0;
+                                if (t > 0)
+                                    f = n.childNodes[0].id;
+                                if (t > 1)    
+                                    s = n.childNodes[1].id; 
+                                // setup request options
+                                options = {
+                                        url: '/departments/delete_one'
+                                        , method: 'post'
+                                        , callback: cmdCallback2
+                                        , params: {
+                                                id:node.id
+                                                , name:node.text
+                                        }
+                                };
+                                // send request
+                                if (node.id !== "-1")
+                                    conn = new Ext.data.Connection().request(options);
+                        }
+                }
+                , tree
+        );
+    };    
+    
+var Rename = function(node) {
+        Ext.Msg.prompt('<%= _("Rename") %>'
+                , '<%= _("Rename ") %>' + '<b>' + node.text + '</b> to ?'
+                , function(response, newname) {
+                        var conn;
+                        var cmdCallback2  = function (options, bSuccess, response) {
+                            var o;
+                            var showMsg = true;
+                            if (true === bSuccess) {
+                                o = Ext.decode(response.responseText);
+                                if (true === o.success) {
+                                    var n = tree.getNodeById(node.id);
+                                    n.setText(newname);
+                                } else {
+                                        Ext.Msg.alert(this.errorText, o.error);
+                                }
+                            }
+                        };
+                        // do nothing if answer is not yes
+                        if('ok' !== response || node.text === newname) {
+                                return;
+                        }
+                        // answer is yes
+                        else {
+                            var options = {
+                              url: '/departments/rename'
+                              , method: 'post'
+                              , callback: cmdCallback2
+                              , params: {
+                                      id_node: node.id
+                                      , old_name: node.text
+                                      , new_name: newname
+                              }
+                            };
+                            if (node.id !== "-1")
+                                conn = new Ext.data.Connection().request(options);
+                        }
+                }
+                , this
+        );
+    };
+
+var NewDepartment = function(node) {
+        Ext.Msg.prompt('<%= _("New Department") %>'
+                , '<%= _("New Department name ?") %>'
+                , function(response, newname) {
+                        var conn;
+                        var cmdCallback2= function (options, bSuccess, response) {
+                            var o;
+                            var showMsg = true;
+                            if (true === bSuccess) {
+                                o = Ext.decode(response.responseText);
+                                if (true === o.success) {
+                                    var n = tree.getNodeById(node.id);
+                                    n.appendChild(new Ext.tree.TreeNode({
+                                                            text:newname,
+                                                            id:o.parent
+                                                        }));
+                                    n.expandChildNodes();                    
+                                } else {
+                                        Ext.Msg.alert(this.errorText, o.error);
+                                }
+                            }
+                        };
+                        // do nothing if answer is not yes
+                        if('ok' !== response) {
+                                return;
+                        }
+                        // answer is yes
+                        else {
+                            var options = {
+                              url: '/departments/new_department'
+                              , method: 'post'
+                              , callback: cmdCallback2
+                              , params: {
+                                      id: node.id
+                                      , name: newname
+                              }
+                            };
+                            conn = new Ext.data.Connection().request(options);
+                        }
+                }
+                , this
+        );
+    };
+
+var onContextMenuItem = function(item, e) {
+
+        // menu item switch
+        switch(item.id) {
+                // {{{
+                case 'rename':
+                        Rename(item.node);
+                break;
+                // }}}
+                // {{{
+                case 'delete_all':
+                        Remove(item.node);
+                break;
+                // }}}
+                // {{{
+                case 'new':
+                        NewDepartment(item.node);
+                break;
+                // }}}
+                // {{{
+                case 'delete':
+                        DeleteOne(item.node);
+                break;
+                // }}}
+
+         }; // end of switch(item.id)
+    };
+
+var ContextMenu = function (node, event) {
+    //event.stopEvent();
+    event.preventDefault();
+    contextMenu = new Ext.menu.Menu({
+                    items: [
+                                    // node name we're working with placeholder
+                              { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
+                            , new Ext.menu.Separator({id:'sep-open'})
+                            , {	id:'rename'
+                                    , text:'<%= _("Rename") %>'
+                                    , node:node
+                                    , e:event
+                                    , handler:onContextMenuItem
+                            }
+                            , {	id:'delete'
+                                    , text:'<%= _("Delete") %>'
+                                    , node:node
+                                    , handler:onContextMenuItem
+                            }
+                            , {	id:'delete_all'
+                                    , text:'<%= _("Delete all") %>'
+                                    , node:node
+                                    , handler:onContextMenuItem
+                            }
+                            , {	id:'new'
+                                    , text:'<%= _("New") %>'
+                                    , node:node
+                                    , handler:onContextMenuItem
+                            }
+                            
+                    ]
+            });
+
+  contextMenu.item = node;
+
+  // set menu item text to node text
+  var itemNodename = contextMenu.items.get('nodename');
+  itemNodename.setText(Ext.util.Format.ellipsis(node.text, 25));
+
+  contextMenu.showAt(contextMenu.getEl().getAlignToXY(event.target, 'tl-tl?', [0, 18]));
+  itemNodename.container.setStyle('opacity', 1);
+};
+
+var root = new Ext.tree.TreeNode({
+    id:"-1",
+    text:"<%= _("Root") %>"
+});
+tree.setRootNode(root);
+
+<% for departments in @departments %>
+    var node<%= departments.id %> = new Ext.tree.TreeNode({
+            text:"<%= departments.name %>",
+            id:"<%= departments.id %>"
+            });
+    <% if departments.parent_id != nil && departments.parent_id != 0 %>
+        node<%= departments.parent_id%>.appendChild(node<%= departments.id %>);
+    <%else%>
+            root.appendChild(node<%= departments.id %>);            
+    <%end%>
+<% end %>
+    // render the tree
+tree.render();
+tree.getRootNode().expand();
+tree.expandAll();
+
+tree.on("beforenodedrop", OnBeforeNodeDrop);
+tree.on("textchange", TextChange);
+tree.on("contextmenu", ContextMenu);
+
+});
+</script>
+
+<h3><%= _("Departments List") %></h3>
+<div id="tree-div"></div>

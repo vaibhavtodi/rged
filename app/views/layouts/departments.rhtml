@@ -3,7 +3,9 @@
   <html>
 
     <head>
-      <title> <%= _('Rails Demonstration: ') + controller.action_name %> </title>
+      <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+      <title> <%= _('Departments: ') + controller.action_name %> </title>
+        <%= stylesheet_link_tag 'scaffold' %>
           <link rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/ext-all.css">
           <link rel="stylesheet" type="text/css" href="/stylesheets/rged.css">
       <style type="text/css">
@@ -24,17 +26,17 @@
   </style>
     </head>
       <body>
-       <div style="width:300px;">
-        <div class="x-box-tl"><div class="x-box-tr"><div class="x-box-tc"></div></div></div>
-        <div class="x-box-ml"><div class="x-box-mr"><div class="x-box-mc">
-            <div id="form-ct">
-              <% if logged_in? %>
-            <%= link_to 'logout', :controller => '/account', :action => 'logout' %>
-          <% end %>         
-          <p style="color: green;"><%= flash[:notice] %></p>
-      <%= @content_for_layout %>
-              </div>
-    </div></div></div>
+
+        <div style="width:300px;">
+            <div class="x-box-tl"><div class="x-box-tr"><div class="x-box-tc"></div></div></div>
+                <div class="x-box-ml"><div class="x-box-mr"><div class="x-box-mc">
+                            <div id="form-ct">
+                                <p style="color: green"><%= flash[:notice] %></p>
+                                <%= yield %>
+                            </div>
+                </div>
+            </div>
+        </div>
     <div class="x-box-bl"><div class="x-box-br"><div class="x-box-bc"></div></div></div>
 </div>
     </body>
