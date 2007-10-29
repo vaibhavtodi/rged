@@ -10,7 +10,15 @@ var tree = new Ext.tree.TreePanel('tree-div', {
         containerScroll: true
  //       rootVisible: false
       //  loader:new Ext.tree.TreeLoader()
-    });    
+    });
+    
+var ctree = new Ext.tree.TreePanel('ctree-div', {
+        animate:true,
+        enableDD:true,
+        containerScroll: true,
+        rootVisible: true
+      //  loader:new Ext.tree.TreeLoader()
+    }); 
 
 var tree_editor = new Ext.tree.TreeEditor(tree, {
     autosize:true
@@ -30,7 +38,7 @@ var cmdCallback= function (options, bSuccess, response) {
 
 var OnBeforeNodeDrop = function(event) {
       var options = {
-              url: '/departments/move'
+              url: '/department/move'
               , method: 'post'
               , callback: cmdCallback
               , params: {
@@ -44,7 +52,7 @@ var OnBeforeNodeDrop = function(event) {
 
 var TextChange = function (node, newtext, oldtext) {
       var options = {
-              url: '/departments/rename'
+              url: '/department/rename'
               , method: 'post'
               , callback: cmdCallback
               , params: {
@@ -83,13 +91,8 @@ var Remove = function (node) {
                         // answer is yes
                         else {
                                 // setup request options
-                                var url_id = ''
-                                if (node.id !== "-1")
-                                    url_id = '/departments/delete';
-                                    else
-                                    url_id = '/departments/delete_all';
                                 options = {
-                                        url: url_id
+                                        url: '/department/delete'
                                         , method: 'post'
                                         , callback: cmdCallback2
                                         , params: {
@@ -98,7 +101,7 @@ var Remove = function (node) {
                                         }
                                 };
                                 // send request
-                               // if (node.id !== "-1")                                  
+                                if (node.id !== "-1")                                  
                                   conn = new Ext.data.Connection().request(options);
                         }
                 }
@@ -130,17 +133,52 @@ var DeleteOne = function (node) {
                         }
                         // answer is yes
                         else {
-                                var n = tree.getNodeById(node.id);
-                                var t = n.childNodes.length;
-                                var f = 0;
-                                var s = 0;
-                                if (t > 0)
-                                    f = n.childNodes[0].id;
-                                if (t > 1)    
-                                    s = n.childNodes[1].id; 
                                 // setup request options
                                 options = {
-                                            url: '/departments/delete_one'
+                                            url: '/department/delete_one'
+                                        , method: 'post'
+                                        , callback: cmdCallback2
+                                        , params: {
+                                                id:node.id
+                                                , name:node.text
+                                        }
+                                };
+                                // send request
+                               if (node.id !== "-1")
+                                    conn = new Ext.data.Connection().request(options);
+                        }
+                }
+                , tree
+        );
+    };
+    
+var DeleteCountry = function (node) {
+    var cmdCallback2  = function (options, bSuccess, response) {
+            var o;
+            var showMsg = true;
+            if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    var n = tree.getNodeById(node.id);
+                    n.parentNode.removeChild(n);
+                } else {
+                        Ext.Msg.alert(this.errorText, o.error);
+                }
+            }
+        };
+    Ext.Msg.confirm('<%= _("Remove") %>'
+                , '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
+                , function(response) {
+                        var conn;
+                        // do nothing if answer is not yes
+                        if('yes' !== response) {
+                                return;
+                        }
+                        // answer is yes
+                        else {
+                                // setup request options
+                                options = {
+                                            url: '/country/delete_country'
                                         , method: 'post'
                                         , callback: cmdCallback2
                                         , params: {
@@ -182,7 +220,7 @@ var Rename = function(node) {
                         // answer is yes
                         else {
                             var options = {
-                              url: '/departments/rename'
+                              url: '/department/rename'
                               , method: 'post'
                               , callback: cmdCallback2
                               , params: {
@@ -199,6 +237,48 @@ var Rename = function(node) {
         );
     };
 
+var NewCountry = function(node) {
+        Ext.Msg.prompt('<%= _("New Department") %>'
+                , '<%= _("New Department name ?") %>'
+                , function(response, newname) {
+                        var conn;
+                        var cmdCallback2= function (options, bSuccess, response) {
+                            var o;
+                            var showMsg = true;
+                            if (true === bSuccess) {
+                                o = Ext.decode(response.responseText);
+                                if (true === o.success) {
+                                    ctree.getRootNode().appendChild(new Ext.tree.TreeNode({
+                                                            text:newname,
+                                                            id:o.id
+                                                        }));                
+                                } else {
+                                        Ext.Msg.alert(this.errorText, o.error);
+                                }
+                            }
+                        };
+                        // do nothing if answer is not yes
+                        if('ok' !== response) {
+                                return;
+                        }
+                        // answer is yes
+                        else {
+                            var options = {
+                              url: '/country/new_country'
+                              , method: 'post'
+                              , callback: cmdCallback2
+                              , params: {
+                                       name: newname
+                                       , id: node.id
+                              }
+                            };
+                            conn = new Ext.data.Connection().request(options);
+                        }
+                }
+                , this
+        );
+    };    
+    
 var NewDepartment = function(node) {
         Ext.Msg.prompt('<%= _("New Department") %>'
                 , '<%= _("New Department name ?") %>'
@@ -228,7 +308,7 @@ var NewDepartment = function(node) {
                         // answer is yes
                         else {
                             var options = {
-                              url: '/departments/new_department'
+                              url: '/department/new_department'
                               , method: 'post'
                               , callback: cmdCallback2
                               , params: {
@@ -270,6 +350,31 @@ var onContextMenuItem = function(item, e) {
 
          }; // end of switch(item.id)
     };
+        
+    
+    
+var ConContextMenuItem = function(item, e) {
+
+        // menu item switch
+        switch(item.id) {
+                // {{{
+                case 'rename':
+                        CRename(item.node);
+                break;
+                // }}}
+                // {{{
+                case 'new':
+                        NewCountry(item.node);
+                break;
+                // }}}
+                // {{{
+                case 'delete':
+                        DeleteCountry(item.node);
+                break;
+                // }}}
+
+         }; // end of switch(item.id)
+    };    
 
 var ContextMenu = function (node, event) {
     //event.stopEvent();
@@ -314,35 +419,97 @@ var ContextMenu = function (node, event) {
   itemNodename.container.setStyle('opacity', 1);
 };
 
+var CContextMenu = function (node, event) {
+    //event.stopEvent();
+    event.preventDefault();
+    contextMenu = new Ext.menu.Menu({
+                    items: [
+                                    // node name we're working with placeholder
+                              { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
+                            , new Ext.menu.Separator({id:'sep-open'})
+                            , {	id:'rename'
+                                    , text:'<%= _("Rename") %>'
+                                    , node:node
+                                    , e:event
+                                    , handler:ConContextMenuItem
+                            }
+                            , {	id:'delete'
+                                    , text:'<%= _("Delete") %>'
+                                    , node:node
+                                    , handler:ConContextMenuItem
+                            }                          
+                            , {	id:'new'
+                                    , text:'<%= _("New") %>'
+                                    , node:node
+                                    , handler:ConContextMenuItem
+                            }
+                            
+                    ]
+            });
+
+  contextMenu.item = node;
+
+  // set menu item text to node text
+  var itemNodename = contextMenu.items.get('nodename');
+  itemNodename.setText(Ext.util.Format.ellipsis(node.text, 25));
+
+  contextMenu.showAt(contextMenu.getEl().getAlignToXY(event.target, 'tl-tl?', [0, 18]));
+  itemNodename.container.setStyle('opacity', 1);
+};
+
 var root = new Ext.tree.TreeNode({
     id:"-1",
     text:"<%= _("Root") %>"
 });
 
+var croot = new Ext.tree.TreeNode({
+    id:"-1",
+    text:"<%= _("Countries_Root") %>"
+});
+
+ctree.setRootNode(croot);
 tree.setRootNode(root);
 
-<% for departments in @departments %>
-    var node<%= departments.id %> = new Ext.tree.TreeNode({
-            text:"<%= departments.name %>",
-            id:"<%= departments.id %>"
+<% for department in @department %>
+    var node<%= department.id %> = new Ext.tree.TreeNode({
+            text:"<%= department.name %>",
+            id:"<%= department.id %>"
             });
-    <% if departments.parent_id != nil && departments.parent_id != 0 %>
-        node<%= departments.parent_id%>.appendChild(node<%= departments.id %>);
+    <% if department.parent_id != nil && department.parent_id != 0 %>
+        node<%= department.parent_id%>.appendChild(node<%= department.id %>);
     <%else%>
-            root.appendChild(node<%= departments.id %>); 
+            root.appendChild(node<%= department.id %>); 
     <%end%>
 <% end %>
+
+<% for country in Country.find_all %>
+    var cnode<%= country.id %> = new Ext.tree.TreeNode({
+            text:"<%= country.name %>",
+            id:"<%= country.id %>"
+            });
+    croot.appendChild(cnode<%= country.id %>); 
+<% end %>
+
     // render the tree
 tree.render();
 tree.getRootNode().expand();
 tree.expandAll();
 
+ctree.render();
+ctree.getRootNode().expand();
+ctree.expandAll();
+
 tree.on("beforenodedrop", OnBeforeNodeDrop);
 tree.on("textchange", TextChange);
 tree.on("contextmenu", ContextMenu);
 
+//ctree.on("beforenodedrop", OnBeforeNodeDrop);
+//ctree.on("textchange", TextChange);
+ctree.on("contextmenu", CContextMenu);
+
 });
 </script>
 
-<h3><%= _("Departments List") %></h3>
+<h3><%= _("Department List") %></h3>
 <div id="tree-div"></div>
+<div id="ctree-div"></div>
