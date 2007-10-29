@@ -5,6 +5,7 @@
 ActiveRecord::Schema.define(:version => 3) do
 
   create_table "countries", :force => true do |t|
+    t.column "name", :string
   end
 
   create_table "departments", :force => true do |t|
