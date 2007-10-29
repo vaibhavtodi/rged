@@ -12,7 +12,7 @@ class DepartmentController < ApplicationController
   def list
     @department = Department.find(:all, :order=> "lft")#, @department = paginate :department, :per_page => 10
   end
-  
+
   def new_department
     if params[:id] != "0"
       parent = Department.find(params[:id])
@@ -21,6 +21,11 @@ class DepartmentController < ApplicationController
     end
     department = Department.new
     department.name = params[:name]
+    if parent != nil
+      department.country_id = parent.country_id
+    else
+      department.country_id = 1
+    end
     return_data = Hash.new()
     if department.save
       if parent != nil
@@ -66,7 +71,7 @@ class DepartmentController < ApplicationController
     end
     render :text=>return_data.to_json, :layout=>false
   end
-  
+
   def delete_one
     return_data = Hash.new()
     department = Department.find(params[:id])
@@ -76,6 +81,6 @@ class DepartmentController < ApplicationController
         return_data = {:success => false, :error => _("Department ") + params[:name] + _(" can not be deleted.")}
     end
     render :text=>return_data.to_json, :layout=>false
-  end  
+  end
 
 end

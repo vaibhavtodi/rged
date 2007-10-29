@@ -11,14 +11,14 @@ var tree = new Ext.tree.TreePanel('tree-div', {
  //       rootVisible: false
       //  loader:new Ext.tree.TreeLoader()
     });
-    
+
 var ctree = new Ext.tree.TreePanel('ctree-div', {
         animate:true,
         enableDD:true,
         containerScroll: true,
         rootVisible: true
       //  loader:new Ext.tree.TreeLoader()
-    }); 
+    });
 
 var tree_editor = new Ext.tree.TreeEditor(tree, {
     autosize:true
@@ -36,17 +36,17 @@ var cmdCallback= function (options, bSuccess, response) {
             }
         };
 
-var OnBeforeNodeDrop = function(event) {
+var OnBeforeNodeDrop = function(tree, node, oldParent, newParent, index) {
       var options = {
               url: '/department/move'
               , method: 'post'
               , callback: cmdCallback
               , params: {
-                      id_child: event.data.node.id
-                      , id_father: event.target.id
+                      id_child: node.id
+                      , id_father: newParent.id
               }
       };
-    if (node.id !== "-1")                                
+    if (node.id !== "-1")
       conn = new Ext.data.Connection().request(options);
     };
 
@@ -101,7 +101,7 @@ var Remove = function (node) {
                                         }
                                 };
                                 // send request
-                                if (node.id !== "-1")                                  
+                                if (node.id !== "-1")
                                   conn = new Ext.data.Connection().request(options);
                         }
                 }
@@ -151,7 +151,7 @@ var DeleteOne = function (node) {
                 , tree
         );
     };
-    
+
 var DeleteCountry = function (node) {
     var cmdCallback2  = function (options, bSuccess, response) {
             var o;
@@ -159,7 +159,7 @@ var DeleteCountry = function (node) {
             if (true === bSuccess) {
                 o = Ext.decode(response.responseText);
                 if (true === o.success) {
-                    var n = tree.getNodeById(node.id);
+                    var n = ctree.getNodeById(node.id);
                     n.parentNode.removeChild(n);
                 } else {
                         Ext.Msg.alert(this.errorText, o.error);
@@ -193,8 +193,8 @@ var DeleteCountry = function (node) {
                 }
                 , tree
         );
-    };    
-    
+    };
+
 var Rename = function(node) {
         Ext.Msg.prompt('<%= _("Rename") %>'
                 , '<%= _("Rename ") %>' + '<b>' + node.text + '</b> to ?'
@@ -251,7 +251,7 @@ var NewCountry = function(node) {
                                     ctree.getRootNode().appendChild(new Ext.tree.TreeNode({
                                                             text:newname,
                                                             id:o.id
-                                                        }));                
+                                                        }));
                                 } else {
                                         Ext.Msg.alert(this.errorText, o.error);
                                 }
@@ -277,8 +277,8 @@ var NewCountry = function(node) {
                 }
                 , this
         );
-    };    
-    
+    };
+
 var NewDepartment = function(node) {
         Ext.Msg.prompt('<%= _("New Department") %>'
                 , '<%= _("New Department name ?") %>'
@@ -295,7 +295,7 @@ var NewDepartment = function(node) {
                                                             text:newname,
                                                             id:o.parent
                                                         }));
-                                    n.expandChildNodes();                    
+                                    n.expandChildNodes();
                                 } else {
                                         Ext.Msg.alert(this.errorText, o.error);
                                 }
@@ -350,9 +350,9 @@ var onContextMenuItem = function(item, e) {
 
          }; // end of switch(item.id)
     };
-        
-    
-    
+
+
+
 var ConContextMenuItem = function(item, e) {
 
         // menu item switch
@@ -374,7 +374,7 @@ var ConContextMenuItem = function(item, e) {
                 // }}}
 
          }; // end of switch(item.id)
-    };    
+    };
 
 var ContextMenu = function (node, event) {
     //event.stopEvent();
@@ -405,7 +405,7 @@ var ContextMenu = function (node, event) {
                                     , node:node
                                     , handler:onContextMenuItem
                             }
-                            
+
                     ]
             });
 
@@ -437,13 +437,13 @@ var CContextMenu = function (node, event) {
                                     , text:'<%= _("Delete") %>'
                                     , node:node
                                     , handler:ConContextMenuItem
-                            }                          
+                            }
                             , {	id:'new'
                                     , text:'<%= _("New") %>'
                                     , node:node
                                     , handler:ConContextMenuItem
                             }
-                            
+
                     ]
             });
 
@@ -478,16 +478,16 @@ tree.setRootNode(root);
     <% if department.parent_id != nil && department.parent_id != 0 %>
         node<%= department.parent_id%>.appendChild(node<%= department.id %>);
     <%else%>
-            root.appendChild(node<%= department.id %>); 
+            root.appendChild(node<%= department.id %>);
     <%end%>
 <% end %>
 
-<% for country in Country.find_all %>
+<% for country in Country.find :all %>
     var cnode<%= country.id %> = new Ext.tree.TreeNode({
             text:"<%= country.name %>",
             id:"<%= country.id %>"
             });
-    croot.appendChild(cnode<%= country.id %>); 
+    croot.appendChild(cnode<%= country.id %>);
 <% end %>
 
     // render the tree
@@ -499,7 +499,7 @@ ctree.render();
 ctree.getRootNode().expand();
 ctree.expandAll();
 
-tree.on("beforenodedrop", OnBeforeNodeDrop);
+tree.on("beforemove", OnBeforeNodeDrop);
 tree.on("textchange", TextChange);
 tree.on("contextmenu", ContextMenu);
 

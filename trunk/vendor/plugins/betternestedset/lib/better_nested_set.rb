@@ -1,30 +1,30 @@
 module SymetrieCom
   module Acts #:nodoc:
-    module NestedSet #:nodoc:      
+    module NestedSet #:nodoc:
       def self.included(base)
-        base.extend(ClassMethods)       
-      end       
+        base.extend(ClassMethods)
+      end
       # This module provides an enhanced acts_as_nested_set mixin for ActiveRecord.
       # Please see the README for background information, examples, and tips on usage.
-      module ClassMethods        
-        
-        
+      module ClassMethods
+
+
         # Configuration options are:
         # * +parent_column+ - Column name for the parent/child foreign key (default: +parent_id+).
-        # * +left_column+ - Column name for the left index (default: +lft+). 
-        # * +right_column+ - Column name for the right index (default: +rgt+). NOTE: 
+        # * +left_column+ - Column name for the left index (default: +lft+).
+        # * +right_column+ - Column name for the right index (default: +rgt+). NOTE:
         #   Don't use +left+ and +right+, since these are reserved database words.
-        # * +scope+ - Restricts what is to be considered a tree. Given a symbol, it'll attach "_id" 
-        #   (if it isn't there already) and use that as the foreign key restriction. It's also possible 
+        # * +scope+ - Restricts what is to be considered a tree. Given a symbol, it'll attach "_id"
+        #   (if it isn't there already) and use that as the foreign key restriction. It's also possible
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_nested_set :scope => 'tree_id = #{tree_id} AND completed = 0'</tt>
-        # * +text_column+ - Column name for the title field (optional). Used as default in the 
-        #   {your-class}_options_for_select helper method. If empty, will use the first string field 
+        # * +text_column+ - Column name for the title field (optional). Used as default in the
+        #   {your-class}_options_for_select helper method. If empty, will use the first string field
         #   of your model class.
         def acts_as_nested_set(options = {})
-                   
+
           options[:scope] = "#{options[:scope]}_id".intern if options[:scope].is_a?(Symbol) && options[:scope].to_s !~ /_id$/
-          
+
           write_inheritable_attribute(:acts_as_nested_set_options,
              { :parent_column  => (options[:parent_column] || 'parent_id'),
                :left_column    => (options[:left_column]   || 'lft'),
@@ -33,9 +33,9 @@ module SymetrieCom
                :text_column    => (options[:text_column] || columns.collect{|c| (c.type == :string) ? c.name : nil }.compact.first),
                :class          => self # for single-table inheritance
               } )
-          
+
           class_inheritable_reader :acts_as_nested_set_options
-          
+
           if acts_as_nested_set_options[:scope].is_a?(Symbol)
             scope_condition_method = %(
               def scope_condition
@@ -49,7 +49,7 @@ module SymetrieCom
           else
             scope_condition_method = "def scope_condition() \"#{acts_as_nested_set_options[:scope]}\" end"
           end
-          
+
           # no bulk assignment
           attr_protected  acts_as_nested_set_options[:left_column].intern,
                           acts_as_nested_set_options[:right_column].intern,
@@ -67,16 +67,16 @@ module SymetrieCom
             end
             #{scope_condition_method}
           end_eval
-               
-          
+
+
           include SymetrieCom::Acts::NestedSet::InstanceMethods
           extend SymetrieCom::Acts::NestedSet::ClassMethods
           # adds the helper for the class
 #          ActionView::Base.send(:define_method, "#{Inflector.underscore(self.class)}_options_for_select") { special=nil
 #              "#{acts_as_nested_set_options[:text_column]} || "#{self.class} id #{id}"
 #            }
-            
-          self.before_update { |e|  
+
+          self.before_update { |e|
             #logger.info("\033[33m Better: Before_Update method called \033[m")
             #logger.info("\033[33m\t  \033[m")
             #logger.info("\033[33m\t id: #{e.id} \033[m")
@@ -87,45 +87,47 @@ module SymetrieCom
             #logger.info("\033[33m\t delete attributes rgt: #{rgt.inspect} \033[m")
             #logger.info("\033[33m\t attributes 2: #{e.attributes.inspect} \033[m")
           }
-          
+
           self.before_create  { |e|
             #logger.info("\033[33m Better: before_create called \033[m")
             maxright = self.maximum(acts_as_nested_set_options[:right_column], :conditions => e.scope_condition) || 0
             e[acts_as_nested_set_options[:left_column]] = maxright+1
             e[acts_as_nested_set_options[:right_column]] = maxright+2
           }
-          
+
           self.before_destroy { |e|
             logger.info("\033[33m Better: before_destroy called \033[m")
             return if e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?
-            e.reload # in case a concurrent move has altered the indexes
+
+              if e.class.exists?(:id => e.id)
+                e.reload# in case a concurrent move has altered the indexes
+              end
             dif = e[acts_as_nested_set_options[:right_column]] - e[acts_as_nested_set_options[:left_column]] + 1
-            self.delete_all( "#{e.scope_condition} AND (#{acts_as_nested_set_options[:left_column]} BETWEEN #{e[acts_as_nested_set_options[:left_column]]} AND #{e[acts_as_nested_set_options[:right_column]]})" )
+            self.delete_all("#{e.scope_condition} AND (#{acts_as_nested_set_options[:left_column]} BETWEEN #{e[acts_as_nested_set_options[:left_column]]} AND #{e[acts_as_nested_set_options[:right_column]]})" )
             self.update_all("#{acts_as_nested_set_options[:left_column]} = CASE \
                                         WHEN #{acts_as_nested_set_options[:left_column]} > #{e[acts_as_nested_set_options[:right_column]]} THEN (#{acts_as_nested_set_options[:left_column]} - #{dif}) \
                                         ELSE #{acts_as_nested_set_options[:left_column]} END, \
                                    #{acts_as_nested_set_options[:right_column]} = CASE \
                                         WHEN #{acts_as_nested_set_options[:right_column]} > #{e[acts_as_nested_set_options[:right_column]]} THEN (#{acts_as_nested_set_options[:right_column]} - #{dif} ) \
-                                        ELSE #{acts_as_nested_set_options[:right_column]} END",
-                                   e.scope_condition)
+                                        ELSE #{acts_as_nested_set_options[:right_column]} END", e.scope_condition)
           }
-          
+
         end
-        
-        
+
+
         # Returns the single root for the class (or just the first root, if there are several).
         # Deprecation note: the original acts_as_nested_set allowed roots to have parent_id = 0,
         # so we currently do the same. This silliness will not be tolerated in future versions, however.
         def root
           acts_as_nested_set_options[:class].find(:first, :conditions => "(#{acts_as_nested_set_options[:parent_column]} IS NULL OR #{acts_as_nested_set_options[:parent_column]} = 0)")
         end
-        
+
         # Returns the roots and/or virtual roots of all trees. See the explanation of virtual roots in the README.
         def roots
           acts_as_nested_set_options[:class].find(:all, :conditions => "(#{acts_as_nested_set_options[:parent_column]} IS NULL OR #{acts_as_nested_set_options[:parent_column]} = 0)", :order => "#{acts_as_nested_set_options[:left_column]}")
         end
-        
-        # Checks the left/right indexes of all records, 
+
+        # Checks the left/right indexes of all records,
         # returning the number of records checked. Throws ActiveRecord::ActiveRecordError if it finds a problem.
         def check_all
           total = 0
@@ -136,7 +138,7 @@ module SymetrieCom
           end
           return total
         end
-        
+
         # Re-calculate the left/right values of all nodes. Can be used to convert ordinary trees into nested sets.
         def renumber_all
           scopes = []
@@ -146,7 +148,7 @@ module SymetrieCom
             scopes << r.scope_condition
           end
         end
-        
+
         # Returns an SQL fragment that matches _items_ *and* all of their descendants, for use in a WHERE clause.
         # You can pass it a single object, a single ID, or an array of objects and/or IDs.
         #   # if a.lft = 2, a.rgt = 7, b.lft = 12 and b.rgt = 13
@@ -158,12 +160,12 @@ module SymetrieCom
           # get objects for IDs
           items.collect! {|s| s.is_a?(acts_as_nested_set_options[:class]) ? s : acts_as_nested_set_options[:class].find(s)}.uniq
           items.reject! {|e| e.new_record?} # exclude unsaved items, since they don't have left/right values yet
-          
+
           return "1 != 1" if items.empty? # PostgreSQL didn't like '0', and SQLite3 didn't like 'FALSE'
           items.map! {|e| "(#{acts_as_nested_set_options[:left_column]} BETWEEN #{e[acts_as_nested_set_options[:left_column]]} AND #{e[acts_as_nested_set_options[:right_column]]})" }
           "(#{items.join(' OR ')})"
         end
-        
+
       end
 
       # This module provides instance methods for an enhanced acts_as_nested_set mixin. Please see the README for background information, examples, and tips on usage.
@@ -190,7 +192,7 @@ module SymetrieCom
 #          self[left_col_name] = maxright+1
 #          self[right_col_name] = maxright+2
 #        end
-        
+
         # On destruction, delete all children and shift the lft/rgt values back to the left so the counts still work.
 #        def before_destroy # already protected by a transaction
 #          logger.info("\033[33m Better: before_destroy called \033[m")
@@ -206,61 +208,61 @@ module SymetrieCom
 #                                      ELSE #{right_col_name} END",
 #                                 scope_condition)
 #        end
-        
+
         # By default, records are compared and sorted using the left column.
         def <=>(x)
           self[left_col_name] <=> x[left_col_name]
         end
-        
+
         # Deprecated. Returns true if this is a root node.
         def root?
           parent_id = self[parent_col_name]
           (parent_id == 0 || parent_id.nil?) && self[right_col_name] && self[left_col_name] && (self[right_col_name] > self[left_col_name])
         end
-        
+
         # Deprecated. Returns true if this is a child node
-        def child?                          
+        def child?
           parent_id = self[parent_col_name]
           !(parent_id == 0 || parent_id.nil?) && (self[left_col_name] > 1) && (self[right_col_name] > self[left_col_name])
         end
-        
+
         # Deprecated. Returns true if we have no idea what this is
         def unknown?
           !root? && !child?
         end
-        
+
         # Returns this record's root ancestor.
         def root
           # the BETWEEN clause is needed to ensure we get the right virtual root, if using those
           base_set_class.find(:first, :conditions => "#{scope_condition} \
             AND (#{parent_col_name} IS NULL OR #{parent_col_name} = 0) AND (#{self[left_col_name]} BETWEEN #{left_col_name} AND #{right_col_name})")
         end
-        
+
         # Returns the root or virtual roots of this record's tree (a tree cannot have more than one real root). See the explanation of virtual roots in the README.
         def roots
           base_set_class.find(:all, :conditions => "#{scope_condition} AND (#{parent_col_name} IS NULL OR #{parent_col_name} = 0)", :order => "#{left_col_name}")
         end
-        
+
         # Returns this record's parent.
         def parent
           base_set_class.find(self[parent_col_name]) if self[parent_col_name]
         end
-        
+
         # Returns an array of all parents, starting with the root.
         def ancestors
           self_and_ancestors - [self]
         end
-        
+
         # Returns an array of all parents plus self, starting with the root.
         def self_and_ancestors
           base_set_class.find(:all, :conditions => "#{scope_condition} AND (#{self[left_col_name]} BETWEEN #{left_col_name} AND #{right_col_name})", :order => left_col_name )
         end
-        
+
         # Returns all the children of this node's parent, except self.
         def siblings
           self_and_siblings - [self]
         end
-        
+
         # Returns all the children of this node's parent, including self.
         def self_and_siblings
           if self[parent_col_name].nil? || self[parent_col_name].zero?
@@ -269,18 +271,18 @@ module SymetrieCom
             base_set_class.find(:all, :conditions => "#{scope_condition} AND #{parent_col_name} = #{self[parent_col_name]}", :order => left_col_name)
           end
         end
-        
+
         # Returns the level of this object in the tree, root level being 0.
         def level
           return 0 if self[parent_col_name].nil?
           base_set_class.count(:conditions => "#{scope_condition} AND (#{self[left_col_name]} BETWEEN #{left_col_name} AND #{right_col_name})") - 1
         end
-        
+
         # Returns the number of nested children of this object.
         def all_children_count
           return (self[right_col_name] - self[left_col_name] - 1)/2
         end
-        
+
         # Returns itself and all nested children.
         # Pass :exclude => item, or id, or [items or id] to exclude one or more items *and* all of their descendants.
         def full_set(special=nil)
@@ -291,32 +293,32 @@ module SymetrieCom
           end
           base_set_class.find(:all, :conditions => "#{scope_condition} #{exclude_str} AND (#{left_col_name} BETWEEN #{self[left_col_name]} AND #{self[right_col_name]})", :order => left_col_name)
         end
-        
+
         # Returns all children and nested children.
         # Pass :exclude => item, or id, or [items or id] to exclude one or more items *and* all of their descendants.
         def all_children(special=nil)
           full_set(special) - [self]
         end
-        
+
         # Returns this record's immediate children.
         def children
           base_set_class.find(:all, :conditions => "#{scope_condition} AND #{parent_col_name} = #{self.id}", :order => left_col_name)
         end
-        
+
         # Deprecated
         alias direct_children children
-        
+
         # Returns this record's terminal children (nodes without children).
         def leaves
           base_set_class.find(:all, :conditions => "#{scope_condition} AND (#{left_col_name} BETWEEN #{self[left_col_name]} AND #{self[right_col_name]}) AND #{left_col_name} + 1 = #{right_col_name}", :order => left_col_name)
         end
-        
+
         # Returns the count of this record's terminal children (nodes without children).
         def leaves_count
           base_set_class.count(:conditions => "#{scope_condition} AND (#{left_col_name} BETWEEN #{self[left_col_name]} AND #{self[right_col_name]}) AND #{left_col_name} + 1 = #{right_col_name}")
         end
-        
-        # Checks the left/right indexes of one node and all descendants. 
+
+        # Checks the left/right indexes of one node and all descendants.
         # Throws ActiveRecord::ActiveRecordError if it finds a problem.
         def check_subtree
           transaction do
@@ -324,8 +326,8 @@ module SymetrieCom
             check # this method is implemented via #check, so that we don't generate lots of unnecessary nested transactions
           end
         end
-        
-        # Checks the left/right indexes of the entire tree that this node belongs to, 
+
+        # Checks the left/right indexes of the entire tree that this node belongs to,
         # returning the number of records checked. Throws ActiveRecord::ActiveRecordError if it finds a problem.
         # This method is needed because check_subtree alone cannot find gaps between virtual roots, orphaned nodes or endless loops.
         def check_full_tree
@@ -333,7 +335,7 @@ module SymetrieCom
           transaction do
             # virtual roots make this method more complex than it otherwise would be
             n = 1
-            roots.each do |r| 
+            roots.each do |r|
               raise ActiveRecord::ActiveRecordError, "Gaps between roots in the tree containing record ##{r.id}" if r[left_col_name] != n
               r.check_subtree
               n = r[right_col_name] + 1
@@ -345,7 +347,7 @@ module SymetrieCom
           end
           return total_nodes
         end
-        
+
         # Re-calculate the left/right values of all nodes in this record's tree. Can be used to convert an ordinary tree into a nested set.
         def renumber_full_tree
           indexes = []
@@ -360,7 +362,7 @@ module SymetrieCom
           end
           ## reload?
         end
-        
+
         # Deprecated. Adds a child to this object in the tree.  If this object hasn't been initialized,
         # it gets set up as a root node.
         #
@@ -401,7 +403,7 @@ module SymetrieCom
                                       scope_condition)
               child.reload
             end
-            
+
             child.move_to_child_of(self)
             # self.reload ## even though move_to calls target.reload, at least one object in the tests was not reloading (near the end of test_common_usage)
           end
@@ -415,10 +417,10 @@ module SymetrieCom
         #     # Looks like we're now the root node!  Woo
         #     self[left_col_name] = 1
         #     self[right_col_name] = 4
-        #     
+        #
         #     # What do to do about validation?
         #     return nil unless self.save
-        #     
+        #
         #     child[parent_col_name] = self.id
         #     child[left_col_name] = 2
         #     child[right_col_name]= 3
@@ -439,25 +441,25 @@ module SymetrieCom
         #   end
         # end
         end
-        
+
         # Move this node to the left of _target_ (you can pass an object or just an id).
         # Unsaved changes in either object will be lost. Raises ActiveRecord::ActiveRecordError if it encounters a problem.
         def move_to_left_of(target)
           self.move_to target, :left
         end
-        
+
         # Move this node to the right of _target_ (you can pass an object or just an id).
         # Unsaved changes in either object will be lost. Raises ActiveRecord::ActiveRecordError if it encounters a problem.
         def move_to_right_of(target)
           self.move_to target, :right
         end
-        
+
         # Make this node a child of _target_ (you can pass an object or just an id).
         # Unsaved changes in either object will be lost. Raises ActiveRecord::ActiveRecordError if it encounters a problem.
         def move_to_child_of(target)
           self.move_to target, :child
         end
-        
+
         # It's a non-recusive Destroy method, one node is destroyed, his children are moved and renumbered
         def uniq_destroy(target)
           elt = base_set_class.find(target)
@@ -502,25 +504,27 @@ module SymetrieCom
                    if root == nil # If we had deleted the only root node, we create new root nodes
                      if child[parent_col_name] == elt.id
                        child[parent_col_name] = nil
-                       child.save                      
-                     end                      
+                       child.save
+                     end
                    end
                  end
                }
               end
-              self.renumber_full_tree
+#              if root == nil
+                self.renumber_full_tree
+#              end
               return true
           else
             raise ActiveRecord::ActiveRecordError, "An error occured, you cannot delete this node"
             return false
           end
-        end        
-        
+        end
+
         protected
         def move_to(target, position) #:nodoc:
           raise ActiveRecord::ActiveRecordError, "You cannot move a new node" if new_record?
           raise ActiveRecord::ActiveRecordError, "You cannot move a node if left or right is nil" unless self[left_col_name] && self[right_col_name]
-          
+
           transaction do
             self.reload # the lft/rgt values could be stale (target is reloaded below)
             if target.is_a?(base_set_class)
@@ -528,16 +532,16 @@ module SymetrieCom
             else
               target = base_set_class.find(target) # load object if we were given an ID
             end
-            
+
             if (target[left_col_name] >= self[left_col_name]) && (target[right_col_name] <= self[right_col_name])
               raise ActiveRecord::ActiveRecordError, "Impossible move, target node cannot be inside moved tree."
             end
-            
+
             # prevent moves between different trees
             if target.scope_condition != scope_condition
               raise ActiveRecord::ActiveRecordError, "Scope conditions do not match. Is the target in the same tree?"
             end
-            
+
             # the move: we just need to define two adjoining segments of the left/right index and swap their positions
             bound = case position
               when :child then target[right_col_name]
@@ -545,27 +549,27 @@ module SymetrieCom
               when :right then target[right_col_name] + 1
               else raise ActiveRecord::ActiveRecordError, "Position should be :child, :left or :right ('#{position}' received)."
             end
-            
+
             if bound > self[right_col_name]
               bound = bound - 1
               other_bound = self[right_col_name] + 1
             else
               other_bound = self[left_col_name] - 1
             end
-            
+
             return if bound == self[right_col_name] || bound == self[left_col_name] # there would be no change, and other_bound is now wrong anyway
-            
-            # we have defined the boundaries of two non-overlapping intervals, 
+
+            # we have defined the boundaries of two non-overlapping intervals,
             # so sorting puts both the intervals and their boundaries in order
             a, b, c, d = [self[left_col_name], self[right_col_name], bound, other_bound].sort
-            
+
             # change nil to NULL for new parent
             if position == :child
               new_parent = target.id
             else
               new_parent = target[parent_col_name].nil? ? 'NULL' : target[parent_col_name]
             end
-            
+
             base_set_class.update_all("\
               #{left_col_name} = CASE \
                 WHEN #{left_col_name} BETWEEN #{a} AND #{b} THEN #{left_col_name} + #{d - b} \
@@ -583,13 +587,13 @@ module SymetrieCom
             target.reload
           end
         end
-        
+
         def check #:nodoc:
           # performance improvements (3X or more for tables with lots of columns) by using :select to load just id, lft and rgt
           ## i don't use the scope condition here, because it shouldn't be needed
           my_children = base_set_class.find(:all, :conditions => "#{parent_col_name} = #{self.id}",
             :order => left_col_name, :select => "#{self.class.primary_key}, #{left_col_name}, #{right_col_name}")
-          
+
           if my_children.empty?
             unless self[left_col_name] && self[right_col_name]
               raise ActiveRecord::ActiveRecordError, "#{self.class.name}##{self.id}.#{right_col_name} or #{left_col_name} is blank"
@@ -614,7 +618,7 @@ module SymetrieCom
             end
           end
         end
-        
+
         # used by the renumbering methods
         def calc_numbers(n, indexes) #:nodoc:
           my_lft = n
@@ -633,19 +637,19 @@ module SymetrieCom
           indexes << {:id => self.id, :lft => my_lft, :rgt => my_rgt} unless self[left_col_name] == my_lft && self[right_col_name] == my_rgt
           return n
         end
-        
+
         # The following code is my crude method of making things concurrency-safe.
         # Basically, we need to ensure that whenever a record is saved, the lft/rgt
         # values are _not_ written to the database, because if any changes to the tree
-        # structure occurrred since the object was loaded, the lft/rgt values could 
-        # be out of date and corrupt the indexes. 
+        # structure occurrred since the object was loaded, the lft/rgt values could
+        # be out of date and corrupt the indexes.
         # I hope that someone with a little more ruby-foo can look at this and come
         # up with a more elegant solution.
         private
-        
+
           # override ActiveRecord to prevent lft/rgt values from being saved (can corrupt indexes under concurrent usage)
 #          def update #:nodoc:
-#            logger.info("\033[33m Better: Update method called \033[m")            
+#            logger.info("\033[33m Better: Update method called \033[m")
 #            connection.update(
 #              "UPDATE #{self.class.table_name} " +
 #              "SET #{quoted_comma_pair_list(connection, special_attributes_with_quotes(false))} " +
