@@ -10,7 +10,7 @@ var tree = new Ext.tree.TreePanel('tree-div', {
         containerScroll: true
  //       rootVisible: false
       //  loader:new Ext.tree.TreeLoader()
-    });
+    });    
 
 var tree_editor = new Ext.tree.TreeEditor(tree, {
     autosize:true
@@ -83,8 +83,13 @@ var Remove = function (node) {
                         // answer is yes
                         else {
                                 // setup request options
+                                var url_id = ''
+                                if (node.id !== "-1")
+                                    url_id = '/departments/delete';
+                                    else
+                                    url_id = '/departments/delete_all';
                                 options = {
-                                        url: '/departments/delete'
+                                        url: url_id
                                         , method: 'post'
                                         , callback: cmdCallback2
                                         , params: {
@@ -93,7 +98,7 @@ var Remove = function (node) {
                                         }
                                 };
                                 // send request
-                                if (node.id !== "-1")                                  
+                               // if (node.id !== "-1")                                  
                                   conn = new Ext.data.Connection().request(options);
                         }
                 }
@@ -135,7 +140,7 @@ var DeleteOne = function (node) {
                                     s = n.childNodes[1].id; 
                                 // setup request options
                                 options = {
-                                        url: '/departments/delete_one'
+                                            url: '/departments/delete_one'
                                         , method: 'post'
                                         , callback: cmdCallback2
                                         , params: {
@@ -144,7 +149,7 @@ var DeleteOne = function (node) {
                                         }
                                 };
                                 // send request
-                                if (node.id !== "-1")
+                               if (node.id !== "-1")
                                     conn = new Ext.data.Connection().request(options);
                         }
                 }
@@ -313,6 +318,7 @@ var root = new Ext.tree.TreeNode({
     id:"-1",
     text:"<%= _("Root") %>"
 });
+
 tree.setRootNode(root);
 
 <% for departments in @departments %>
@@ -323,7 +329,7 @@ tree.setRootNode(root);
     <% if departments.parent_id != nil && departments.parent_id != 0 %>
         node<%= departments.parent_id%>.appendChild(node<%= departments.id %>);
     <%else%>
-            root.appendChild(node<%= departments.id %>);            
+            root.appendChild(node<%= departments.id %>); 
     <%end%>
 <% end %>
     // render the tree
