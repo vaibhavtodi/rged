@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2007-10-24 17:41+0200\n"
+"POT-Creation-Date: 2007-11-06 15:02+0100\n"
 "PO-Revision-Date: 2007-10-09 10:36+0200\n"
 "Last-Translator: Alastair Brunton <alastair@brunton.com>\n"
 "Language-Team: fr_FR <langteam@langteam.com>\n"
@@ -25,59 +25,78 @@ msgstr "Thanks for signing up!"
 msgid "You have been logged out."
 msgstr "You have been logged out."
 
-#: app/controllers/departments_controller.rb:31
-msgid "Department %{name} can not be created."
-msgstr "Department %{name} can not be created."
+#: app/controllers/country_controller.rb:21
+msgid "Country "
+msgstr "Country"
 
-#: app/controllers/departments_controller.rb:43
-#: app/controllers/departments_controller.rb:55
-#: app/controllers/departments_controller.rb:66
-#: app/controllers/departments_controller.rb:77
-msgid "Department "
-msgstr "Department"
-
-#: app/controllers/departments_controller.rb:43
-msgid " can not be moved."
-msgstr " can not be moved."
-
-#: app/controllers/departments_controller.rb:55
-msgid " can not be rename to "
-msgstr " can not be rename to "
-
-#: app/controllers/departments_controller.rb:66
-#: app/controllers/departments_controller.rb:77
+#: app/controllers/country_controller.rb:21
+#: app/controllers/department_controller.rb:86
+#: app/controllers/department_controller.rb:97
 msgid " can not be deleted."
 msgstr " can not be deleted."
 
-#: app/controllers/directory_controller.rb:212
-#: app/controllers/directory_controller.rb:215
+#: app/controllers/country_controller.rb:33
+msgid "Country %{name} can not be created."
+msgstr "Country %{name} can not be created."
+
+#: app/controllers/department_controller.rb:36
+msgid "Department Created"
+msgstr "Department Created"
+
+#: app/controllers/department_controller.rb:39
+msgid "Create Failed"
+msgstr "Create Failed"
+
+#: app/controllers/department_controller.rb:56
+msgid "%{model} %{name} can not be moved."
+msgstr "%{model} %{name} can not be moved."
+
+#: app/controllers/department_controller.rb:56
+msgid "Department"
+msgstr "Department"
+
+#: app/controllers/department_controller.rb:73
+msgid "Department Updated"
+msgstr "Department Updated"
+
+#: app/controllers/department_controller.rb:76
+msgid "Update failed"
+msgstr "Update failed"
+
+#: app/controllers/department_controller.rb:86
+#: app/controllers/department_controller.rb:97
+msgid "Department "
+msgstr "Department"
+
+#: app/controllers/directory_controller.rb:210
+#: app/controllers/directory_controller.rb:213
 msgid "Cannot rename file "
 msgstr "Cannot rename file "
 
-#: app/controllers/directory_controller.rb:212
-#: app/controllers/directory_controller.rb:215
+#: app/controllers/directory_controller.rb:210
+#: app/controllers/directory_controller.rb:213
 msgid " to "
 msgstr " to "
 
-#: app/controllers/directory_controller.rb:233
+#: app/controllers/directory_controller.rb:231
 msgid "Cannot create directory: "
 msgstr "Cannot create directory: "
 
-#: app/controllers/directory_controller.rb:252
-#: app/controllers/directory_controller.rb:255
+#: app/controllers/directory_controller.rb:250
+#: app/controllers/directory_controller.rb:253
 msgid "Cannot delete: "
 msgstr "Cannot delete: "
 
-#: app/controllers/directory_controller.rb:300
-#: app/controllers/directory_controller.rb:307
+#: app/controllers/directory_controller.rb:298
+#: app/controllers/directory_controller.rb:305
 msgid "File "
 msgstr "File"
 
-#: app/controllers/directory_controller.rb:300
+#: app/controllers/directory_controller.rb:298
 msgid " allready exist"
 msgstr " allready exist"
 
-#: app/controllers/directory_controller.rb:307
+#: app/controllers/directory_controller.rb:305
 msgid " can't be uploaded"
 msgstr " can't be uploaded"
 
@@ -125,58 +144,111 @@ msgstr "Confirm Password"
 msgid "Cancel"
 msgstr "Cancel"
 
-#: app/views/departments/_form.rhtml:5
+#: app/views/department/_form.rhtml:5
 msgid "Department Name"
 msgstr "Department Name"
 
-#: app/views/departments/list.rhtml:75 app/views/departments/list.rhtml:118
+#: app/views/department/edit.rhtml:1
+msgid "Edit Page"
+msgstr "Edit Page"
+
+#: app/views/department/edit.rhtml:4 app/views/department/new.rhtml:4
+#: app/views/department/show.rhtml:4
+msgid "Name"
+msgstr "Name"
+
+#: app/views/department/edit.rhtml:7 app/views/department/new.rhtml:7
+#: app/views/department/show.rhtml:7
+msgid "Country"
+msgstr "Country"
+
+#: app/views/department/edit.rhtml:10 app/views/department/new.rhtml:10
+#: app/views/department/show.rhtml:10
+msgid "Parent"
+msgstr "Parent"
+
+#: app/views/department/edit.rhtml:14 app/views/department/show.rhtml:14
+msgid "Version"
+msgstr "Version"
+
+#: app/views/department/edit.rhtml:17 app/views/department/show.rhtml:17
+msgid "Left"
+msgstr "Left"
+
+#: app/views/department/edit.rhtml:20 app/views/department/show.rhtml:20
+msgid "Right"
+msgstr "Right"
+
+#: app/views/department/edit.rhtml:24 app/views/department/show.rhtml:24
+msgid "Update"
+msgstr "Update"
+
+#: app/views/department/list.rhtml:54 app/views/department/list.rhtml:97
+#: app/views/department/list.rhtml:242
 msgid "Remove"
 msgstr "Remove"
 
-#: app/views/departments/list.rhtml:76 app/views/departments/list.rhtml:119
+#: app/views/department/list.rhtml:55 app/views/department/list.rhtml:98
+#: app/views/department/list.rhtml:243
 msgid "Do you really want delete: "
 msgstr "Do you really want delete: "
 
-#: app/views/departments/list.rhtml:156 app/views/departments/list.rhtml:278
-msgid "Rename"
-msgstr "Rename"
-
-#: app/views/departments/list.rhtml:157
-msgid "Rename "
-msgstr "Rename "
-
-#: app/views/departments/list.rhtml:198
-msgid "New Department"
-msgstr "New Department"
-
-#: app/views/departments/list.rhtml:199
-msgid "New Department name ?"
-msgstr "New Department name ?"
-
-#: app/views/departments/list.rhtml:284
+#: app/views/department/list.rhtml:165 app/views/department/list.rhtml:346
 msgid "Delete"
 msgstr "Delete"
 
-#: app/views/departments/list.rhtml:289
+#: app/views/department/list.rhtml:170
 msgid "Delete all"
 msgstr "Delete all"
 
-#: app/views/departments/list.rhtml:294
+#: app/views/department/list.rhtml:175 app/views/department/list.rhtml:351
 msgid "New"
 msgstr "New"
 
-#: app/views/departments/list.rhtml:314
-msgid "Root"
-msgstr "Root"
+#: app/views/department/list.rhtml:180
+msgid "Show"
+msgstr "Show"
 
-#: app/views/departments/list.rhtml:341
-msgid "Departments List"
-msgstr "Departments List"
+#: app/views/department/list.rhtml:185
+msgid "Edit"
+msgstr "Edit"
+
+#: app/views/department/list.rhtml:273
+msgid "New Department"
+msgstr "New Department"
+
+#: app/views/department/list.rhtml:274
+msgid "New Department name ?"
+msgstr "New Department name ?"
+
+#: app/views/department/list.rhtml:340
+msgid "Rename"
+msgstr "Rename"
+
+#: app/views/department/list.rhtml:380
+msgid "Department List"
+msgstr "Department List"
+
+#: app/views/department/list.rhtml:383
+msgid "Countries List"
+msgstr "Countries List"
+
+#: app/views/department/new.rhtml:1
+msgid "New Page"
+msgstr "New Page"
+
+#: app/views/department/new.rhtml:14
+msgid "Create"
+msgstr "Create"
+
+#: app/views/department/show.rhtml:1
+msgid "Show Page"
+msgstr "Show Page"
 
 #: app/views/layouts/application.rhtml:6
 msgid "Rails Demonstration: "
 msgstr "Rails Demonstration: "
 
-#: app/views/layouts/departments.rhtml:7
+#: app/views/layouts/department.rhtml:7
 msgid "Departments: "
 msgstr "Departments: "

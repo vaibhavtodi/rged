@@ -1,4 +1,4 @@
-module DepartmentsHelper
+module DepartmentHelper
   def get_indentation(department, n=0)
     $n = n
     if department.send(department.parent_column) == nil
@@ -8,6 +8,6 @@ module DepartmentsHelper
       get_indentation(parent, $n += 1)
     end
   end
-  
-  
+
+
 end
