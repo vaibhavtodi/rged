@@ -1,18 +1,18 @@
 require File.dirname(__FILE__) + '/../test_helper'
-require 'departments_controller'
+require 'department_controller'
 
 # Re-raise errors caught by the controller.
-class DepartmentsController; def rescue_action(e) raise e end; end
+class DepartmentController; def rescue_action(e) raise e end; end
 
-class DepartmentsControllerTest < Test::Unit::TestCase
-  fixtures :departments
+class DepartmentControllerTest < Test::Unit::TestCase
+  fixtures :department
 
   def setup
-    @controller = DepartmentsController.new
+    @controller = DepartmentController.new
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
 
-    @first_id = departments(:first).id
+    @first_id = department(:first).id
   end
 
   def test_index
@@ -27,7 +27,7 @@ class DepartmentsControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'list'
 
-    assert_not_nil assigns(:departments)
+    assert_not_nil assigns(:department)
   end
 
   def test_show
@@ -36,8 +36,8 @@ class DepartmentsControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'show'
 
-    assert_not_nil assigns(:departments)
-    assert assigns(:departments).valid?
+    assert_not_nil assigns(:department)
+    assert assigns(:department).valid?
   end
 
   def test_new
@@ -46,18 +46,18 @@ class DepartmentsControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'new'
 
-    assert_not_nil assigns(:departments)
+    assert_not_nil assigns(:department)
   end
 
   def test_create
-    num_departments = Departments.count
+    num_department = Department.count
 
-    post :create, :departments => {}
+    post :create, :department => {}
 
     assert_response :redirect
     assert_redirected_to :action => 'list'
 
-    assert_equal num_departments + 1, Departments.count
+    assert_equal num_department + 1, Department.count
   end
 
   def test_edit
@@ -66,8 +66,8 @@ class DepartmentsControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'edit'
 
-    assert_not_nil assigns(:departments)
-    assert assigns(:departments).valid?
+    assert_not_nil assigns(:department)
+    assert assigns(:department).valid?
   end
 
   def test_update
@@ -78,7 +78,7 @@ class DepartmentsControllerTest < Test::Unit::TestCase
 
   def test_destroy
     assert_nothing_raised {
-      Departments.find(@first_id)
+      Department.find(@first_id)
     }
 
     post :destroy, :id => @first_id
@@ -86,7 +86,7 @@ class DepartmentsControllerTest < Test::Unit::TestCase
     assert_redirected_to :action => 'list'
 
     assert_raise(ActiveRecord::RecordNotFound) {
-      Departments.find(@first_id)
+      Department.find(@first_id)
     }
   end
 end
