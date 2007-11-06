@@ -37,7 +37,7 @@ var OnBeforeNodeDrop = function(tree, node, oldParent, newParent, index) {
       conn = new Ext.data.Connection().request(options);
     };
 
-var Remove = function (node) {
+var Destroy = function (node, is_all) {
     var cmdCallback2  = function (options, bSuccess, response) {
             var o;
             var showMsg = true;
@@ -63,55 +63,13 @@ var Remove = function (node) {
                         else {
                                 // setup request options
                                 options = {
-                                        url: '/department/delete/'+node.id
+                                            url: '/department/destroy/'+node.id+'.json'
                                         , method: 'post'
                                         , callback: cmdCallback2
                                         , params: {
                                                 id:node.id
                                                 , name:node.text
-                                        }
-                                };
-                                // send request
-                                if (node.id !== "0")
-                                  conn = new Ext.data.Connection().request(options);
-                        }
-                }
-                , this
-        );
-    };
-
-var DeleteOne = function (node) {
-    var cmdCallback2  = function (options, bSuccess, response) {
-            var o;
-            var showMsg = true;
-            if (true === bSuccess) {
-                o = Ext.decode(response.responseText);
-                if (true === o.success) {
-                    var n = tree.getNodeById(node.id);
-                    n.parentNode.removeChild(n);
-                } else {
-                        Ext.Msg.alert(this.errorText, o.error);
-                }
-            }
-        };
-    Ext.Msg.confirm('<%= _("Remove") %>'
-                , '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
-                , function(response) {
-                        var conn;
-                        // do nothing if answer is not yes
-                        if('yes' !== response) {
-                                return;
-                        }
-                        // answer is yes
-                        else {
-                                // setup request options
-                                options = {
-                                            url: '/department/delete_one/'+node_id
-                                        , method: 'post'
-                                        , callback: cmdCallback2
-                                        , params: {
-                                                id:node.id
-                                                , name:node.text
+                                                , only_one:is_all
                                         }
                                 };
                                 // send request
@@ -134,10 +92,10 @@ var onContextMenuItem = function(item, e) {
         switch(item.id) {
                 // {{{
                 case 'delete_all':
-                        Remove(item.node);
+                        Destroy(item.node, 0);
                 break;
                 case 'delete':
-                        DeleteOne(item.node);
+                        Destroy(item.node, 1);
                 break;
                 case 'new':
                         NewDepartment(item.node);
