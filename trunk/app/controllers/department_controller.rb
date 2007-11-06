@@ -77,24 +77,21 @@ class DepartmentController < ApplicationController
     end
   end
 
-  def delete
+  def destroy
     return_data = Hash.new()
     department = Department.find(params[:id])
-    if department.destroy
-      return_data = {:success => true}
+    if params[:only_one] == "1"
+      if department.uniq_destroy(params[:id])
+        return_data = {:success => true}
+      else
+        return_data = {:success => false, :error => _("Department ") + params[:name] + _(" can not be deleted.")}
+      end
     else
-      return_data = {:success => false, :error => _("Department ") + params[:name] + _(" can not be deleted.")}
-    end
-    render :json=>return_data.to_json, :layout=>false
-  end
-
-  def delete_one
-    return_data = Hash.new()
-    department = Department.find(params[:id])
-    if department.uniq_destroy(params[:id])
-      return_data = {:success => true}
-    else
-      return_data = {:success => false, :error => _("Department ") + params[:name] + _(" can not be deleted.")}
+      if department.destroy
+        return_data = {:success => true}
+      else
+        return_data = {:success => false, :error => _("Department ") + params[:name] + _(" can not be deleted.")}
+      end
     end
     render :json=>return_data.to_json, :layout=>false
   end

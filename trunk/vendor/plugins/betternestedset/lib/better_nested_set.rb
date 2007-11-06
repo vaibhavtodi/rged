@@ -96,7 +96,7 @@ module SymetrieCom
           }
 
           self.before_destroy { |e|
-            logger.info("\033[33m Better: before_destroy called \033[m")
+            #logger.info("\033[33m Better: before_destroy called \033[m")
             return if e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?
 
               if e.class.exists?(:id => e.id)

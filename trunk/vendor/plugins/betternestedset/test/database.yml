@@ -1,7 +1,7 @@
 mysql:
   :adapter: mysql
   :host: localhost
-  :username: rails
+  :username: root
   :password:
   :database: acts_as_nested_set_plugin_test
 postgresql:
