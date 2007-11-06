@@ -1,4 +1,14 @@
 class CountryController < ApplicationController
+
+def list
+  if request.xhr? && params[:node] # json_node
+    p_id = params[:node].to_i > 0 ? params[:node] : nil
+    roots = Country.find(:all).collect{ |r|
+     {'id' => r.id, 'text' => r.name, 'leaf' => true }
+    }
+    render :json => roots.to_json
+  end
+end
   
 def delete_country
     return_data = Hash.new()

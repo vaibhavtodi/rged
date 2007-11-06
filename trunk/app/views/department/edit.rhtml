@@ -1,0 +1,28 @@
+<h3><%= _("Edit Page") %></h3>
+
+<form action = "/department/update" >
+<p><label> <%= _('Name') %> </label><br/>
+<%= text_field_tag('name', value = @node.name) %></p>
+
+<p><label> <%= _('Country') %> </label><br/>
+<%= text_field_tag('country', value = Country.find(@node.country_id).name) %></p>
+
+<p><label> <%= _('Parent') %> </label><br/>
+<%= text_field_tag('parent', value = @node.parent_id != nil ? Department.find(@node.parent_id).name : _("nil"), :disabled => true) %></p>
+
+
+<p><label> <%= _('Version') %> </label><br/>
+<%= text_field_tag('version', value = @node.version_a) %></p>
+
+<p><label> <%= _('Left') %> </label><br/>
+<%= text_field_tag('lft', value = @node.lft, :disabled => true) %></p>
+
+<p><label> <%= _('Right') %> </label><br/>
+<%= text_field_tag('rgt', value = @node.rgt, :disabled => true) %></p>
+<br>
+
+<p><%= submit_tag _('Update') %></p>
+</form>
+<br>
+
+<%= link_to 'list', :controller => '/department', :action => 'list' %>

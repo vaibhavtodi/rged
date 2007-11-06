@@ -3,6 +3,7 @@ class CreateDepartments < ActiveRecord::Migration
     create_table :departments do |t|
       t.column :parent_id, :integer
       t.column :country_id, :integer
+      t.column :version_a, :integer
       t.column :lft, :integer
       t.column :rgt, :integer
       t.column :name, :string

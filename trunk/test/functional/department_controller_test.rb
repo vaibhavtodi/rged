@@ -5,7 +5,7 @@ require 'department_controller'
 class DepartmentController; def rescue_action(e) raise e end; end
 
 class DepartmentControllerTest < Test::Unit::TestCase
-  fixtures :department
+  fixtures :departments
 
   def setup
     @controller = DepartmentController.new
