@@ -55,7 +55,7 @@ module SymetrieCom
                           acts_as_nested_set_options[:right_column].intern,
                           acts_as_nested_set_options[:parent_column].intern
           # no assignment to structure fields
-          module_eval <<-"end_eval", __FILE__, __LINE__
+            module_eval <<-"end_eval", __FILE__, __LINE__
             def #{acts_as_nested_set_options[:left_column]}=(x)
               raise ActiveRecord::ActiveRecordError, "Unauthorized assignment to #{acts_as_nested_set_options[:left_column]}: it's an internal field handled by acts_as_nested_set code, use move_to_* methods instead."
             end
@@ -77,43 +77,51 @@ module SymetrieCom
 #            }
 
           self.before_update { |e|
-            #logger.info("\033[33m Better: Before_Update method called \033[m")
-            #logger.info("\033[33m\t  \033[m")
-            #logger.info("\033[33m\t id: #{e.id} \033[m")
-            #logger.info("\033[33m\t attributes: #{e.attributes.inspect} \033[m")
-            lft = e.instance_variable_get("@attributes").delete(acts_as_nested_set_options[:left_column])
-            #logger.info("\033[33m\t delete attributes lft: #{lft.inspect} \033[m")
-            rgt = e.instance_variable_get("@attributes").delete(acts_as_nested_set_options[:right_column])
-            #logger.info("\033[33m\t delete attributes rgt: #{rgt.inspect} \033[m")
-            #logger.info("\033[33m\t attributes 2: #{e.attributes.inspect} \033[m")
+            if !e.instance_variable_get("@attributes")[acts_as_nested_set_options[:left_column]].blank? &&
+               !e.instance_variable_get("@attributes")[acts_as_nested_set_options[:right_column]].blank?
+              lft = e.instance_variable_get("@attributes").delete(acts_as_nested_set_options[:left_column])
+              rgt = e.instance_variable_get("@attributes").delete(acts_as_nested_set_options[:right_column])
+              self.instance_variable_set("@my_#{acts_as_nested_set_options[:left_column]}", lft)
+              self.instance_variable_set("@my_#{acts_as_nested_set_options[:right_column]}", rgt)
+            end
+
+          }
+
+          self.after_update { |e|
+            if !self.instance_variable_get("@my_#{acts_as_nested_set_options[:left_column]}").blank? &&
+                !self.instance_variable_get("@my_#{acts_as_nested_set_options[:right_column]}").blank?
+              e.instance_variable_get("@attributes").update({
+                  acts_as_nested_set_options[:left_column] => self.instance_variable_get("@my_#{acts_as_nested_set_options[:left_column]}"),
+                  acts_as_nested_set_options[:right_column] => self.instance_variable_get("@my_#{acts_as_nested_set_options[:right_column]}")})
+            end
           }
 
           self.before_create  { |e|
-            #logger.info("\033[33m Better: before_create called \033[m")
             maxright = self.maximum(acts_as_nested_set_options[:right_column], :conditions => e.scope_condition) || 0
             e[acts_as_nested_set_options[:left_column]] = maxright+1
-            e[acts_as_nested_set_options[:right_column]] = maxright+2
-          }
+              e[acts_as_nested_set_options[:right_column]] = maxright+2
+            }
 
-          self.before_destroy { |e|
-            #logger.info("\033[33m Better: before_destroy called \033[m")
-            return if e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?
-
+          self.before_destroy { |e|            
+              return if (e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?)
+                   
               if e.class.exists?(:id => e.id)
                 e.reload# in case a concurrent move has altered the indexes
+              else
+                next
               end
-            dif = e[acts_as_nested_set_options[:right_column]] - e[acts_as_nested_set_options[:left_column]] + 1
-            self.delete_all("#{e.scope_condition} AND (#{acts_as_nested_set_options[:left_column]} BETWEEN #{e[acts_as_nested_set_options[:left_column]]} AND #{e[acts_as_nested_set_options[:right_column]]})" )
-            self.update_all("#{acts_as_nested_set_options[:left_column]} = CASE \
+              dif = e[acts_as_nested_set_options[:right_column]] - e[acts_as_nested_set_options[:left_column]] + 1
+              self.delete_all("#{e.scope_condition} AND (#{acts_as_nested_set_options[:left_column]} BETWEEN #{e[acts_as_nested_set_options[:left_column]]} AND #{e[acts_as_nested_set_options[:right_column]]})" )
+              self.update_all("#{acts_as_nested_set_options[:left_column]} = CASE \
                                         WHEN #{acts_as_nested_set_options[:left_column]} > #{e[acts_as_nested_set_options[:right_column]]} THEN (#{acts_as_nested_set_options[:left_column]} - #{dif}) \
                                         ELSE #{acts_as_nested_set_options[:left_column]} END, \
                                    #{acts_as_nested_set_options[:right_column]} = CASE \
                                         WHEN #{acts_as_nested_set_options[:right_column]} > #{e[acts_as_nested_set_options[:right_column]]} THEN (#{acts_as_nested_set_options[:right_column]} - #{dif} ) \
                                         ELSE #{acts_as_nested_set_options[:right_column]} END", e.scope_condition)
-          }
+            }
+
 
         end
-
 
         # Returns the single root for the class (or just the first root, if there are several).
         # Deprecation note: the original acts_as_nested_set allowed roots to have parent_id = 0,
@@ -649,7 +657,6 @@ module SymetrieCom
 
           # override ActiveRecord to prevent lft/rgt values from being saved (can corrupt indexes under concurrent usage)
 #          def update #:nodoc:
-#            logger.info("\033[33m Better: Update method called \033[m")
 #            connection.update(
 #              "UPDATE #{self.class.table_name} " +
 #              "SET #{quoted_comma_pair_list(connection, special_attributes_with_quotes(false))} " +
@@ -658,21 +665,21 @@ module SymetrieCom
 #            )
 #          end
 
-          # exclude the lft/rgt columns from update statements
-          def special_attributes_with_quotes(include_primary_key = true) #:nodoc:
-            attributes.inject({}) do |quoted, (name, value)|
-              if column = column_for_attribute(name)
-                quoted[name] = quote_value(value, column) unless (!include_primary_key && column.primary) || [acts_as_nested_set_options[:left_column], acts_as_nested_set_options[:right_column]].include?(column.name)
-              end
-              quoted
-            end
-          end
-
-          # i couldn't figure out how to call attributes_with_quotes without cutting and pasting this private method in.  :(
-          # Quote strings appropriately for SQL statements.
-          def quote_value(value, column = nil) #:nodoc:
-            self.class.connection.quote(value, column)
-          end
+#          # exclude the lft/rgt columns from update statements
+#          def special_attributes_with_quotes(include_primary_key = true) #:nodoc:
+#            attributes.inject({}) do |quoted, (name, value)|
+#              if column = column_for_attribute(name)
+#                quoted[name] = quote_value(value, column) unless (!include_primary_key && column.primary) || [acts_as_nested_set_options[:left_column], acts_as_nested_set_options[:right_column]].include?(column.name)
+#              end
+#              quoted
+#            end
+#          end
+#
+#          # i couldn't figure out how to call attributes_with_quotes without cutting and pasting this private method in.  :(
+#          # Quote strings appropriately for SQL statements.
+#          def quote_value(value, column = nil) #:nodoc:
+#            self.class.connection.quote(value, column)
+#          end
 
       end
     end
