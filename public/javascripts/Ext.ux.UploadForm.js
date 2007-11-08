@@ -10,7 +10,7 @@ Ext.namespace('Ext.ux');
   * @version $Id: Ext.ux.UploadForm.js 72 2007-07-27 18:59:45Z jozo $
   *
   * @class Ext.ux.UploadForm
-  * @extends Ext.tree.BasicForm
+  * @extends Ext.form.BasicForm
   * @constructor
   * Creates new Ext.ux.UploadForm
 	* 
@@ -1027,8 +1027,8 @@ Ext.extend(Ext.ux.UploadForm, Ext.form.BasicForm, {
 				target: this.progressBar
 				, title: this.uploadProgressText
 				, text: this.getProgressTemplate().apply(this.formatProgress(o))
-				, width: 160
-				, autoHide: true
+				, qwidth: 160
+//				, autoHide: true
 			});
 			Ext.QuickTips.enable();
 		}

@@ -269,11 +269,10 @@ Rged.prototype =  {
                 title: 'Folders'
             },
             {                     
-                xtype:'panel',
+               xtype:'panel',
                 region: 'center',
                 titlebar: true,
                 contentEl:'grid',
-     //           width: '100%',
                 title: 'Files',
                 autoScroll:false,
                 tabPosition: 'top',
@@ -285,18 +284,6 @@ Rged.prototype =  {
             }
                 ]
             });
-            
-//       mainLayout.beginUpdate();
-//        mainLayout.add(this.northPanel = new Ext.Panel({ region:'north',
-//            fitToFrame: true, closable: false, contentEl: 'menu'
-//        }));
-//        mainLayout.add(this.westPanel = new Ext.ContentPanel({ region:'west',
-//            fitToFrame: true, closable: false, title: 'Folders', contentEl: 'tree'
-//        }));
-//        mainLayout.add(this.centerPanel = new Ext.Panel({region:'center',
-//            fitToFrame: true, autoScroll: true, resizeEl: this.grid, title: 'Files', contentEl: 'grid'
-//        }));
-//        mainLayout.endUpdate();
 
     },
 
@@ -411,7 +398,7 @@ Rged.prototype =  {
 
     grid_onCellDblClick: function( grid, rowIndex, columnIndex, e )
     {
-        var rec = grid.getDataSource().getAt(rowIndex);
+        var rec = grid.getStore().getAt(rowIndex);
         var path = rec.get('path');
         var folder = rec.get('cls');
         if (folder == 'folder') {
@@ -423,7 +410,7 @@ Rged.prototype =  {
     
     grid_onCellClick: function( grid, rowIndex, columnIndex, e )
     {
-        var rec = grid.getDataSource().getAt(rowIndex);
+        var rec = grid.getStore().getAt(rowIndex);
         var p = "/root" + rec.get('path');
         if (p.substr(p.length - 1, 1) == '/')
             p = p.substr(0, p.length - 1)
@@ -523,6 +510,9 @@ Rged.prototype =  {
     },
 
     renameFile: function(sel) {
+        // set focus to no button to avoid accidental deletions
+        var msgdlg = Ext.Msg.getDialog();
+        msgdlg.defaultButton = msgdlg.buttons[2];//.focus();
         Ext.Msg.prompt(this.tree.renameText
                 , this.tree.renameText + ' <b>' + sel.get('name') + '</b> to ?'
                 , function(response, newname) {
@@ -537,11 +527,7 @@ Rged.prototype =  {
                         }
                 }
                 , this
-        );
-
-        // set focus to no button to avoid accidental deletions
-        var msgdlg = Ext.Msg.getDialog();
-        msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
+        );       
     },
 
     rename: function (newname, oldname) {
@@ -562,6 +548,9 @@ Rged.prototype =  {
     },
     deleteFile: function(sel) {
         // display confirmation message
+        // set focus to no button to avoid accidental deletions
+        var msgdlg = Ext.Msg.getDialog();
+        msgdlg.defaultButton = msgdlg.buttons[2];//.focus();
         Ext.Msg.confirm(this.tree.deleteText
                 , this.tree.reallyWantText + ' ' + this.tree.deleteText.toLowerCase() + ' <b>' + sel.get('name') + '</b>?'
                 , function(response) {
@@ -589,10 +578,6 @@ Rged.prototype =  {
                 }
                 , this
         );
-
-        // set focus to no button to avoid accidental deletions
-        var msgdlg = Ext.Msg.getDialog();
-        msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
     },
     
     downloadFile: function(sel) {

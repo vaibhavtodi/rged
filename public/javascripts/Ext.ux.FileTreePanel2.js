@@ -692,7 +692,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 		// save current node to context menu and open submenu
 		var menu = this.contextMenu;
 		menu.node = node;
-		menu.items.get('open').menu.node = node;
+//		menu.items.get('open').menu.node = node;
 
 		// set menu item text to node text
 		var itemNodename = menu.items.get('nodename');
@@ -1161,6 +1161,9 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 		}
 
 		// display confirmation message
+                // set focus to no button to avoid accidental deletions
+       		var msgdlg = Ext.Msg.getDialog();
+		msgdlg.defaultButton = msgdlg.buttons[2];//.focus();
 		Ext.Msg.confirm(this.deleteText
 			, this.reallyWantText + ' ' + this.deleteText.toLowerCase() + ' <b>' + node.text + '</b>?'  
 			, function(response) {
@@ -1193,11 +1196,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 				}
 			}
 			, this
-		);
-
-		// set focus to no button to avoid accidental deletions
-		var msgdlg = Ext.Msg.getDialog();
-		msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
+		);		
 	}
 	// }}}
 	// {{{
@@ -1251,6 +1250,8 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 		* @param {Object} scope Scope for callback (defaults to this)
 		*/
 	, confirmOverwrite: function(filename, callback, scope) {
+       		var msgdlg = Ext.Msg.getDialog();
+		msgdlg.defaultButton = msgdlg.buttons[2];//focus();
 		Ext.Msg.confirm(this.confirmText
 		, String.format(this.existsText, filename) 
 			+ '. ' + this.overwriteText
@@ -1260,8 +1261,6 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 			}	
 		}
 		, this);
-		var msgdlg = Ext.Msg.getDialog();
-		msgdlg.setDefaultButton(msgdlg.buttons[2]).focus();
 		msgdlg.setZIndex(16000);
 	}
 	// }}}
@@ -1275,19 +1274,28 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 			// create container for upload form
 			switch(this.uploadPosition) {
 				case 'menu':
-					uploadFormCt = Ext.DomHelper.append(document.body, {
-						tag: 'div', id: 'uf-ct-' + this.id, style: 'margin-left:30px;margin-bottom:4px;width:154px'
+					uploadFormCt = Ext.DomHelper.append(
+                                            document.body, {
+                                                tag: '',
+                                                 id: 'uf-ct-' + this.id, 
+                                                 style: 'margin-left:30px;margin-bottom:4px;width:154px'
 						, children: [
-							{tag:'div', html:this.uploadFileText + ' (Ctrl+U)'}
-							, {tag:'br'}
+                                                    {
+                                                        tag:'div', 
+                                                        html:this.uploadFileText + ' (Ctrl+U)'}, 
+                                                        {tag:'br'}
 						]
-					}, true);
+                                                }, 
+                                                true);
 				break;
 
 				case 'floating':
-					uploadFormCt = Ext.DomHelper.append(document.body, {
-						tag:'div', id:'uf-ct-' + this.id
-					}, true);
+					uploadFormCt = Ext.DomHelper.append(
+                                            document.body, {
+                                                tag:'', 
+                                                id:'uf-ct-' + this.id
+					}, 
+                                        true);
 					uploadFormCt.on({click:{stopEvent:true,fn:Ext.emptyFn}});
 				break;
 			}
@@ -1300,6 +1308,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 				, iconPath: this.iconPath
 				, pgCfg: this.pgCfg
 				, floating: 'floating' === this.uploadPosition
+                                
 			});
 
 			// hide form on body click
