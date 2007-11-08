@@ -64,7 +64,7 @@ Ext.namespace('Ext.ux');
 	* @cfg {String} uploadText Text to use for menu upload message(s)
 	* @cfg {String} uploadUrl url to upload to. dataUrl is used if not set
   */
-Ext.ux.FileTreePanel = function(el, config) {
+Ext.ux.FileTreePanel = function(config) {
 
 	// {{{
 	// create tree loaeder if it doesn't exist in config
@@ -96,7 +96,7 @@ Ext.ux.FileTreePanel = function(el, config) {
 	// }}}
 	// {{{
 	// call parent constructor
-	Ext.ux.FileTreePanel.superclass.constructor.call(this, el, config);
+	Ext.ux.FileTreePanel.superclass.constructor.call(this, config);
 	// }}}
 	// {{{
 	// icons
