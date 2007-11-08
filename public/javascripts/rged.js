@@ -56,9 +56,9 @@ Ext.override(Ext.ux.FileTreePanel, {
 
 var Rged = function() {
     // All Panel
-    this.northPanel = null;
-    this.westPanel = null;
-    this.centerPanel = null;
+    //this.northPanel = null;
+    //this.westPanel = null;
+    //this.centerPanel = null;
     this.menu = null;
     this.tree = null;
     this.grid = null;
@@ -97,6 +97,8 @@ Rged.prototype =  {
 		, enableNewDir: true
 		, uploadPosition: 'menu'
 		, edit: true
+                , height:'auto'
+                , width:'auto'
 		, maxFileSize: 1048575
 		, hrefPrefix: '/filetree/'
 		, pgCfg: {
@@ -240,18 +242,15 @@ Rged.prototype =  {
             var mainLayout = new Ext.Viewport({
                 layout:'border',
                 items: [
-                    {                     
-                xtype:'panel',
-                region: 'center',
-                titlebar: true,
-                contentEl:'grid',
-                title: 'Files',
-                autoScroll:false,
-                tabPosition: 'top',
-                closeOnTab: true,
-                resizeTabs: true,
-                fitToFrame: true, autoScroll: true, resizeEl: this.grid, title: 'Files'
-            },
+                {
+                region: 'north',
+                contentEl: 'menu',
+                split:false,
+                initialSize: 32,
+                titlebar: false,
+                fitToFrame: true, 
+                closable: false
+                },
                     {
                 region: 'west',
                 contentEl:'tree',
@@ -269,15 +268,21 @@ Rged.prototype =  {
                 closable: false, 
                 title: 'Folders'
             },
-                    {
-                region: 'north',
-                contentEl: 'menu',
-                split:false,
-                initialSize: 32,
-                titlebar: false,
+            {                     
+                xtype:'panel',
+                region: 'center',
+                titlebar: true,
+                contentEl:'grid',
+     //           width: '100%',
+                title: 'Files',
+                autoScroll:false,
+                tabPosition: 'top',
+                closeOnTab: true,
+                resizeTabs: true,
                 fitToFrame: true, 
-                closable: false
-                }
+                autoScroll: true, 
+                resizeEl: this.grid
+            }
                 ]
             });
             
@@ -387,6 +392,7 @@ Rged.prototype =  {
                     
                 } 
             ],
+            autoHeight:true,
             sm:  new Ext.grid.RowSelectionModel({singleSelect: true}),
             enableDragDrop : true,
             ddGroup: 'TreeDD',
@@ -395,7 +401,7 @@ Rged.prototype =  {
         });
 
         this.grid.render('grid');
-       //this.grid.getSelectionModel().selectFirstRow();
+        //this.grid.getSelectionModel().selectFirstRow();
         this.grid.on('celldblclick', this.grid_onCellDblClick, this);
         this.grid.on('cellclick', this.grid_onCellClick, this);
         this.grid.on('cellcontextmenu', this.grid_onCellContextMenu, this);
