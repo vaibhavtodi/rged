@@ -7,8 +7,6 @@ module SymetrieCom
       # This module provides an enhanced acts_as_nested_set mixin for ActiveRecord.
       # Please see the README for background information, examples, and tips on usage.
       module ClassMethods
-
-
         # Configuration options are:
         # * +parent_column+ - Column name for the parent/child foreign key (default: +parent_id+).
         # * +left_column+ - Column name for the left index (default: +lft+).
@@ -102,9 +100,9 @@ module SymetrieCom
               e[acts_as_nested_set_options[:right_column]] = maxright+2
             }
 
-          self.before_destroy { |e|            
+          self.before_destroy { |e|
               return if (e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?)
-                   
+
               if e.class.exists?(:id => e.id)
                 e.reload# in case a concurrent move has altered the indexes
               else

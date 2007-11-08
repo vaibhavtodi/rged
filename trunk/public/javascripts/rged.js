@@ -1,7 +1,7 @@
 // set blank image to local file
 Ext.BLANK_IMAGE_URL = '/javascripts/extjs/resources/images/default/s.gif';
 
-Ext.override(Ext.grid.Grid, {
+Ext.override(Ext.grid.GridPanel, {
         getDragDropText: function(){
             var sel = this.selModel.getSelected();
             if (sel)
@@ -75,8 +75,9 @@ Rged.prototype =  {
 
            // tree in the panel
 
-	this.tree = new Ext.ux.FileTreePanel('tree', {
-		animate: true
+	this.tree = new Ext.ux.FileTreePanel({
+                el: 'tree'
+		, animate: true
 		, dataUrl: '/directory/get'
                 , renameUrl: '/directory/rename'
                 , deleteUrl: '/directory/delete'
@@ -110,15 +111,15 @@ Rged.prototype =  {
 				, method: 'post'
 			}
 		}
+                , root: new Ext.tree.AsyncTreeNode({text:'root', path: '/', id: '/', allowDrag:false})
 	});
 
-	var root = new Ext.tree.AsyncTreeNode({text:'root', path: '/', id: '/', allowDrag:false});
-	this.tree.setRootNode(root);
 	this.tree.render();
+        this.tree.getRootNode().expand();
         this.tree.on('click', this.tree_onClick, this);
         this.tree.on('renamesuccess', function(tree, node, newname, oldname) { this.change_path(this.path)}, this);
         this.tree.on('beforeopen', this.tree_onDownload, this);
-        root.expand();
+
     },
  
     tree_onDownload: function(tree, node, mode) {
@@ -185,23 +186,44 @@ Rged.prototype =  {
    },
     // Initialize the menu
     init_menu: function () {
-
-       this.menu = new Ext.Toolbar('menu');
-       this.menu.addButton({id: 'rename',
-           text: 'Rename', cls: 'x-btn-text-icon menu-rename', handler: this.menu_onRename, scope: this});
-       this.menu.addButton({id: 'delete',
-           text: 'Delete', cls: 'x-btn-text-icon menu-delete', handler: this.menu_onDelete, scope: this});
-       this.menu.addButton({id: 'download',
-           text: 'Download', cls: 'x-btn-text-icon menu-download', handler: this.menu_onDownload, scope: this});
-       this.menu.addButton({id: 'refresh',
-           text: 'Refresh', cls: 'x-btn-text-icon menu-refresh', handler: this.menu_onRefresh, scope: this});
-       this.textBox = new Ext.form.TextField ({cls : 'rged-adress', width: 500});
+       this.menu = new Ext.Toolbar()
+       this.menu.render('menu')
+       this.menu.addButton({
+           id: 'rename',
+           text: 'Rename',
+           cls: 'x-btn-text-icon menu-rename', 
+           handler: this.menu_onRename, 
+           scope: this
+           });
+       this.menu.addButton({
+           id: 'delete',
+           text: 'Delete',
+            cls: 'x-btn-text-icon menu-delete', 
+            handler: this.menu_onDelete, 
+            scope: this});
+       this.menu.addButton({
+           id: 'download',
+           text: 'Download', 
+           cls: 'x-btn-text-icon menu-download', 
+           handler: this.menu_onDownload, 
+           scope: this});
+       this.menu.addButton({
+           id: 'refresh',
+           text: 'Refresh', 
+           cls: 'x-btn-text-icon menu-refresh', 
+           handler: this.menu_onRefresh, 
+           scope: this});
+       this.textBox = new Ext.form.TextField ({
+           cls: 'rged-adress',
+           width: 500});
        this.textBox.on('change', this.menu_onChange, this);
        this.textBox.on('specialkey', this.menu_onSpecialKey, this);
        this.menu.addField(this.textBox);
        this.menu.addFill ();
        this.menu.addButton({
-           text: 'Logout', cls: 'x-btn-text-icon menu-logout', handler: function(o, e) {
+           text: 'Logout', 
+           cls: 'x-btn-text-icon menu-logout',
+           handler: function(o, e) {
                window.location = '/account/logout/';
            }
        });
@@ -209,44 +231,67 @@ Rged.prototype =  {
 
     // Initilize the global layout
     init_layout: function () {
-       var mainLayout = new Ext.BorderLayout(document.body, {
-            north: {
-                split:false,
-                initialSize: 32,
-                titlebar: false
+//         this.northPanel = new Ext.Panel();
+//         
+//         this.westPanel = new Ext.Panel();
+//            
+//            this.centerPanel = new Ext.Panel();
+            
+            var mainLayout = new Ext.Viewport({
+                layout:'border',
+                items: [
+                    {                     
+                xtype:'panel',
+                region: 'center',
+                titlebar: true,
+                contentEl:'grid',
+                title: 'Files',
+                autoScroll:false,
+                tabPosition: 'top',
+                closeOnTab: true,
+                resizeTabs: true,
+                fitToFrame: true, autoScroll: true, resizeEl: this.grid, title: 'Files'
             },
-            west: {
+                    {
+                region: 'west',
+                contentEl:'tree',
                 split:true,
-                initialSize: 250,
-                minSize: 175,
-                maxSize: 400,
+                width: 250,
+                minWidth: 175,
+                maxWidth: 400,
                 titlebar: true,
                 collapsible: true,
                 animate: true,
                 useShim: true,
                 autoScroll: true,
-                cmargins: {top:2,bottom:2,right:2,left:2}
+                cmargins: {top:2,bottom:2,right:2,left:2},
+                fitToFrame: true, 
+                closable: false, 
+                title: 'Folders'
             },
-            center: {
-                titlebar: true,
-                title: 'Files',
-                autoScroll:false,
-                tabPosition: 'top',
-                closeOnTab: true,
-                resizeTabs: true
-            }
-        });
-        mainLayout.beginUpdate();
-        mainLayout.add('north', this.northPanel = new Ext.ContentPanel('menu', {
-            fitToFrame: true, closable: false
-        }));
-        mainLayout.add('west', this.westPanel = new Ext.ContentPanel('tree', {
-            fitToFrame: true, closable: false, title: 'Folders'
-        }));
-        mainLayout.add('center', this.centerPanel = new Ext.ContentPanel('grid', {
-            fitToFrame: true, autoScroll: true, resizeEl: this.grid, title: 'Files'
-        }));
-        mainLayout.endUpdate();
+                    {
+                region: 'north',
+                contentEl: 'menu',
+                split:false,
+                initialSize: 32,
+                titlebar: false,
+                fitToFrame: true, 
+                closable: false
+                }
+                ]
+            });
+            
+//       mainLayout.beginUpdate();
+//        mainLayout.add(this.northPanel = new Ext.Panel({ region:'north',
+//            fitToFrame: true, closable: false, contentEl: 'menu'
+//        }));
+//        mainLayout.add(this.westPanel = new Ext.ContentPanel({ region:'west',
+//            fitToFrame: true, closable: false, title: 'Folders', contentEl: 'tree'
+//        }));
+//        mainLayout.add(this.centerPanel = new Ext.Panel({region:'center',
+//            fitToFrame: true, autoScroll: true, resizeEl: this.grid, title: 'Files', contentEl: 'grid'
+//        }));
+//        mainLayout.endUpdate();
 
     },
 
@@ -298,28 +343,59 @@ Rged.prototype =  {
                 return '<img width="16" height="18" src="/javascripts/extjs/resources/images/default/tree/leaf.gif"/>';
         }
 	// Column Model of the grid
-        var colModel = new Ext.grid.ColumnModel([
-                        {id: 'icon', header: '<img src="/images/icons/arrow_up.png" width="16" height="18"/>', width: 25, sortable: false, renderer: icon, dataIndex: 'cls', fixed : true},
-			{id:'name',header: "Name", width: 160, sortable: true, locked:false, dataIndex: 'name'
-                            , editor: new Ext.grid.GridEditor(new Ext.form.TextField({
-                                allowBlank: false}))},
-			{header: "Size", width: 75, sortable: true, renderer: size, dataIndex: 'size'},
-                        {header: "Last Updated", width: 85, sortable: true, renderer: Ext.util.Format.dateRenderer('m/d/Y'), dataIndex: 'lastChange'}
-		]);
+//        var colModel = new Ext.grid.ColumnModel([
+//                        {id: 'icon', header: '<img src="/images/icons/arrow_up.png" width="16" height="18"/>', width: 25, sortable: false, renderer: icon, dataIndex: 'cls', fixed : true},
+//			{id:'name',header: "Name", width: 160, sortable: true, locked:false, dataIndex: 'name'
+//                            , editor: new Ext.grid.GridEditor(new Ext.form.TextField({
+//                                allowBlank: false}))},
+//			{header: "Size", width: 75, sortable: true, renderer: size, dataIndex: 'size'},
+//                        {header: "Last Updated", width: 85, sortable: true, renderer: Ext.util.Format.dateRenderer('m/d/Y'), dataIndex: 'lastChange'}
+//		]);
 
 
         // create the Grid
-        this.grid = new Ext.grid.Grid('grid', {
-            ds: this.ds,
-            cm: colModel,
-            selModel:  new Ext.grid.RowSelectionModel({singleSelect: true}),
+        this.grid = new Ext.grid.GridPanel({
+            store: this.ds,
+            columns: [
+               {
+                   id: 'icon',
+                   header: '<img src="/images/icons/arrow_up.png" width="16" height="18"/>',
+                   width: 25, sortable: false, renderer: icon, dataIndex: 'cls', 
+                   fixed : true
+               },
+               {
+                   id:'name',
+                   header: "Name", 
+                   width: 160, 
+                   sortable: true, 
+                   locked:false, 
+                   dataIndex: 'name',
+                   editor: new Ext.grid.GridEditor(new Ext.form.TextField({
+                                allowBlank: false}))},
+                {
+                    header: "Size", 
+                    width: 75, 
+                    sortable: true, 
+                    renderer: size, 
+                    dataIndex: 'size'},
+                {
+                    header: "Last Updated", 
+                    width: 85, 
+                    sortable: true, 
+                    renderer: Ext.util.Format.dateRenderer('m/d/Y'), 
+                    dataIndex: 'lastChange'
+                    
+                } 
+            ],
+            sm:  new Ext.grid.RowSelectionModel({singleSelect: true}),
             enableDragDrop : true,
             ddGroup: 'TreeDD',
             autoExpandColumn: 'name',
             loadMask: true
         });
 
-        this.grid.render();
+        this.grid.render('grid');
+       //this.grid.getSelectionModel().selectFirstRow();
         this.grid.on('celldblclick', this.grid_onCellDblClick, this);
         this.grid.on('cellclick', this.grid_onCellClick, this);
         this.grid.on('cellcontextmenu', this.grid_onCellContextMenu, this);
