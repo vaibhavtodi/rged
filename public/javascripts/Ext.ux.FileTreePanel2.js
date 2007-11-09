@@ -1161,7 +1161,6 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 		}
 
 		// display confirmation message
-                // set focus to no button to avoid accidental deletions
        		var msgdlg = Ext.Msg.getDialog();
 		msgdlg.defaultButton = msgdlg.buttons[2];//.focus();
 		Ext.Msg.confirm(this.deleteText
