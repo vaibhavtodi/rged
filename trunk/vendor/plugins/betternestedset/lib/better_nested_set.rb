@@ -24,13 +24,13 @@ module SymetrieCom
           options[:scope] = "#{options[:scope]}_id".intern if options[:scope].is_a?(Symbol) && options[:scope].to_s !~ /_id$/
 
           write_inheritable_attribute(:acts_as_nested_set_options,
-             { :parent_column  => (options[:parent_column] || 'parent_id'),
-               :left_column    => (options[:left_column]   || 'lft'),
-               :right_column   => (options[:right_column]  || 'rgt'),
-               :scope          => (options[:scope] || '1 = 1'),
-               :text_column    => (options[:text_column] || columns.collect{|c| (c.type == :string) ? c.name : nil }.compact.first),
-               :class          => self # for single-table inheritance
-              } )
+            { :parent_column  => (options[:parent_column] || 'parent_id'),
+              :left_column    => (options[:left_column]   || 'lft'),
+              :right_column   => (options[:right_column]  || 'rgt'),
+              :scope          => (options[:scope] || '1 = 1'),
+              :text_column    => (options[:text_column] || columns.collect{|c| (c.type == :string) ? c.name : nil }.compact.first),
+              :class          => self # for single-table inheritance
+            } )
 
           class_inheritable_reader :acts_as_nested_set_options
 
@@ -50,10 +50,10 @@ module SymetrieCom
 
           # no bulk assignment
           attr_protected  acts_as_nested_set_options[:left_column].intern,
-                          acts_as_nested_set_options[:right_column].intern,
-                          acts_as_nested_set_options[:parent_column].intern
+            acts_as_nested_set_options[:right_column].intern,
+            acts_as_nested_set_options[:parent_column].intern
           # no assignment to structure fields
-            module_eval <<-"end_eval", __FILE__, __LINE__
+          module_eval <<-"end_eval", __FILE__, __LINE__
             def #{acts_as_nested_set_options[:left_column]}=(x)
               raise ActiveRecord::ActiveRecordError, "Unauthorized assignment to #{acts_as_nested_set_options[:left_column]}: it's an internal field handled by acts_as_nested_set code, use move_to_* methods instead."
             end
@@ -70,13 +70,14 @@ module SymetrieCom
           include SymetrieCom::Acts::NestedSet::InstanceMethods
           extend SymetrieCom::Acts::NestedSet::ClassMethods
           # adds the helper for the class
-#          ActionView::Base.send(:define_method, "#{Inflector.underscore(self.class)}_options_for_select") { special=nil
-#              "#{acts_as_nested_set_options[:text_column]} || "#{self.class} id #{id}"
-#            }
+          #          ActionView::Base.send(:define_method, "#{Inflector.underscore(self.class)}_options_for_select") { special=nil
+          #              "#{acts_as_nested_set_options[:text_column]} || "#{self.class} id #{id}"
+          #            }
 
+          # override ActiveRecord to prevent lft/rgt values from being saved (can corrupt indexes under concurrent usage)
           self.before_update { |e|
             if !e.instance_variable_get("@attributes")[acts_as_nested_set_options[:left_column]].blank? &&
-               !e.instance_variable_get("@attributes")[acts_as_nested_set_options[:right_column]].blank?
+                !e.instance_variable_get("@attributes")[acts_as_nested_set_options[:right_column]].blank?
               lft = e.instance_variable_get("@attributes").delete(acts_as_nested_set_options[:left_column])
               rgt = e.instance_variable_get("@attributes").delete(acts_as_nested_set_options[:right_column])
               self.instance_variable_set("@my_#{acts_as_nested_set_options[:left_column]}", lft)
@@ -84,7 +85,8 @@ module SymetrieCom
             end
 
           }
-
+          
+          # reinsert left_column and right_column
           self.after_update { |e|
             if !self.instance_variable_get("@my_#{acts_as_nested_set_options[:left_column]}").blank? &&
                 !self.instance_variable_get("@my_#{acts_as_nested_set_options[:right_column]}").blank?
@@ -94,29 +96,31 @@ module SymetrieCom
             end
           }
 
+          # On creation, automatically add the new node to the right of all existing nodes in this tree.
           self.before_create  { |e|
             maxright = self.maximum(acts_as_nested_set_options[:right_column], :conditions => e.scope_condition) || 0
             e[acts_as_nested_set_options[:left_column]] = maxright+1
-              e[acts_as_nested_set_options[:right_column]] = maxright+2
-            }
+            e[acts_as_nested_set_options[:right_column]] = maxright+2
+          }
 
+          # On destruction, delete all children and shift the lft/rgt values back to the left so the counts still work.  
           self.before_destroy { |e|
-              return if (e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?)
+            return if (e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?)
 
-              if e.class.exists?(:id => e.id)
-                e.reload# in case a concurrent move has altered the indexes
-              else
-                next
-              end
-              dif = e[acts_as_nested_set_options[:right_column]] - e[acts_as_nested_set_options[:left_column]] + 1
-              self.delete_all("#{e.scope_condition} AND (#{acts_as_nested_set_options[:left_column]} BETWEEN #{e[acts_as_nested_set_options[:left_column]]} AND #{e[acts_as_nested_set_options[:right_column]]})" )
-              self.update_all("#{acts_as_nested_set_options[:left_column]} = CASE \
+            if e.class.exists?(:id => e.id)
+              e.reload# in case a concurrent move has altered the indexes
+            else
+              next
+            end
+            dif = e[acts_as_nested_set_options[:right_column]] - e[acts_as_nested_set_options[:left_column]] + 1
+            self.delete_all("#{e.scope_condition} AND (#{acts_as_nested_set_options[:left_column]} BETWEEN #{e[acts_as_nested_set_options[:left_column]]} AND #{e[acts_as_nested_set_options[:right_column]]})" )
+            self.update_all("#{acts_as_nested_set_options[:left_column]} = CASE \
                                         WHEN #{acts_as_nested_set_options[:left_column]} > #{e[acts_as_nested_set_options[:right_column]]} THEN (#{acts_as_nested_set_options[:left_column]} - #{dif}) \
                                         ELSE #{acts_as_nested_set_options[:left_column]} END, \
                                    #{acts_as_nested_set_options[:right_column]} = CASE \
                                         WHEN #{acts_as_nested_set_options[:right_column]} > #{e[acts_as_nested_set_options[:right_column]]} THEN (#{acts_as_nested_set_options[:right_column]} - #{dif} ) \
                                         ELSE #{acts_as_nested_set_options[:right_column]} END", e.scope_condition)
-            }
+          }
 
 
         end
@@ -190,30 +194,6 @@ module SymetrieCom
         def base_set_class()#:nodoc:
           acts_as_nested_set_options[:class] # for single-table inheritance
         end
-
-#        # On creation, automatically add the new node to the right of all existing nodes in this tree.
-#        def before_create # already protected by a transaction
-#          logger.info("\033[33m Better: before_create called \033[m")
-#          maxright = base_set_class.maximum(right_col_name, :conditions => scope_condition) || 0
-#          self[left_col_name] = maxright+1
-#          self[right_col_name] = maxright+2
-#        end
-
-        # On destruction, delete all children and shift the lft/rgt values back to the left so the counts still work.
-#        def before_destroy # already protected by a transaction
-#          logger.info("\033[33m Better: before_destroy called \033[m")
-#          return if self[right_col_name].nil? || self[left_col_name].nil?
-#          self.reload # in case a concurrent move has altered the indexes
-#          dif = self[right_col_name] - self[left_col_name] + 1
-#          base_set_class.delete_all( "#{scope_condition} AND (#{left_col_name} BETWEEN #{self[left_col_name]} AND #{self[right_col_name]})" )
-#          base_set_class.update_all("#{left_col_name} = CASE \
-#                                      WHEN #{left_col_name} > #{self[right_col_name]} THEN (#{left_col_name} - #{dif}) \
-#                                      ELSE #{left_col_name} END, \
-#                                 #{right_col_name} = CASE \
-#                                      WHEN #{right_col_name} > #{self[right_col_name]} THEN (#{right_col_name} - #{dif} ) \
-#                                      ELSE #{right_col_name} END",
-#                                 scope_condition)
-#        end
 
         # By default, records are compared and sorted using the left column.
         def <=>(x)
@@ -393,7 +373,7 @@ module SymetrieCom
                                           WHEN id = #{child.id} \
                                             THEN 4 \
                                          ELSE #{right_col_name} END",
-                                      scope_condition)
+                scope_condition)
               self.reload; child.reload
             end
             unless child[left_col_name] && child[right_col_name]
@@ -406,46 +386,46 @@ module SymetrieCom
                                           WHEN id = #{child.id} \
                                             THEN #{maxright + 2} \
                                           ELSE #{right_col_name} END",
-                                      scope_condition)
+                scope_condition)
               child.reload
             end
 
             child.move_to_child_of(self)
             # self.reload ## even though move_to calls target.reload, at least one object in the tests was not reloading (near the end of test_common_usage)
           end
-        # self.reload
-        # child.reload
-        #
-        # if child.root?
-        #   raise ActiveRecord::ActiveRecordError, "Adding sub-tree isn\'t currently supported"
-        # else
-        #   if ( (self[left_col_name] == nil) || (self[right_col_name] == nil) )
-        #     # Looks like we're now the root node!  Woo
-        #     self[left_col_name] = 1
-        #     self[right_col_name] = 4
-        #
-        #     # What do to do about validation?
-        #     return nil unless self.save
-        #
-        #     child[parent_col_name] = self.id
-        #     child[left_col_name] = 2
-        #     child[right_col_name]= 3
-        #     return child.save
-        #   else
-        #     # OK, we need to add and shift everything else to the right
-        #     child[parent_col_name] = self.id
-        #     right_bound = self[right_col_name]
-        #     child[left_col_name] = right_bound
-        #     child[right_col_name] = right_bound + 1
-        #     self[right_col_name] += 2
-        #     self.class.transaction {
-        #       self.class.update_all( "#{left_col_name} = (#{left_col_name} + 2)",  "#{scope_condition} AND #{left_col_name} >= #{right_bound}" )
-        #       self.class.update_all( "#{right_col_name} = (#{right_col_name} + 2)",  "#{scope_condition} AND #{right_col_name} >= #{right_bound}" )
-        #       self.save
-        #       child.save
-        #     }
-        #   end
-        # end
+          # self.reload
+          # child.reload
+          #
+          # if child.root?
+          #   raise ActiveRecord::ActiveRecordError, "Adding sub-tree isn\'t currently supported"
+          # else
+          #   if ( (self[left_col_name] == nil) || (self[right_col_name] == nil) )
+          #     # Looks like we're now the root node!  Woo
+          #     self[left_col_name] = 1
+          #     self[right_col_name] = 4
+          #
+          #     # What do to do about validation?
+          #     return nil unless self.save
+          #
+          #     child[parent_col_name] = self.id
+          #     child[left_col_name] = 2
+          #     child[right_col_name]= 3
+          #     return child.save
+          #   else
+          #     # OK, we need to add and shift everything else to the right
+          #     child[parent_col_name] = self.id
+          #     right_bound = self[right_col_name]
+          #     child[left_col_name] = right_bound
+          #     child[right_col_name] = right_bound + 1
+          #     self[right_col_name] += 2
+          #     self.class.transaction {
+          #       self.class.update_all( "#{left_col_name} = (#{left_col_name} + 2)",  "#{scope_condition} AND #{left_col_name} >= #{right_bound}" )
+          #       self.class.update_all( "#{right_col_name} = (#{right_col_name} + 2)",  "#{scope_condition} AND #{right_col_name} >= #{right_bound}" )
+          #       self.save
+          #       child.save
+          #     }
+          #   end
+          # end
         end
 
         # Move this node to the left of _target_ (you can pass an object or just an id).
@@ -471,55 +451,55 @@ module SymetrieCom
           elt = base_set_class.find(target)
           # We move children only if deletion works
           if base_set_class.delete(elt.id)
-              # Case if we delete a non-root node
-              if (elt[parent_col_name] != nil && elt[parent_col_name] != 0)
-                elt.all_children.each{ |child|
-                  if child[parent_col_name] == elt.id
-                   child.move_to_child_of(elt[parent_col_name])
-                  end
-                }
-              else # The node deleted is a root node
-                # We recover all root nodes
-                roots = self.roots
-                root = nil
-                lft = true
-                if elt[left_col_name] == 1
-                  lft = false
+            # Case if we delete a non-root node
+            if (elt[parent_col_name] != nil && elt[parent_col_name] != 0)
+              elt.all_children.each{ |child|
+                if child[parent_col_name] == elt.id
+                  child.move_to_child_of(elt[parent_col_name])
                 end
-                # we search the first root node
-                roots.each{ |r|
-                  # 'before' the node deleted
-                  if lft && (r[right_col_name] == (elt[left_col_name] - 1))
+              }
+            else # The node deleted is a root node
+              # We recover all root nodes
+              roots = self.roots
+              root = nil
+              lft = true
+              if elt[left_col_name] == 1
+                lft = false
+              end
+              # we search the first root node
+              roots.each{ |r|
+                # 'before' the node deleted
+                if lft && (r[right_col_name] == (elt[left_col_name] - 1))
+                  root = r
+                else
+                  # 'after' the node deleted
+                  if !lft && (r[left_col_name] == (elt[right_col_name] + 1))
                     root = r
+                  end
+                end
+              }
+              # Move children
+              elt.all_children.each{ |child|
+                if child[parent_col_name] == elt.id && root != nil
+                  if lft
+                    child.move_to_right_of(root)
                   else
-                    # 'after' the node deleted
-                    if !lft && (r[left_col_name] == (elt[right_col_name] + 1))
-                      root = r
+                    child.move_to_left_of(root)
+                  end
+                else
+                  if root == nil # If we had deleted the only root node, we create new root nodes
+                    if child[parent_col_name] == elt.id
+                      child[parent_col_name] = nil
+                      child.save
                     end
                   end
-                }
-                # Move children
-                elt.all_children.each{ |child|
-                 if child[parent_col_name] == elt.id && root != nil
-                    if lft
-                      child.move_to_right_of(root)
-                    else
-                      child.move_to_left_of(root)
-                    end
-                 else
-                   if root == nil # If we had deleted the only root node, we create new root nodes
-                     if child[parent_col_name] == elt.id
-                       child[parent_col_name] = nil
-                       child.save
-                     end
-                   end
-                 end
-               }
-              end
-#              if root == nil
-                self.renumber_full_tree
-#              end
-              return true
+                end
+              }
+            end
+            #              if root == nil
+            self.renumber_full_tree
+            #              end
+            return true
           else
             raise ActiveRecord::ActiveRecordError, "An error occured, you cannot delete this node"
             return false
@@ -550,10 +530,10 @@ module SymetrieCom
 
             # the move: we just need to define two adjoining segments of the left/right index and swap their positions
             bound = case position
-              when :child then target[right_col_name]
-              when :left  then target[left_col_name]
-              when :right then target[right_col_name] + 1
-              else raise ActiveRecord::ActiveRecordError, "Position should be :child, :left or :right ('#{position}' received)."
+            when :child then target[right_col_name]
+            when :left  then target[left_col_name]
+            when :right then target[right_col_name] + 1
+            else raise ActiveRecord::ActiveRecordError, "Position should be :child, :left or :right ('#{position}' received)."
             end
 
             if bound > self[right_col_name]
@@ -653,31 +633,31 @@ module SymetrieCom
         # up with a more elegant solution.
         private
 
-          # override ActiveRecord to prevent lft/rgt values from being saved (can corrupt indexes under concurrent usage)
-#          def update #:nodoc:
-#            connection.update(
-#              "UPDATE #{self.class.table_name} " +
-#              "SET #{quoted_comma_pair_list(connection, special_attributes_with_quotes(false))} " +
-#              "WHERE #{self.class.primary_key} = #{quote_value(id)}",
-#              "#{self.class.name} Update"
-#            )
-#          end
+        # override ActiveRecord to prevent lft/rgt values from being saved (can corrupt indexes under concurrent usage)
+        #          def update #:nodoc:
+        #            connection.update(
+        #              "UPDATE #{self.class.table_name} " +
+        #              "SET #{quoted_comma_pair_list(connection, special_attributes_with_quotes(false))} " +
+        #              "WHERE #{self.class.primary_key} = #{quote_value(id)}",
+        #              "#{self.class.name} Update"
+        #            )
+        #          end
 
-#          # exclude the lft/rgt columns from update statements
-#          def special_attributes_with_quotes(include_primary_key = true) #:nodoc:
-#            attributes.inject({}) do |quoted, (name, value)|
-#              if column = column_for_attribute(name)
-#                quoted[name] = quote_value(value, column) unless (!include_primary_key && column.primary) || [acts_as_nested_set_options[:left_column], acts_as_nested_set_options[:right_column]].include?(column.name)
-#              end
-#              quoted
-#            end
-#          end
-#
-#          # i couldn't figure out how to call attributes_with_quotes without cutting and pasting this private method in.  :(
-#          # Quote strings appropriately for SQL statements.
-#          def quote_value(value, column = nil) #:nodoc:
-#            self.class.connection.quote(value, column)
-#          end
+        #          # exclude the lft/rgt columns from update statements
+        #          def special_attributes_with_quotes(include_primary_key = true) #:nodoc:
+        #            attributes.inject({}) do |quoted, (name, value)|
+        #              if column = column_for_attribute(name)
+        #                quoted[name] = quote_value(value, column) unless (!include_primary_key && column.primary) || [acts_as_nested_set_options[:left_column], acts_as_nested_set_options[:right_column]].include?(column.name)
+        #              end
+        #              quoted
+        #            end
+        #          end
+        #
+        #          # i couldn't figure out how to call attributes_with_quotes without cutting and pasting this private method in.  :(
+        #          # Quote strings appropriately for SQL statements.
+        #          def quote_value(value, column = nil) #:nodoc:
+        #            self.class.connection.quote(value, column)
+        #          end
 
       end
     end
