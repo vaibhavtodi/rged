@@ -95,7 +95,7 @@ Rged.prototype =  {
 		, enableDelete: true
                 , enableDownload: true
 		, enableNewDir: true
-		, uploadPosition: 'menu'
+		, uploadPosition: 'floating'
 		, edit: true
                 , height:'auto'
                 , width:'auto'

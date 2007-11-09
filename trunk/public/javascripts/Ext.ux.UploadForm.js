@@ -348,8 +348,9 @@ Ext.extend(Ext.ux.UploadForm, Ext.form.BasicForm, {
 
 		// add button
 		var bbtnCt = ct.select('div.x-uf-bbtn-ct').item(0);
-		this.browseBtn = new Ext.Button(bbtnCt, {
-			text:this.addText + '...'
+		this.browseBtn = new Ext.Button({
+			renderTo: bbtnCt
+			, text:this.addText + '...'
 			, cls: 'x-btn-text-icon'
 			, icon: this.addIcon
 			, minWidth:this.buttonWidth
@@ -358,8 +359,9 @@ Ext.extend(Ext.ux.UploadForm, Ext.form.BasicForm, {
 		// upload button
 		var ubtnCt = ct.select('div.x-uf-ubtn-ct').item(0);
 		this.ubtnCt = ubtnCt;
-		this.uploadBtn = new Ext.Button(ubtnCt, {
-			icon: this.uploadIcon
+		this.uploadBtn = new Ext.Button({
+                        renderTo: ubtnCt
+			, icon: this.uploadIcon
 			, cls: 'x-btn-icon'
 			, tooltip: this.uploadText
 			, scope: this
@@ -369,8 +371,9 @@ Ext.extend(Ext.ux.UploadForm, Ext.form.BasicForm, {
 		// clear all button
 		var cbtnCt = ct.select('div.x-uf-cbtn-ct').item(0);
 		this.cbtnCt = cbtnCt;
-		this.clearBtn = new Ext.Button(cbtnCt, {
-			icon: this.clearIcon
+		this.clearBtn = new Ext.Button({
+			renderTo: cbtnCt
+			, icon: this.clearIcon
 			, cls: 'x-btn-icon'
 			, tooltip: this.clearAllText
 			, scope: this
