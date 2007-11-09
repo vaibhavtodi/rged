@@ -1,7 +1,7 @@
 /* Ext.ux.UploadForm css file
  *
- * vim:sw=2:ts=2:fdc=4 
- * $Id: uploadform.css 66 2007-07-25 23:14:47Z jozo $ 
+ * vim:sw=2:ts=2:fdc=4
+ * $Id: uploadform.css 66 2007-07-25 23:14:47Z jozo $
  */
 
 .x-uf-buttons-ct {
@@ -32,7 +32,7 @@
 	position: absolute;
 	opacity: 0.0;
 	-moz-opacity: 0.0;
-	/*filter: alpha(opacity=0);	*/
+	filter: alpha(opacity=0);
 	right:0;
 	height: 22px;
 }
@@ -74,7 +74,7 @@
 	left: 0;
 	opacity: 0.6;
 	-moz-opacity: 0.6;
-	/*filter: alpha(opacity=60);	*/
+	filter: alpha(opacity=60);
 	background-color: white;
 }
 .x-uf-wait {
@@ -120,7 +120,7 @@
 }
 .x-uf-pginfo-value {
 	text-align: right;
-/*	font-weight: bold; */
+	font-weight: bold;
 }
 
 .x-uf-filepb {
