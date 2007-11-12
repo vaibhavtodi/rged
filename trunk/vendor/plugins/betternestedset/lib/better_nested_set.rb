@@ -74,6 +74,13 @@ module SymetrieCom
           #              "#{acts_as_nested_set_options[:text_column]} || "#{self.class} id #{id}"
           #            }
 
+          # The following code is my crude method of making things concurrency-safe.
+          # Basically, we need to ensure that whenever a record is saved, the lft/rgt
+          # values are _not_ written to the database, because if any changes to the tree
+          # structure occurrred since the object was loaded, the lft/rgt values could
+          # be out of date and corrupt the indexes.
+          # I hope that someone with a little more ruby-foo can look at this and come
+          # up with a more elegant solution.
           # override ActiveRecord to prevent lft/rgt values from being saved (can corrupt indexes under concurrent usage)
           self.before_update { |e|
             if !e.instance_variable_get("@attributes")[acts_as_nested_set_options[:left_column]].blank? &&
@@ -85,7 +92,7 @@ module SymetrieCom
             end
 
           }
-          
+
           # reinsert left_column and right_column
           self.after_update { |e|
             if !self.instance_variable_get("@my_#{acts_as_nested_set_options[:left_column]}").blank? &&
@@ -103,7 +110,7 @@ module SymetrieCom
             e[acts_as_nested_set_options[:right_column]] = maxright+2
           }
 
-          # On destruction, delete all children and shift the lft/rgt values back to the left so the counts still work.  
+          # On destruction, delete all children and shift the lft/rgt values back to the left so the counts still work.
           self.before_destroy { |e|
             return if (e[acts_as_nested_set_options[:right_column]].nil? || e[acts_as_nested_set_options[:left_column]].nil?)
 
@@ -623,42 +630,6 @@ module SymetrieCom
           indexes << {:id => self.id, :lft => my_lft, :rgt => my_rgt} unless self[left_col_name] == my_lft && self[right_col_name] == my_rgt
           return n
         end
-
-        # The following code is my crude method of making things concurrency-safe.
-        # Basically, we need to ensure that whenever a record is saved, the lft/rgt
-        # values are _not_ written to the database, because if any changes to the tree
-        # structure occurrred since the object was loaded, the lft/rgt values could
-        # be out of date and corrupt the indexes.
-        # I hope that someone with a little more ruby-foo can look at this and come
-        # up with a more elegant solution.
-        private
-
-        # override ActiveRecord to prevent lft/rgt values from being saved (can corrupt indexes under concurrent usage)
-        #          def update #:nodoc:
-        #            connection.update(
-        #              "UPDATE #{self.class.table_name} " +
-        #              "SET #{quoted_comma_pair_list(connection, special_attributes_with_quotes(false))} " +
-        #              "WHERE #{self.class.primary_key} = #{quote_value(id)}",
-        #              "#{self.class.name} Update"
-        #            )
-        #          end
-
-        #          # exclude the lft/rgt columns from update statements
-        #          def special_attributes_with_quotes(include_primary_key = true) #:nodoc:
-        #            attributes.inject({}) do |quoted, (name, value)|
-        #              if column = column_for_attribute(name)
-        #                quoted[name] = quote_value(value, column) unless (!include_primary_key && column.primary) || [acts_as_nested_set_options[:left_column], acts_as_nested_set_options[:right_column]].include?(column.name)
-        #              end
-        #              quoted
-        #            end
-        #          end
-        #
-        #          # i couldn't figure out how to call attributes_with_quotes without cutting and pasting this private method in.  :(
-        #          # Quote strings appropriately for SQL statements.
-        #          def quote_value(value, column = nil) #:nodoc:
-        #            self.class.connection.quote(value, column)
-        #          end
-
       end
     end
   end
