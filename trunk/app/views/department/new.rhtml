@@ -8,7 +8,7 @@
 <%= text_field_tag 'country' %></p>
 
 <p><label> <%= _('Parent') %> </label><br/>
-<%= text_field_tag('parent', value = !@parent_id.equal?("-1") ? Department.find(@parent_id).name : "#{@parent_id}") %></p>
+<%= text_field_tag('parent', value = !@parent_id.equal?("0") ? Department.find(@parent_id).name : "#{@parent_id}") %></p>
 <br>
 
 <p><%= submit_tag _('Create') %></p>

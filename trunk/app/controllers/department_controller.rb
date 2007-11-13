@@ -1,8 +1,7 @@
 class DepartmentController < ApplicationController
   
   def index
-    list
-    render :action => 'list'
+    redirect_back_or_default(:controller => 'department', :action => 'list')
   end
 
   # GETs should be safe (see http://www.w3.org/2001/tag/doc/whenToUseGet.html)
@@ -20,7 +19,7 @@ class DepartmentController < ApplicationController
   end
 
   def create
-    if !(params[:parent].equal?("-1"))
+    if !(params[:parent].equal?("0"))
       parent = Department.find_by_name(params[:parent])
     else
       parent = nil
