@@ -41,8 +41,13 @@ class DepartmentController < ApplicationController
 
   def move
     @department = Department.find(params[:id])
+   # logger.info("\033[33m department: name: #{@department.name}\033[m")
+   # logger.info("\033[33m \t parent_id : #{@department.parent_id} \033[m")
+    
     p_id = params[:parent_id].to_i > 0 ? params[:parent_id].to_i : nil
+    # logger.info("\033[33m \t p_id : #{p_id} \033[m")
     @sibs = Department.find(:all, :conditions => {:parent_id => p_id}, :order => 'lft')
+    #logger.info("\033[33m \t sibs: name: #{@sibs.name} \033[m")
     if @sibs.any?
       dest = @sibs[params[:index].to_i] || @sibs.clear
     end
