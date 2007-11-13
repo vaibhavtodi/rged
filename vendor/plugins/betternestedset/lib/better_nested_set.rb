@@ -498,11 +498,11 @@ module SymetrieCom
                     if child[parent_col_name] == elt.id
                       child[parent_col_name] = nil
                       child.save
-                      self.renumber_full_tree
                     end
                   end
                 end
               }
+              self.renumber_full_tree
             end
             return true
           else

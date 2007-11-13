@@ -81,10 +81,10 @@ var Destroy = function (node, is_all) {
         );
     };
 
-var NewDepartment = function(node) { window.location="<%= url_for(:controller => :department, :action => :new) %>?parent_id=" + node.id};
+var NewDepartment = function(node) { window.location="<%= url_for(:controller => 'department', :action => 'new') %>?parent_id=" + node.id };
 
-var Show = function (node) { window.location="<%= url_for(:controller => :department, :action => :show) %>/" + node.id }
-var Edit = function (node) { window.location="<%= url_for(:controller => :department, :action => :edit) %>/" + node.id }
+var Show = function (node) { window.location="<%= url_for(:controller => 'department', :action => 'show') %>/" + node.id }
+var Edit = function (node) { window.location="<%= url_for(:controller => 'department', :action => 'edit') %>/" + node.id }
 
 var onContextMenuItem = function(item, e) {
 
