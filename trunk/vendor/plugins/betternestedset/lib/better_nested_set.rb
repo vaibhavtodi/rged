@@ -494,18 +494,16 @@ module SymetrieCom
                     child.move_to_left_of(root)
                   end
                 else
-                  if root == nil # If we had deleted the only root node, we create new root nodes
+                  if child[parent_col_name] == elt.id && root == nil # If we had deleted the only root node, we create new root nodes
                     if child[parent_col_name] == elt.id
                       child[parent_col_name] = nil
                       child.save
+                      self.renumber_full_tree
                     end
                   end
                 end
               }
             end
-            #              if root == nil
-            self.renumber_full_tree
-            #              end
             return true
           else
             raise ActiveRecord::ActiveRecordError, "An error occured, you cannot delete this node"
