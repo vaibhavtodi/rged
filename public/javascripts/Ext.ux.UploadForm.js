@@ -1030,7 +1030,7 @@ Ext.extend(Ext.ux.UploadForm, Ext.form.BasicForm, {
 				target: this.progressBar
 				, title: this.uploadProgressText
 				, text: this.getProgressTemplate().apply(this.formatProgress(o))
-				, qwidth: 160
+				, width: 160
 				, autoHide: true
 			});
 			Ext.QuickTips.enable();

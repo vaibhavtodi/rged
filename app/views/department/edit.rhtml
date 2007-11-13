@@ -1,6 +1,8 @@
 <h3><%= _("Edit Page") %></h3>
 
 <form action = "/department/update" >
+<%= hidden_field_tag('id', value = @node.id) %></p>
+
 <p><label> <%= _('Name') %> </label><br/>
 <%= text_field_tag('name', value = @node.name) %></p>
 

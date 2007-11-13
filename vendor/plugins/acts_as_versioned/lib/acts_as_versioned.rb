@@ -175,7 +175,7 @@ module ActiveRecord #:nodoc:
 
           cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column,
             :version_column, :max_version_limit, :track_changed_attributes, :version_condition, :version_sequence_name, :non_versioned_columns,
-            :version_association_options
+            :version_association_options, :last_version
 
           # legacy
           alias_method :non_versioned_fields,  :non_versioned_columns
@@ -195,13 +195,14 @@ module ActiveRecord #:nodoc:
           self.version_column               = options[:version_column]     || 'version'
           self.version_sequence_name        = options[:sequence_name]
           self.max_version_limit            = options[:limit].to_i
+          self.last_version                 = options[:last_version].to_i || 0
           self.version_condition            = options[:if] || true
           self.non_versioned_columns        = [self.primary_key, inheritance_column, version_column, 'lock_version', versioned_inheritance_column]
           self.version_association_options  = {
                                                 :class_name  => "#{self.to_s}::#{versioned_class_name}",
                                                 :foreign_key => "#{versioned_foreign_key}",
-                                                :order       => "#{version_column}",
-                                                :dependent   => :delete_all
+                                                :order       => "#{version_column}"
+                                                
                                               }.merge(options[:association_options] || {})
 
           if block_given?
@@ -230,7 +231,8 @@ module ActiveRecord #:nodoc:
             after_update :save_version
             after_save   :clear_old_versions
             after_save   :clear_changed_attributes
-
+            before_destroy :reset_version
+            
             unless options[:if_changed].nil?
               self.track_changed_attributes = true
               options[:if_changed] = [options[:if_changed]] unless options[:if_changed].is_a?(Array)
@@ -284,6 +286,21 @@ module ActiveRecord #:nodoc:
           base.extend ClassMethods
         end
 
+        def reset_version(last = 0)
+          sql = nil
+          latest = versions.find(:first, :order => "`#{self.class.version_column}` desc")
+          if last == 0 
+            if self.class.last_version > 0
+              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` < #{latest.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+            else
+              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.versioned_foreign_key}` = #{self.id}"
+            end
+          else
+            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` < #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+          end
+          self.class.versioned_class.connection.execute sql
+        end
+        
         # Saves a version of the model if applicable
         def save_version
           save_version_on_create if save_version?

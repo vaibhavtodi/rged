@@ -1,5 +1,5 @@
 class DepartmentController < ApplicationController
-
+  
   def index
     list
     render :action => 'list'
@@ -65,15 +65,27 @@ class DepartmentController < ApplicationController
   end
 
   def update
-    department = Department.find_by_name(params[:name])
+    department = Department.find(params[:id])
+    department.name = params[:name]
     department.country_id = Country.find_by_name(params[:country]).id
-    department.version_a = params[:version]
-    if department.save
-      redirect_back_or_default(:controller => 'department', :action => 'list')
-      flash[:notice] = _("Department Updated")
+    version = params[:version]
+    version = version.to_i  
+    if department.version_a != version
+      if department.revert_to!(version)
+        redirect_back_or_default(:controller => 'department', :action => 'list')
+        flash[:notice] = _("Department Updated")
+      else
+        redirect_back_or_default(:controller => 'department', :action => 'list')
+        flash[:notice] = _("Update failed")
+      end
     else
-      redirect_back_or_default(:controller => 'department', :action => 'list')
-      flash[:notice] = _("Update failed")
+      if department.save #&& department.reset_version(version + 1)
+        redirect_back_or_default(:controller => 'department', :action => 'list')
+        flash[:notice] = _("Department Updated")
+      else
+        redirect_back_or_default(:controller => 'department', :action => 'list')
+        flash[:notice] = _("Update failed")
+      end
     end
   end
 
