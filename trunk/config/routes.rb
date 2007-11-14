@@ -1,3 +1,4 @@
+puts "r 1"
 ActionController::Routing::Routes.draw do |map|
   # The priority is based upon order of creation: first created -> highest priority.
 
@@ -11,14 +12,20 @@ ActionController::Routing::Routes.draw do |map|
 
   # You can have the root of your site routed by hooking up ''
   # -- just remember to delete public/index.html.
+  puts "r 2"
   map.connect '', :controller => "index"
 
   # Allow downloading Web Service WSDL as a file with an extension
   # instead of a file named 'wsdl'
+  puts "r 3"
   map.connect ':controller/service.wsdl', :action => 'wsdl'
 
   # Install the default route as the lowest priority.
+  puts "r 4"
   map.connect ':controller/:action/:id.:format'
+  puts "r 5"
   map.connect ':controller/:action.:format'
+  puts "r 6"
   map.connect ':controller/:action/:id'
+  puts "r 7"
 end
