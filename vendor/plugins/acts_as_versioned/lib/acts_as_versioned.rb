@@ -195,7 +195,7 @@ module ActiveRecord #:nodoc:
           self.version_column               = options[:version_column]     || 'version'
           self.version_sequence_name        = options[:sequence_name]
           self.max_version_limit            = options[:limit].to_i
-          self.last_version                 = options[:last_version].to_i || 0
+          self.last_version                 = options[:last_version] || false
           self.version_condition            = options[:if] || true
           self.non_versioned_columns        = [self.primary_key, inheritance_column, version_column, 'lock_version', versioned_inheritance_column]
           self.version_association_options  = {
@@ -290,7 +290,7 @@ module ActiveRecord #:nodoc:
           sql = nil
           latest = versions.find(:first, :order => "`#{self.class.version_column}` desc")
           if last == 0
-            if self.class.last_version > 0
+            if self.class.last_version
               sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` < #{latest.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
             else
               sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.versioned_foreign_key}` = #{self.id}"
@@ -299,6 +299,7 @@ module ActiveRecord #:nodoc:
             sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` < #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
           end
           self.class.versioned_class.connection.execute sql
+          latest
         end
 
         # Saves a version of the model if applicable
