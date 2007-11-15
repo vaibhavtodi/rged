@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2007-11-06 15:02+0100\n"
+"POT-Creation-Date: 2007-11-15 18:00+0100\n"
 "PO-Revision-Date: 2007-10-09 10:36+0200\n"
 "Last-Translator: Alastair Brunton <alastair@brunton.com>\n"
 "Language-Team: fr_FR <langteam@langteam.com>\n"
@@ -25,46 +25,48 @@ msgstr "Thanks for signing up!"
 msgid "You have been logged out."
 msgstr "You have been logged out."
 
-#: app/controllers/country_controller.rb:21
+#: app/controllers/country_controller.rb:20
 msgid "Country "
 msgstr "Country"
 
-#: app/controllers/country_controller.rb:21
-#: app/controllers/department_controller.rb:86
-#: app/controllers/department_controller.rb:97
+#: app/controllers/country_controller.rb:20
+#: app/controllers/department_controller.rb:103
+#: app/controllers/department_controller.rb:109
 msgid " can not be deleted."
 msgstr " can not be deleted."
 
-#: app/controllers/country_controller.rb:33
+#: app/controllers/country_controller.rb:32
 msgid "Country %{name} can not be created."
 msgstr "Country %{name} can not be created."
 
-#: app/controllers/department_controller.rb:36
+#: app/controllers/department_controller.rb:35
 msgid "Department Created"
 msgstr "Department Created"
 
-#: app/controllers/department_controller.rb:39
+#: app/controllers/department_controller.rb:38
 msgid "Create Failed"
 msgstr "Create Failed"
 
-#: app/controllers/department_controller.rb:56
+#: app/controllers/department_controller.rb:60
 msgid "%{model} %{name} can not be moved."
 msgstr "%{model} %{name} can not be moved."
 
-#: app/controllers/department_controller.rb:56
+#: app/controllers/department_controller.rb:60
 msgid "Department"
 msgstr "Department"
 
-#: app/controllers/department_controller.rb:73
+#: app/controllers/department_controller.rb:80
+#: app/controllers/department_controller.rb:88
 msgid "Department Updated"
 msgstr "Department Updated"
 
-#: app/controllers/department_controller.rb:76
+#: app/controllers/department_controller.rb:83
+#: app/controllers/department_controller.rb:91
 msgid "Update failed"
 msgstr "Update failed"
 
-#: app/controllers/department_controller.rb:86
-#: app/controllers/department_controller.rb:97
+#: app/controllers/department_controller.rb:103
+#: app/controllers/department_controller.rb:109
 msgid "Department "
 msgstr "Department"
 
@@ -152,84 +154,86 @@ msgstr "Department Name"
 msgid "Edit Page"
 msgstr "Edit Page"
 
-#: app/views/department/edit.rhtml:4 app/views/department/new.rhtml:4
+#: app/views/department/edit.rhtml:6 app/views/department/new.rhtml:4
 #: app/views/department/show.rhtml:4
 msgid "Name"
 msgstr "Name"
 
-#: app/views/department/edit.rhtml:7 app/views/department/new.rhtml:7
+#: app/views/department/edit.rhtml:9 app/views/department/new.rhtml:7
 #: app/views/department/show.rhtml:7
 msgid "Country"
 msgstr "Country"
 
-#: app/views/department/edit.rhtml:10 app/views/department/new.rhtml:10
+#: app/views/department/edit.rhtml:12 app/views/department/new.rhtml:10
 #: app/views/department/show.rhtml:10
 msgid "Parent"
 msgstr "Parent"
 
-#: app/views/department/edit.rhtml:14 app/views/department/show.rhtml:14
+#: app/views/department/edit.rhtml:13
+msgid "nil"
+msgstr "nil"
+
+#: app/views/department/edit.rhtml:16 app/views/department/show.rhtml:14
 msgid "Version"
 msgstr "Version"
 
-#: app/views/department/edit.rhtml:17 app/views/department/show.rhtml:17
+#: app/views/department/edit.rhtml:19 app/views/department/show.rhtml:17
 msgid "Left"
 msgstr "Left"
 
-#: app/views/department/edit.rhtml:20 app/views/department/show.rhtml:20
+#: app/views/department/edit.rhtml:22 app/views/department/show.rhtml:20
 msgid "Right"
 msgstr "Right"
 
-#: app/views/department/edit.rhtml:24 app/views/department/show.rhtml:24
+#: app/views/department/edit.rhtml:26 app/views/department/show.rhtml:24
 msgid "Update"
 msgstr "Update"
 
-#: app/views/department/list.rhtml:54 app/views/department/list.rhtml:97
-#: app/views/department/list.rhtml:242
+#: app/views/department/list.rhtml:54 app/views/department/list.rhtml:199
 msgid "Remove"
 msgstr "Remove"
 
-#: app/views/department/list.rhtml:55 app/views/department/list.rhtml:98
-#: app/views/department/list.rhtml:243
+#: app/views/department/list.rhtml:55 app/views/department/list.rhtml:200
 msgid "Do you really want delete: "
 msgstr "Do you really want delete: "
 
-#: app/views/department/list.rhtml:165 app/views/department/list.rhtml:346
+#: app/views/department/list.rhtml:123 app/views/department/list.rhtml:303
 msgid "Delete"
 msgstr "Delete"
 
-#: app/views/department/list.rhtml:170
+#: app/views/department/list.rhtml:128
 msgid "Delete all"
 msgstr "Delete all"
 
-#: app/views/department/list.rhtml:175 app/views/department/list.rhtml:351
+#: app/views/department/list.rhtml:133 app/views/department/list.rhtml:308
 msgid "New"
 msgstr "New"
 
-#: app/views/department/list.rhtml:180
+#: app/views/department/list.rhtml:138
 msgid "Show"
 msgstr "Show"
 
-#: app/views/department/list.rhtml:185
+#: app/views/department/list.rhtml:143
 msgid "Edit"
 msgstr "Edit"
 
-#: app/views/department/list.rhtml:273
-msgid "New Department"
-msgstr "New Department"
+#: app/views/department/list.rhtml:230
+msgid "New Country"
+msgstr "New Country"
 
-#: app/views/department/list.rhtml:274
-msgid "New Department name ?"
-msgstr "New Department name ?"
+#: app/views/department/list.rhtml:231
+msgid "Country name ?"
+msgstr "Country name ?"
 
-#: app/views/department/list.rhtml:340
+#: app/views/department/list.rhtml:297
 msgid "Rename"
 msgstr "Rename"
 
-#: app/views/department/list.rhtml:380
+#: app/views/department/list.rhtml:337
 msgid "Department List"
 msgstr "Department List"
 
-#: app/views/department/list.rhtml:383
+#: app/views/department/list.rhtml:340
 msgid "Countries List"
 msgstr "Countries List"
 
