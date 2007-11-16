@@ -289,17 +289,21 @@ module ActiveRecord #:nodoc:
         def reset_version(last = 0)
           sql = nil
           latest = versions.find(:first, :order => "`#{self.class.version_column}` desc")
+          if last < 0
+            last = 0
+          end
           if last == 0
             if self.class.last_version
-              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` < #{latest.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{self.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
             else
               sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.versioned_foreign_key}` = #{self.id}"
             end
           else
-            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` < #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+            self.revert_to!(last)
+            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
           end
           self.class.versioned_class.connection.execute sql
-          latest
+         # latest
         end
 
         # Saves a version of the model if applicable
