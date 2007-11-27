@@ -220,14 +220,14 @@ module ActiveRecord #:nodoc:
             def self.reloadable? ; false ; end
             # find first version before the given version
             def self.before(version)
-              find :first, :order => "`#{original_class.version_column}` desc",
-                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` < ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
+              find :first, :order => "#{original_class.version_column} desc",
+                :conditions => ["#{original_class.versioned_foreign_key} = ? and #{original_class.version_column} < ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
             end
 
             # find first version after the given version.
             def self.after(version)
-              find :first, :order => "`#{original_class.version_column}`",
-                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` > ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
+              find :first, :order => "#{original_class.version_column}",
+                :conditions => ["#{original_class.versioned_foreign_key} = ? and #{original_class.version_column} > ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
             end
 
             def previous
@@ -248,7 +248,7 @@ module ActiveRecord #:nodoc:
 
               # find latest version of this record
               def latest
-                @latest ||= find(:first, :order => "`#{original_class.version_column}` desc")
+                @latest ||= find(:first, :order => "#{original_class.version_column} desc")
               end
             end
 
@@ -299,17 +299,17 @@ module ActiveRecord #:nodoc:
           end
           if last == 0
             if self.class.last_version
-              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{self.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+              sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.version_column} <> #{self.send(self.class.version_column)} AND #{self.class.versioned_foreign_key} = #{self.id}"
             else
-              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.versioned_foreign_key}` = #{self.id}"
+              sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.versioned_foreign_key} = #{self.id}"
             end
           else
             self.revert_to!(last)
-            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+            sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.version_column} <> #{last} AND #{self.class.versioned_foreign_key} = #{self.id}"
           end
           self.class.versioned_class.connection.execute sql
           if last == 0
-            versions.find(:first, :order => "`#{self.class.version_column}` desc")
+            versions.find(:first, :order => "#{self.class.version_column} desc")
           else
             self
           end
@@ -335,7 +335,7 @@ module ActiveRecord #:nodoc:
           return if self.class.max_version_limit == 0
           excess_baggage = send(self.class.version_column).to_i - self.class.max_version_limit
           if excess_baggage > 0
-            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <= #{excess_baggage} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+            sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.version_column} <= #{excess_baggage} AND #{self.class.versioned_foreign_key} = #{self.id}"
             self.class.versioned_class.connection.execute sql
           end
         end
@@ -344,7 +344,7 @@ module ActiveRecord #:nodoc:
         def find_version(version)
           return version if version.is_a?(self.class.versioned_class)
           return nil if version.is_a?(ActiveRecord::Base)
-          find_versions(:conditions => ["`#{version_column}` = ?", version], :limit => 1).first
+          find_versions(:conditions => ["#{version_column} = ?", version], :limit => 1).first
         end
 
         # Finds versions of this model.  Takes an options hash like <tt>find</tt>
@@ -483,15 +483,15 @@ module ActiveRecord #:nodoc:
           # Finds a specific version of a specific row of this model
           def find_version(id, version)
             find_versions(id,
-              :conditions => ["`#{versioned_foreign_key}` = ? AND `#{version_column}` = ?", id, version],
+              :conditions => ["#{versioned_foreign_key} = ? AND #{version_column} = ?", id, version],
               :limit => 1).first
           end
 
           # Finds versions of a specific model.  Takes an options hash like <tt>find</tt>
           def find_versions(id, options = {})
             versioned_class.find :all, {
-              :conditions => ["`#{versioned_foreign_key}` = ?", id],
-              :order      => "`#{version_column}`" }.merge(options)
+              :conditions => ["#{versioned_foreign_key} = ?", id],
+              :order      => "#{version_column}" }.merge(options)
           end
 
           # Returns an array of columns that are versioned.  See non_versioned_columns
