@@ -1,5 +1,5 @@
 class DepartmentController < ApplicationController
-  
+
   def index
     redirect_back_or_default(:controller => 'department', :action => 'list')
   end
@@ -43,7 +43,7 @@ class DepartmentController < ApplicationController
     @department = Department.find(params[:id])
    # logger.info("\033[33m department: name: #{@department.name}\033[m")
    # logger.info("\033[33m \t parent_id : #{@department.parent_id} \033[m")
-    
+
     p_id = params[:parent_id].to_i > 0 ? params[:parent_id].to_i : nil
     # logger.info("\033[33m \t p_id : #{p_id} \033[m")
     @sibs = Department.find(:all, :conditions => {:parent_id => p_id}, :order => 'lft')
@@ -73,7 +73,7 @@ class DepartmentController < ApplicationController
     department.name = params[:name]
     department.country_id = Country.find_by_name(params[:country]).id
     version = params[:version]
-    version = version.to_i  
+    version = version.to_i
     if department.version_a != version
       if department.revert_to!(version)
         redirect_back_or_default(:controller => 'department', :action => 'list')
@@ -84,6 +84,8 @@ class DepartmentController < ApplicationController
       end
     else
       if department.save #&& department.reset_version(version + 1)
+        v = department.versions.latest
+        logger.info("\033[33m #{v.toto} \033[m")
         redirect_back_or_default(:controller => 'department', :action => 'list')
         flash[:notice] = _("Department Updated")
       else
@@ -111,7 +113,7 @@ class DepartmentController < ApplicationController
     end
     render :json=>return_data.to_json, :layout=>false
   end
-  
+
   def show
     @node = Department.find(params[:id])
   end
@@ -119,7 +121,7 @@ class DepartmentController < ApplicationController
   def edit
     @node = Department.find(params[:id])
   end
-  
+
   def new
     @parent_id = params[:parent_id]
   end
