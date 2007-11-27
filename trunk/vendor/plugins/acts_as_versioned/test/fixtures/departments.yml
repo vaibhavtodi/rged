@@ -1,0 +1,13 @@
+edition:
+        id: 1
+        version_a: 1
+        lft: 1
+        rgt: 2
+        name: Edition
+
+press:
+        id: 2
+        version_a: 1
+        lft: 3
+        rgt: 4
+        name: Press
