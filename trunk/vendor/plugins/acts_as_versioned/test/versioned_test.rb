@@ -2,21 +2,22 @@ require File.join(File.dirname(__FILE__), 'abstract_unit')
 require File.join(File.dirname(__FILE__), 'fixtures/page')
 require File.join(File.dirname(__FILE__), 'fixtures/widget')
 
-class Hash
-  # Usage { :a => 1, :b => 2, :c => 3}.except(:a) -> { :b => 2, :c => 3}
-  def except(*keys)
-    self.reject { |k,v|
-      keys.include? k.to_sym
-      }
-  end
-
-  # Usage { :a => 1, :b => 2, :c => 3}.only(:a) -> {:a => 1}
-  def only(*keys)
-    self.dup.reject { |k,v|
-      !keys.include? k.to_sym
-      }
-  end
-end
+# uncomment this to add Hash class extension
+#class Hash
+#  # Usage { :a => 1, :b => 2, :c => 3}.except(:a) -> { :b => 2, :c => 3}
+#  def except(*keys)
+#    self.reject { |k,v|
+#      keys.include? k.to_sym
+#      }
+#  end
+#
+#  # Usage { :a => 1, :b => 2, :c => 3}.only(:a) -> {:a => 1}
+#  def only(*keys)
+#    self.dup.reject { |k,v|
+#      !keys.include? k.to_sym
+#      }
+#  end
+#end
 
 class VersionedTest < Test::Unit::TestCase
   fixtures :pages, :page_versions, :locked_pages, :locked_pages_revisions, :authors, :landmarks, :landmark_versions, :departments, :department_versions, :department2s, :department2_versions

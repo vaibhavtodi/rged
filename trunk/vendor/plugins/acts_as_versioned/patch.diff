@@ -1,0 +1,1231 @@
+Binary files acts_as_versioned/.DS_Store and acts_as_versioned_my/.DS_Store differ
+Binary files acts_as_versioned/lib/.DS_Store and acts_as_versioned_my/lib/.DS_Store differ
+diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_versioned_my/lib/acts_as_versioned.rb
+--- acts_as_versioned/lib/acts_as_versioned.rb	2007-11-27 11:58:46.000000000 +0100
++++ acts_as_versioned_my/lib/acts_as_versioned.rb	2007-11-27 11:37:09.000000000 +0100
+@@ -1,5 +1,5 @@
+ # Copyright (c) 2005 Rick Olson
+-# 
++#
+ # Permission is hereby granted, free of charge, to any person obtaining
+ # a copy of this software and associated documentation files (the
+ # "Software"), to deal in the Software without restriction, including
+@@ -7,10 +7,10 @@
+ # distribute, sublicense, and/or sell copies of the Software, and to
+ # permit persons to whom the Software is furnished to do so, subject to
+ # the following conditions:
+-# 
++#
+ # The above copyright notice and this permission notice shall be
+ # included in all copies or substantial portions of the Software.
+-# 
++#
+ # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+@@ -21,7 +21,7 @@
+ 
+ module ActiveRecord #:nodoc:
+   module Acts #:nodoc:
+-    # Specify this act if you want to save a copy of the row in a versioned table.  This assumes there is a 
++    # Specify this act if you want to save a copy of the row in a versioned table.  This assumes there is a
+     # versioned table ready and that your model has a version field.  This works with optimisic locking if the lock_version
+     # column is present as well.
+     #
+@@ -55,7 +55,7 @@
+     #
+     # Simple Queries to page between versions
+     #
+-    #   page.versions.before(version) 
++    #   page.versions.before(version)
+     #   page.versions.after(version)
+     #
+     # Access the previous/next versions from the versioned model itself
+@@ -95,9 +95,9 @@
+         #     end
+         #
+         # * <tt>if_changed</tt> - Simple way of specifying attributes that are required to be changed before saving a model.  This takes
+-        #   either a symbol or array of symbols.  WARNING - This will attempt to overwrite any attribute setters you may have.  
++        #   either a symbol or array of symbols.  WARNING - This will attempt to overwrite any attribute setters you may have.
+         #   Use this instead if you want to write your own attribute setters (and ignore if_changed):
+-        # 
++        #
+         #     def name=(new_name)
+         #       write_changed_attribute :name, new_name
+         #     end
+@@ -132,14 +132,14 @@
+         #
+         # == Database Schema
+         #
+-        # The model that you're versioning needs to have a 'version' attribute. The model is versioned 
+-        # into a table called #{model}_versions where the model name is singlular. The _versions table should 
++        # The model that you're versioning needs to have a 'version' attribute. The model is versioned
++        # into a table called #{model}_versions where the model name is singlular. The _versions table should
+         # contain all the fields you want versioned, the same version column, and a #{model}_id foreign key field.
+         #
+         # A lock_version field is also accepted if your model uses Optimistic Locking.  If your table uses Single Table inheritance,
+         # then that field is reflected in the versioned model as 'versioned_type' by default.
+         #
+-        # Acts_as_versioned comes prepared with the ActiveRecord::Acts::Versioned::ActMethods::ClassMethods#create_versioned_table 
++        # Acts_as_versioned comes prepared with the ActiveRecord::Acts::Versioned::ActMethods::ClassMethods#create_versioned_table
+         # method, perfect for a migration.  It will also create the version column if the main model does not already have it.
+         #
+         #   class AddVersions < ActiveRecord::Migration
+@@ -148,16 +148,16 @@
+         #       # that create_table does
+         #       Post.create_versioned_table
+         #     end
+-        #   
++        #
+         #     def self.down
+         #       Post.drop_versioned_table
+         #     end
+         #   end
+-        # 
++        #
+         # == Changing What Fields Are Versioned
+         #
+-        # By default, acts_as_versioned will version all but these fields: 
+-        # 
++        # By default, acts_as_versioned will version all but these fields:
++        #
+         #   [self.primary_key, inheritance_column, 'version', 'lock_version', versioned_inheritance_column]
+         #
+         # You can add or change those by modifying #non_versioned_columns.  Note that this takes strings and not symbols.
+@@ -166,17 +166,17 @@
+         #     acts_as_versioned
+         #     self.non_versioned_columns << 'comments_count'
+         #   end
+-        # 
++        #
+         def acts_as_versioned(options = {}, &extension)
+           # don't allow multiple calls
+           return if self.included_modules.include?(ActiveRecord::Acts::Versioned::ActMethods)
+ 
+           send :include, ActiveRecord::Acts::Versioned::ActMethods
+-          
+-          cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column, 
++
++          cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column,
+             :version_column, :max_version_limit, :track_changed_attributes, :version_condition, :version_sequence_name, :non_versioned_columns,
+-            :version_association_options
+-            
++            :version_association_options, :last_version, :super_class
++
+           # legacy
+           alias_method :non_versioned_fields,  :non_versioned_columns
+           alias_method :non_versioned_fields=, :non_versioned_columns=
+@@ -195,13 +195,15 @@
+           self.version_column               = options[:version_column]     || 'version'
+           self.version_sequence_name        = options[:sequence_name]
+           self.max_version_limit            = options[:limit].to_i
++          self.last_version                 = options[:last_version] || false
++          self.super_class                  = options[:super_class] || ActiveRecord::Base
+           self.version_condition            = options[:if] || true
+-          self.non_versioned_columns        = [self.primary_key, inheritance_column, 'version', 'lock_version', versioned_inheritance_column]
++          self.non_versioned_columns        = [self.primary_key, inheritance_column, version_column, 'lock_version', versioned_inheritance_column]
+           self.version_association_options  = {
+                                                 :class_name  => "#{self.to_s}::#{versioned_class_name}",
+-                                                :foreign_key => versioned_foreign_key,
+-                                                :order       => 'version',
+-                                                :dependent   => :delete_all
++                                                :foreign_key => "#{versioned_foreign_key}",
++                                                :order       => "#{version_column}"
++
+                                               }.merge(options[:association_options] || {})
+ 
+           if block_given?
+@@ -209,28 +211,54 @@
+             silence_warnings do
+               self.const_set(extension_module_name, Module.new(&extension))
+             end
+-            
++
+             options[:extend] = self.const_get(extension_module_name)
+           end
+ 
++                    # create the dynamic versioned model
++          const_set(versioned_class_name, Class.new(super_class)).class_eval do
++            def self.reloadable? ; false ; end
++            # find first version before the given version
++            def self.before(version)
++              find :first, :order => "`#{original_class.version_column}` desc",
++                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` < ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
++            end
++
++            # find first version after the given version.
++            def self.after(version)
++              find :first, :order => "`#{original_class.version_column}`",
++                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` > ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
++            end
++
++            def previous
++              self.class.before(self)
++            end
++
++            def next
++              self.class.after(self)
++            end
++          end
++
+           class_eval do
+             has_many :versions, version_association_options do
+               # finds earliest version of this record
+               def earliest
+                 @earliest ||= find(:first)
+               end
+-              
++
+               # find latest version of this record
+               def latest
+-                @latest ||= find(:first, :order => 'version desc')
++                @latest ||= find(:first, :order => "`#{original_class.version_column}` desc")
+               end
+             end
++
+             before_save  :set_new_version
+             after_create :save_version_on_create
+             after_update :save_version
+             after_save   :clear_old_versions
+             after_save   :clear_changed_attributes
+-            
++            before_destroy :reset_version
++
+             unless options[:if_changed].nil?
+               self.track_changed_attributes = true
+               options[:if_changed] = [options[:if_changed]] unless options[:if_changed].is_a?(Array)
+@@ -240,60 +268,63 @@
+                 end
+               end
+             end
+-            
++
+             include options[:extend] if options[:extend].is_a?(Module)
+           end
+ 
+-          # create the dynamic versioned model
+-          const_set(versioned_class_name, Class.new(ActiveRecord::Base)).class_eval do
+-            def self.reloadable? ; false ; end
+-            # find first version before the given version
+-            def self.before(version)
+-              find :first, :order => 'version desc',
+-                :conditions => ["#{original_class.versioned_foreign_key} = ? and version < ?", version.send(original_class.versioned_foreign_key), version.version]
+-            end
+-            
+-            # find first version after the given version.
+-            def self.after(version)
+-              find :first, :order => 'version',
+-                :conditions => ["#{original_class.versioned_foreign_key} = ? and version > ?", version.send(original_class.versioned_foreign_key), version.version]
+-            end
+-            
+-            def previous
+-              self.class.before(self)
+-            end
+-            
+-            def next
+-              self.class.after(self)
+-            end
+-          end
+-          
++
++
+           versioned_class.cattr_accessor :original_class
+           versioned_class.original_class = self
+           versioned_class.set_table_name versioned_table_name
+-          versioned_class.belongs_to self.to_s.demodulize.underscore.to_sym, 
+-            :class_name  => "::#{self.to_s}", 
++          versioned_class.belongs_to self.to_s.demodulize.underscore.to_sym,
++            :class_name  => "::#{self.to_s}",
+             :foreign_key => versioned_foreign_key
+           versioned_class.send :include, options[:extend]         if options[:extend].is_a?(Module)
+           versioned_class.set_sequence_name version_sequence_name if version_sequence_name
+         end
+       end
+-    
++
+       module ActMethods
+         def self.included(base) # :nodoc:
+           base.extend ClassMethods
+         end
+-        
++
++        # reset all version if last_version option equal to false or last equal to 0
++        # and keep the current the current_version if last_version equal to true or the version defined by last
++        def reset_version(last = 0)
++          sql = nil
++          if last < 0
++            last = 0
++          end
++          if last == 0
++            if self.class.last_version
++              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{self.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
++            else
++              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.versioned_foreign_key}` = #{self.id}"
++            end
++          else
++            self.revert_to!(last)
++            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
++          end
++          self.class.versioned_class.connection.execute sql
++          if last == 0
++            versions.find(:first, :order => "`#{self.class.version_column}` desc")
++          else
++            self
++          end
++        end
++
+         # Saves a version of the model if applicable
+         def save_version
+           save_version_on_create if save_version?
+         end
+-        
++
+         # Saves a version of the model in the versioned table.  This is called in the after_save callback by default
+         def save_version_on_create
+           rev = self.class.versioned_class.new
+           self.clone_versioned_model(self, rev)
+-          rev.version = send(self.class.version_column)
++          rev.send("#{self.class.version_column}=", send(self.class.version_column))
+           rev.send("#{self.class.versioned_foreign_key}=", self.id)
+           rev.save
+         end
+@@ -304,24 +335,36 @@
+           return if self.class.max_version_limit == 0
+           excess_baggage = send(self.class.version_column).to_i - self.class.max_version_limit
+           if excess_baggage > 0
+-            sql = "DELETE FROM #{self.class.versioned_table_name} WHERE version <= #{excess_baggage} AND #{self.class.versioned_foreign_key} = #{self.id}"
++            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <= #{excess_baggage} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+             self.class.versioned_class.connection.execute sql
+           end
+         end
+ 
++              # Finds a specific version of this model.
++        def find_version(version)
++          return version if version.is_a?(self.class.versioned_class)
++          return nil if version.is_a?(ActiveRecord::Base)
++          find_versions(:conditions => ["`#{version_column}` = ?", version], :limit => 1).first
++        end
++
++        # Finds versions of this model.  Takes an options hash like <tt>find</tt>
++        def find_versions(options = {})
++          versions.find(:all, options)
++        end
++
+         # Reverts a model to a given version.  Takes either a version number or an instance of the versioned model
+         def revert_to(version)
+           if version.is_a?(self.class.versioned_class)
+             return false unless version.send(self.class.versioned_foreign_key) == self.id and !version.new_record?
+           else
+-            return false unless version = versions.find_by_version(version)
++            return false unless version = find_version(version)
+           end
+           self.clone_versioned_model(version, self)
+-          self.send("#{self.class.version_column}=", version.version)
++          self.send("#{self.class.version_column}=", version.send(self.class.version_column))
+           true
+         end
+ 
+-        # Reverts a model to a given version and saves the model.  
++        # Reverts a model to a given version and saves the model.
+         # Takes either a version number or an instance of the versioned model
+         def revert_to!(version)
+           revert_to(version) ? save_without_revision : false
+@@ -347,7 +390,7 @@
+         def versioned_attributes
+           self.attributes.keys.select { |k| !self.class.non_versioned_columns.include?(k) }
+         end
+-        
++
+         # If called with no parameters, gets whether the current model has changed and needs to be versioned.
+         # If called with a single parameter, gets whether the parameter has changed.
+         def changed?(attr_name = nil)
+@@ -355,28 +398,28 @@
+             (!self.class.track_changed_attributes || (changed_attributes && changed_attributes.length > 0)) :
+             (changed_attributes && changed_attributes.include?(attr_name.to_s))
+         end
+-        
++
+         # keep old dirty? method
+         alias_method :dirty?, :changed?
+-        
++
+         # Clones a model.  Used when saving a new version or reverting a model's version.
+         def clone_versioned_model(orig_model, new_model)
+           self.versioned_attributes.each do |key|
+             new_model.send("#{key}=", orig_model.send(key)) if orig_model.has_attribute?(key)
+           end
+-          
++
+           if orig_model.is_a?(self.class.versioned_class)
+             new_model[new_model.class.inheritance_column] = orig_model[self.class.versioned_inheritance_column]
+           elsif new_model.is_a?(self.class.versioned_class)
+             new_model[self.class.versioned_inheritance_column] = orig_model[orig_model.class.inheritance_column]
+           end
+         end
+-        
++
+         # Checks whether a new version shall be saved or not.  Calls <tt>version_condition_met?</tt> and <tt>changed?</tt>.
+         def save_version?
+           version_condition_met? && changed?
+         end
+-        
++
+         # Checks condition set in the :if option to check whether a revision should be created or not.  Override this for
+         # custom version condition checking.
+         def version_condition_met?
+@@ -387,7 +430,7 @@
+             version_condition.call(self)
+           else
+             version_condition
+-          end          
++          end
+         end
+ 
+         # Executes the block with the versioning callbacks disabled.
+@@ -412,18 +455,18 @@
+ 
+         def empty_callback() end #:nodoc:
+ 
+-        protected          
++        protected
+           # sets the new version before saving, unless you're using optimistic locking.  In that case, let it take care of the version.
+           def set_new_version
+             self.send("#{self.class.version_column}=", self.next_version) if new_record? || (!locking_enabled? && save_version?)
+           end
+-          
++
+           # Gets the next available version for the current record, or 1 for a new record
+           def next_version
+             return 1 if new_record?
+-            (versions.calculate(:max, :version) || 0) + 1
++            (versions.calculate(:max, self.version_column.to_sym) || 0) + 1
+           end
+-          
++
+           # clears current changed attributes.  Called after save.
+           def clear_changed_attributes
+             self.changed_attributes = []
+@@ -439,23 +482,23 @@
+         module ClassMethods
+           # Finds a specific version of a specific row of this model
+           def find_version(id, version)
+-            find_versions(id, 
+-              :conditions => ["#{versioned_foreign_key} = ? AND version = ?", id, version], 
++            find_versions(id,
++              :conditions => ["`#{versioned_foreign_key}` = ? AND `#{version_column}` = ?", id, version],
+               :limit => 1).first
+           end
+-        
++
+           # Finds versions of a specific model.  Takes an options hash like <tt>find</tt>
+           def find_versions(id, options = {})
+             versioned_class.find :all, {
+-              :conditions => ["#{versioned_foreign_key} = ?", id],
+-              :order      => 'version' }.merge(options)
++              :conditions => ["`#{versioned_foreign_key}` = ?", id],
++              :order      => "`#{version_column}`" }.merge(options)
+           end
+ 
+           # Returns an array of columns that are versioned.  See non_versioned_columns
+           def versioned_columns
+             self.columns.select { |c| !non_versioned_columns.include?(c.name) }
+           end
+-    
++
+           # Returns an instance of the dynamic versioned model
+           def versioned_class
+             const_get versioned_class_name
+@@ -464,39 +507,39 @@
+           # Rake migration task to create the versioned table using options passed to acts_as_versioned
+           def create_versioned_table(create_table_options = {})
+             # create version column in main table if it does not exist
+-            if !self.content_columns.find { |c| %w(version lock_version).include? c.name }
+-              self.connection.add_column table_name, :version, :integer
++            if !self.content_columns.find { |c| [version_column, 'lock_version'].include? c.name }
++              self.connection.add_column table_name, version_column, :integer
+             end
+-            
++
+             self.connection.create_table(versioned_table_name, create_table_options) do |t|
+               t.column versioned_foreign_key, :integer
+-              t.column :version, :integer
++              t.column version_column, :integer
+             end
+-            
++
+             updated_col = nil
+-            self.versioned_columns.each do |col| 
++            self.versioned_columns.each do |col|
+               updated_col = col if !updated_col && %(updated_at updated_on).include?(col.name)
+-              self.connection.add_column versioned_table_name, col.name, col.type, 
+-                :limit => col.limit, 
++              self.connection.add_column versioned_table_name, col.name, col.type,
++                :limit => col.limit,
+                 :default => col.default
+             end
+-        
++
+             if type_col = self.columns_hash[inheritance_column]
+-              self.connection.add_column versioned_table_name, versioned_inheritance_column, type_col.type, 
+-                :limit => type_col.limit, 
++              self.connection.add_column versioned_table_name, versioned_inheritance_column, type_col.type,
++                :limit => type_col.limit,
+                 :default => type_col.default
+             end
+-    
++
+             if updated_col.nil?
+               self.connection.add_column versioned_table_name, :updated_at, :timestamp
+             end
+           end
+-          
++
+           # Rake migration task to drop the versioned table
+           def drop_versioned_table
+             self.connection.drop_table versioned_table_name
+           end
+-          
++
+           # Executes the block with the versioning callbacks disabled.
+           #
+           #   Foo.without_revision do
+@@ -504,7 +547,7 @@
+           #   end
+           #
+           def without_revision(&block)
+-            class_eval do 
++            class_eval do
+               CALLBACKS.each do |attr_name|
+                 alias_method "orig_#{attr_name}".to_sym, attr_name
+                 alias_method attr_name, :empty_callback
+@@ -512,7 +555,7 @@
+             end
+             block.call
+           ensure
+-            class_eval do 
++            class_eval do
+               CALLBACKS.each do |attr_name|
+                 alias_method attr_name, "orig_#{attr_name}".to_sym
+               end
+@@ -531,11 +574,11 @@
+             result = block.call
+             ActiveRecord::Base.lock_optimistically = true if current
+             result
+-          end          
++          end
+         end
+       end
+     end
+   end
+ end
+ 
+-ActiveRecord::Base.send :include, ActiveRecord::Acts::Versioned
+\ No newline at end of file
++ActiveRecord::Base.send :include, ActiveRecord::Acts::Versioned
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department.rb acts_as_versioned_my/test/fixtures/department.rb
+--- acts_as_versioned/test/fixtures/department.rb	1970-01-01 01:00:00.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/department.rb	2007-11-27 11:03:57.000000000 +0100
+@@ -0,0 +1,12 @@
++class Department < ActiveRecord::Base
++  acts_as_versioned :if_changed => [:name],
++    :version_column => 'version_a',
++    :last_version => true,
++    :super_class => self
++  non_versioned_columns << 'lft' << 'rgt' << 'parent_id'
++
++  def my_printf
++    "Version class inherits of my_printf"
++  end
++
++end
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2.rb acts_as_versioned_my/test/fixtures/department2.rb
+--- acts_as_versioned/test/fixtures/department2.rb	1970-01-01 01:00:00.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/department2.rb	2007-11-27 11:08:51.000000000 +0100
+@@ -0,0 +1,12 @@
++class Department2 < ActiveRecord::Base
++  acts_as_versioned :if_changed => [:name],
++    :version_column => 'version_a',
++    :last_version => false,
++    :super_class => self
++  non_versioned_columns << 'lft' << 'rgt' << 'parent_id'
++
++  def my_printf
++    "Version class inherits of my_printf"
++  end
++
++end
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2_versions.yml acts_as_versioned_my/test/fixtures/department2_versions.yml
+--- acts_as_versioned/test/fixtures/department2_versions.yml	1970-01-01 01:00:00.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/department2_versions.yml	2007-11-27 11:14:45.000000000 +0100
+@@ -0,0 +1,11 @@
++edition:
++        id: 1
++        department2_id: 1
++        version_a: 1
++        name: Edition
++
++press:
++        id: 2
++        department2_id: 2
++        version_a: 1
++        name: Press
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2s.yml acts_as_versioned_my/test/fixtures/department2s.yml
+--- acts_as_versioned/test/fixtures/department2s.yml	1970-01-01 01:00:00.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/department2s.yml	2007-11-27 11:01:23.000000000 +0100
+@@ -0,0 +1,13 @@
++edition:
++        id: 1
++        version_a: 1
++        lft: 1
++        rgt: 2
++        name: Edition
++
++press:
++        id: 2
++        version_a: 1
++        lft: 3
++        rgt: 4
++        name: Press
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department_versions.yml acts_as_versioned_my/test/fixtures/department_versions.yml
+--- acts_as_versioned/test/fixtures/department_versions.yml	1970-01-01 01:00:00.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/department_versions.yml	2007-11-26 18:46:03.000000000 +0100
+@@ -0,0 +1,11 @@
++edition:
++        id: 1
++        department_id: 1
++        version_a: 1
++        name: Edition
++
++press:
++        id: 2
++        department_id: 2
++        version_a: 1
++        name: Press
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/departments.yml acts_as_versioned_my/test/fixtures/departments.yml
+--- acts_as_versioned/test/fixtures/departments.yml	1970-01-01 01:00:00.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/departments.yml	2007-11-26 18:47:53.000000000 +0100
+@@ -0,0 +1,13 @@
++edition:
++        id: 1
++        version_a: 1
++        lft: 1
++        rgt: 2
++        name: Edition
++
++press:
++        id: 2
++        version_a: 1
++        lft: 3
++        rgt: 4
++        name: Press
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/locked_pages_revisions.yml acts_as_versioned_my/test/fixtures/locked_pages_revisions.yml
+--- acts_as_versioned/test/fixtures/locked_pages_revisions.yml	2007-11-27 11:58:46.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/locked_pages_revisions.yml	2007-10-31 21:06:11.000000000 +0100
+@@ -2,26 +2,26 @@
+   id: 1
+   page_id: 1
+   title: Welcome to the weblg
+-  version: 23
++  lock_version: 23
+   version_type: LockedPage
+ 
+ welcome_2:
+   id: 2
+   page_id: 1
+   title: Welcome to the weblog
+-  version: 24
++  lock_version: 24
+   version_type: LockedPage
+ 
+ thinking_1:
+   id: 3
+   page_id: 2
+   title: So I was thinking!!!
+-  version: 23
++  lock_version: 23
+   version_type: SpecialLockedPage
+ 
+ thinking_2:
+   id: 4
+   page_id: 2
+   title: So I was thinking
+-  version: 24
++  lock_version: 24
+   version_type: SpecialLockedPage
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/page.rb acts_as_versioned_my/test/fixtures/page.rb
+--- acts_as_versioned/test/fixtures/page.rb	2007-11-27 11:58:46.000000000 +0100
++++ acts_as_versioned_my/test/fixtures/page.rb	2007-10-31 21:06:11.000000000 +0100
+@@ -10,7 +10,7 @@
+       base.belongs_to :author
+       base.belongs_to :revisor, :class_name => 'Author'
+     end
+-    
++
+     def feeling_good?
+       @@feeling_good == true
+     end
+@@ -25,9 +25,9 @@
+ 
+ class LockedPage < ActiveRecord::Base
+   acts_as_versioned \
+-    :inheritance_column => :version_type, 
+-    :foreign_key        => :page_id, 
+-    :table_name         => :locked_pages_revisions, 
++    :inheritance_column => :version_type,
++    :foreign_key        => :page_id,
++    :table_name         => :locked_pages_revisions,
+     :class_name         => 'LockedPageRevision',
+     :version_column     => :lock_version,
+     :limit              => 2,
+@@ -40,4 +40,4 @@
+ 
+ class Author < ActiveRecord::Base
+   has_many :pages
+-end
+\ No newline at end of file
++end
+diff -Nur --exclude=.svn acts_as_versioned/test/schema.rb acts_as_versioned_my/test/schema.rb
+--- acts_as_versioned/test/schema.rb	2007-11-27 11:58:46.000000000 +0100
++++ acts_as_versioned_my/test/schema.rb	2007-11-27 11:14:16.000000000 +0100
+@@ -17,12 +17,12 @@
+     t.column :author_id, :integer
+     t.column :revisor_id, :integer
+   end
+-  
++
+   create_table :authors, :force => true do |t|
+     t.column :page_id, :integer
+     t.column :name, :string
+   end
+-  
++
+   create_table :locked_pages, :force => true do |t|
+     t.column :lock_version, :integer
+     t.column :title, :string, :limit => 255
+@@ -31,7 +31,7 @@
+ 
+   create_table :locked_pages_revisions, :force => true do |t|
+     t.column :page_id, :integer
+-    t.column :version, :integer
++    t.column :lock_version, :integer
+     t.column :title, :string, :limit => 255
+     t.column :version_type, :string, :limit => 255
+     t.column :updated_at, :datetime
+@@ -50,7 +50,7 @@
+     t.column :version, :integer
+     t.column :updated_at, :datetime
+   end
+-  
++
+   create_table :landmarks, :force => true do |t|
+     t.column :name, :string
+     t.column :latitude, :float
+@@ -65,4 +65,33 @@
+     t.column :longitude, :float
+     t.column :version, :integer
+   end
++
++  create_table :departments, :force => true do |t|
++    t.column :parent_id, :integer
++    t.column :version_a, :integer
++    t.column :lft, :integer
++    t.column :rgt, :integer
++    t.column :name, :string
++  end
++
++  create_table :department_versions, :force => true do |t|
++    t.column :department_id, :integer
++    t.column :version_a, :integer
++    t.column :name, :string
++  end
++
++  create_table :department2s, :force => true do |t|
++    t.column :parent_id, :integer
++    t.column :version_a, :integer
++    t.column :lft, :integer
++    t.column :rgt, :integer
++    t.column :name, :string
++  end
++
++  create_table :department2_versions, :force => true do |t|
++    t.column :department2_id, :integer
++    t.column :version_a, :integer
++    t.column :name, :string
++  end
++
+ end
+diff -Nur --exclude=.svn acts_as_versioned/test/versioned_test.rb acts_as_versioned_my/test/versioned_test.rb
+--- acts_as_versioned/test/versioned_test.rb	2007-11-27 11:58:46.000000000 +0100
++++ acts_as_versioned_my/test/versioned_test.rb	2007-11-27 11:44:23.000000000 +0100
+@@ -2,10 +2,28 @@
+ require File.join(File.dirname(__FILE__), 'fixtures/page')
+ require File.join(File.dirname(__FILE__), 'fixtures/widget')
+ 
++# uncomment this to add Hash class extension
++#class Hash
++#  # Usage { :a => 1, :b => 2, :c => 3}.except(:a) -> { :b => 2, :c => 3}
++#  def except(*keys)
++#    self.reject { |k,v|
++#      keys.include? k.to_sym
++#      }
++#  end
++#
++#  # Usage { :a => 1, :b => 2, :c => 3}.only(:a) -> {:a => 1}
++#  def only(*keys)
++#    self.dup.reject { |k,v|
++#      !keys.include? k.to_sym
++#      }
++#  end
++#end
++
+ class VersionedTest < Test::Unit::TestCase
+-  fixtures :pages, :page_versions, :locked_pages, :locked_pages_revisions, :authors, :landmarks, :landmark_versions
++  fixtures :pages, :page_versions, :locked_pages, :locked_pages_revisions, :authors, :landmarks, :landmark_versions, :departments, :department_versions, :department2s, :department2_versions
+   set_fixture_class :page_versions => Page::Version
+ 
++
+   def test_saves_versioned_copy
+     p = Page.create! :title => 'first title', :body => 'first body'
+     assert !p.new_record?
+@@ -17,13 +35,13 @@
+   def test_saves_without_revision
+     p = pages(:welcome)
+     old_versions = p.versions.count
+-    
++
+     p.save_without_revision
+-    
++
+     p.without_revision do
+       p.update_attributes :title => 'changed'
+     end
+-    
++
+     assert_equal old_versions, p.versions.count
+   end
+ 
+@@ -31,7 +49,7 @@
+     p = pages(:welcome)
+     assert_equal 24, p.version
+     assert_equal 'Welcome to the weblog', p.title
+-    
++
+     assert p.revert_to!(p.versions.first.version), "Couldn't revert to 23"
+     assert_equal 23, p.version
+     assert_equal 'Welcome to the weblg', p.title
+@@ -58,12 +76,12 @@
+     p = pages(:welcome)
+     assert_equal 24, p.version
+     assert_equal 'Welcome to the weblog', p.title
+-    
++
+     assert p.revert_to!(p.versions.first), "Couldn't revert to 23"
+     assert_equal 23, p.version
+     assert_equal 'Welcome to the weblg', p.title
+   end
+-  
++
+   def test_rollback_fails_with_invalid_revision
+     p = locked_pages(:welcome)
+     assert !p.revert_to!(locked_pages(:thinking))
+@@ -75,27 +93,27 @@
+     assert_equal 1, p.versions.size
+     assert_instance_of LockedPage.versioned_class, p.versions.first
+   end
+-  
++
+   def test_rollback_with_version_number_with_options
+     p = locked_pages(:welcome)
+     assert_equal 'Welcome to the weblog', p.title
+     assert_equal 'LockedPage', p.versions.first.version_type
+-    
+-    assert p.revert_to!(p.versions.first.version), "Couldn't revert to 23"
++
++    assert p.revert_to!(p.versions.first.lock_version), "Couldn't revert to 23"
+     assert_equal 'Welcome to the weblg', p.title
+     assert_equal 'LockedPage', p.versions.first.version_type
+   end
+-  
++
+   def test_rollback_with_version_class_with_options
+     p = locked_pages(:welcome)
+     assert_equal 'Welcome to the weblog', p.title
+     assert_equal 'LockedPage', p.versions.first.version_type
+-    
++
+     assert p.revert_to!(p.versions.first), "Couldn't revert to 1"
+     assert_equal 'Welcome to the weblg', p.title
+     assert_equal 'LockedPage', p.versions.first.version_type
+   end
+-  
++
+   def test_saves_versioned_copy_with_sti
+     p = SpecialLockedPage.create! :title => 'first title'
+     assert !p.new_record?
+@@ -103,12 +121,12 @@
+     assert_instance_of LockedPage.versioned_class, p.versions.first
+     assert_equal 'SpecialLockedPage', p.versions.first.version_type
+   end
+-  
++
+   def test_rollback_with_version_number_with_sti
+     p = locked_pages(:thinking)
+     assert_equal 'So I was thinking', p.title
+-    
+-    assert p.revert_to!(p.versions.first.version), "Couldn't revert to 1"
++
++    assert p.revert_to!(p.versions.first.lock_version), "Couldn't revert to 1"
+     assert_equal 'So I was thinking!!!', p.title
+     assert_equal 'SpecialLockedPage', p.versions.first.version_type
+   end
+@@ -116,11 +134,11 @@
+   def test_lock_version_works_with_versioning
+     p = locked_pages(:thinking)
+     p2 = LockedPage.find(p.id)
+-    
++
+     p.title = 'fresh title'
+     p.save
+     assert_equal 2, p.versions.size # limit!
+-    
++
+     assert_raises(ActiveRecord::StaleObjectError) do
+       p2.title = 'stale title'
+       p2.save
+@@ -130,13 +148,13 @@
+   def test_version_if_condition
+     p = Page.create! :title => "title"
+     assert_equal 1, p.version
+-    
++
+     Page.feeling_good = false
+     p.save
+     assert_equal 1, p.version
+     Page.feeling_good = true
+   end
+-  
++
+   def test_version_if_condition2
+     # set new if condition
+     Page.class_eval do
+@@ -144,40 +162,40 @@
+       alias_method :old_feeling_good, :feeling_good?
+       alias_method :feeling_good?, :new_feeling_good
+     end
+-    
++
+     p = Page.create! :title => "title"
+     assert_equal 1, p.version # version does not increment
+     assert_equal 1, p.versions(true).size
+-    
++
+     p.update_attributes(:title => 'new title')
+     assert_equal 1, p.version # version does not increment
+     assert_equal 1, p.versions(true).size
+-    
++
+     p.update_attributes(:title => 'a title')
+     assert_equal 2, p.version
+     assert_equal 2, p.versions(true).size
+-    
++
+     # reset original if condition
+     Page.class_eval { alias_method :feeling_good?, :old_feeling_good }
+   end
+-  
++
+   def test_version_if_condition_with_block
+     # set new if condition
+     old_condition = Page.version_condition
+     Page.version_condition = Proc.new { |page| page.title[0..0] == 'b' }
+-    
++
+     p = Page.create! :title => "title"
+     assert_equal 1, p.version # version does not increment
+     assert_equal 1, p.versions(true).size
+-    
++
+     p.update_attributes(:title => 'a title')
+     assert_equal 1, p.version # version does not increment
+     assert_equal 1, p.versions(true).size
+-    
++
+     p.update_attributes(:title => 'b title')
+     assert_equal 2, p.version
+     assert_equal 2, p.versions(true).size
+-    
++
+     # reset original if condition
+     Page.version_condition = old_condition
+   end
+@@ -200,29 +218,29 @@
+       assert p.versions(true).size <= 2, "locked version can only store 2 versions"
+     end
+   end
+-  
++
+   def test_track_changed_attributes_default_value
+     assert !Page.track_changed_attributes
+     assert LockedPage.track_changed_attributes
+     assert SpecialLockedPage.track_changed_attributes
+   end
+-  
++
+   def test_version_order
+     assert_equal 23, pages(:welcome).versions.first.version
+     assert_equal 24, pages(:welcome).versions.last.version
+   end
+-  
+-  def test_track_changed_attributes    
++
++  def test_track_changed_attributes
+     p = LockedPage.create! :title => "title"
+     assert_equal 1, p.lock_version
+     assert_equal 1, p.versions(true).size
+-    
++
+     p.title = 'title'
+     assert !p.save_version?
+     p.save
+     assert_equal 2, p.lock_version # still increments version because of optimistic locking
+     assert_equal 1, p.versions(true).size
+-    
++
+     p.title = 'updated title'
+     assert p.save_version?
+     p.save
+@@ -235,14 +253,14 @@
+     assert_equal 4, p.lock_version
+     assert_equal 2, p.versions(true).size # version 1 deleted
+   end
+-    
++
+   def assert_page_title(p, i, version_field = :version)
+     p.title = "title#{i}"
+     p.save
+     assert_equal "title#{i}", p.title
+     assert_equal (i+4), p.send(version_field)
+   end
+-  
++
+   def test_find_versions
+     assert_equal 2, locked_pages(:welcome).versions.size
+     assert_equal 1, locked_pages(:welcome).versions.find(:all, :conditions => ['title LIKE ?', '%weblog%']).length
+@@ -250,7 +268,7 @@
+     assert_equal 0, locked_pages(:thinking).versions.find(:all, :conditions => ['title LIKE ?', '%web%']).length
+     assert_equal 2, locked_pages(:welcome).versions.length
+   end
+-  
++
+   def test_with_sequence
+     assert_equal 'widgets_seq', Widget.versioned_class.sequence_name
+     3.times { Widget.create! :name => 'new widget' }
+@@ -265,25 +283,25 @@
+   def test_has_many_through_with_custom_association
+     assert_equal [authors(:caged), authors(:mly)], pages(:welcome).revisors
+   end
+-  
++
+   def test_referential_integrity
+     pages(:welcome).destroy
+     assert_equal 0, Page.count
+     assert_equal 0, Page::Version.count
+   end
+-  
++
+   def test_association_options
+     association = Page.reflect_on_association(:versions)
+     options = association.options
+-    assert_equal :delete_all, options[:dependent]
++#    assert_equal :delete_all, options[:dependent]
+     assert_equal 'version', options[:order]
+-    
++
+     association = Widget.reflect_on_association(:versions)
+     options = association.options
+     assert_equal :nullify, options[:dependent]
+     assert_equal 'version desc', options[:order]
+     assert_equal 'widget_id', options[:foreign_key]
+-    
++
+     widget = Widget.create! :name => 'new widget'
+     assert_equal 1, Widget.count
+     assert_equal 1, Widget.versioned_class.count
+@@ -297,12 +315,12 @@
+     page_version = page.versions.last
+     assert_equal page, page_version.page
+   end
+-  
++
+   def test_unchanged_attributes
+     landmarks(:washington).attributes = landmarks(:washington).attributes.except("id")
+     assert !landmarks(:washington).changed?
+   end
+-  
++
+   def test_unchanged_string_attributes
+     landmarks(:washington).attributes = landmarks(:washington).attributes.except("id").inject({}) { |params, (key, value)| params.update(key => value.to_s) }
+     assert !landmarks(:washington).changed?
+@@ -311,18 +329,157 @@
+   def test_should_find_earliest_version
+     assert_equal page_versions(:welcome_1), pages(:welcome).versions.earliest
+   end
+-  
++
+   def test_should_find_latest_version
+     assert_equal page_versions(:welcome_2), pages(:welcome).versions.latest
+   end
+-  
++
+   def test_should_find_previous_version
+     assert_equal page_versions(:welcome_1), page_versions(:welcome_2).previous
+     assert_equal page_versions(:welcome_1), pages(:welcome).versions.before(page_versions(:welcome_2))
+   end
+-  
++
+   def test_should_find_next_version
+     assert_equal page_versions(:welcome_2), page_versions(:welcome_1).next
+     assert_equal page_versions(:welcome_2), pages(:welcome).versions.after(page_versions(:welcome_1))
+   end
+-end
+\ No newline at end of file
++
++  # Here we test if we can put our version column name
++  def test_my_version_column_name
++    edition = departments(:edition)
++    press = departments(:press)
++    assert_equal edition.versions.version_column, 'version_a'
++    assert_equal press.versions.version_column, 'version_a'
++  end
++
++  def test_inheritance_clas
++    edition = departments(:edition)
++    press = departments(:press)
++    assert edition.versions.latest.my_printf
++    assert_equal edition.versions.latest.my_printf, 'Version class inherits of my_printf'
++    assert press.versions.latest.my_printf
++    assert_equal press.versions.latest.my_printf,'Version class inherits of my_printf'
++  end
++
++  def test_reset_version_column_name
++    edition = departments(:edition)
++    press = departments(:press)
++
++    # we save different versions of edition and we test if the save failed or not
++    edition.name = "Edition2"
++    assert edition.save, "Couldn't save edition"
++    assert_equal edition.name, "Edition2"
++    assert_equal 2, edition.version_a
++    edition.name = "Edition3"
++    assert edition.save, "Couldn't save edition"
++    assert_equal edition.name, "Edition3"
++    assert_equal 3, edition.version_a
++
++    # we test reset_version with last = 2
++    edition = edition.reset_version(2)
++    assert_equal edition.version_a, 2
++    assert_equal edition.name, "Edition2"
++    assert_equal 1, edition.versions.count
++
++    # we save different versions of press and we test if the save failed or not
++    press.name = "Press2"
++    assert press.save, "Couldn't save press"
++    assert_equal press.name, "Press2"
++    assert_equal 2, press.version_a
++    press.name = "Press3"
++    assert press.save, "Couldn't save press"
++    assert_equal press.name, "Press3"
++    assert_equal 3, press.version_a
++
++    # we test reset_version with last = 2
++    press = press.reset_version(2)
++    assert_equal press.version_a, 2
++    assert_equal press.name, "Press2"
++    assert_equal 1, press.versions.count
++
++
++  end
++
++  def test_destroy_with_reset_version_with_keep_current_version
++    edition = departments(:edition)
++    press = departments(:press)
++
++    # we save different versions of edition and we test if the save failed or not
++    edition.name = "Edition2"
++    assert edition.save, "Couldn't save edition"
++    assert_equal edition.name, "Edition2"
++    assert_equal 2, edition.version_a
++    edition.name = "Edition3"
++    assert edition.save, "Couldn't save edition"
++    assert_equal edition.name, "Edition3"
++    assert_equal 3, edition.version_a
++    assert_equal 3, edition.versions.count
++
++    # we test reset_version with last_version option equal to true
++    edition.destroy
++    assert_equal edition.version_a, 3
++    assert_equal edition.name, "Edition3"
++    assert_equal 1, Department.count
++    assert_equal 2, Department.versioned_class.count
++
++
++    # we save different versions of press and we test if the save failed or not
++    press.name = "Press2"
++    assert press.save, "Couldn't save press"
++    assert_equal press.name, "Press2"
++    assert_equal 2, press.version_a
++    press.name = "Press3"
++    assert press.save, "Couldn't save press"
++    assert_equal press.name, "Press3"
++    assert_equal 3, press.version_a
++    assert_equal 3, press.versions.count
++
++    # we test reset_version with last_version option equal to true
++    press.destroy
++    assert_equal press.version_a, 3
++    assert_equal press.name, "Press3"
++    assert_equal 0, Department.count
++    assert_equal 2, Department.versioned_class.count
++
++  end
++
++  def test_destroy_with_reset_version_without_keep_current_version
++    edition = department2s(:edition)
++    press = department2s(:press)
++
++    # we save different versions of edition and we test if the save failed or not
++    edition.name = "Edition2"
++    assert edition.save, "Couldn't save edition"
++    assert_equal edition.name, "Edition2"
++    assert_equal 2, edition.version_a
++    edition.name = "Edition3"
++    assert edition.save, "Couldn't save edition"
++    assert_equal edition.name, "Edition3"
++    assert_equal 3, edition.version_a
++    assert_equal 3, edition.versions.count
++
++    # we test reset_version with last_version option equal to false
++    department2s(:edition).destroy
++    assert_equal 1, Department2.count
++    assert_equal 1, Department2.versioned_class.count
++
++
++    # we save different versions of press and we test if the save failed or not
++    press.name = "Press2"
++    assert press.save, "Couldn't save press"
++    assert_equal press.name, "Press2"
++    assert_equal 2, press.version_a
++    press.name = "Press3"
++    assert press.save, "Couldn't save press"
++    assert_equal press.name, "Press3"
++    assert_equal 3, press.version_a
++    assert_equal 3, press.versions.count
++
++    # we test reset_version with last_version option equal to false
++    department2s(:press).destroy
++    assert_equal 0, Department2.count
++    assert_equal 0, Department2.versioned_class.count
++
++  end
++
++end
