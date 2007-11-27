@@ -1,8 +1,8 @@
-Binary files acts_as_versioned/.DS_Store and acts_as_versioned_my/.DS_Store differ
-Binary files acts_as_versioned/lib/.DS_Store and acts_as_versioned_my/lib/.DS_Store differ
-diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_versioned_my/lib/acts_as_versioned.rb
---- acts_as_versioned/lib/acts_as_versioned.rb	2007-11-27 11:58:46.000000000 +0100
-+++ acts_as_versioned_my/lib/acts_as_versioned.rb	2007-11-27 11:37:09.000000000 +0100
+Binary files acts_as_versioned/.DS_Store and acts_as_versioned_tmp/.DS_Store differ
+Binary files acts_as_versioned/lib/.DS_Store and acts_as_versioned_tmp/lib/.DS_Store differ
+diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_versioned_tmp/lib/acts_as_versioned.rb
+--- acts_as_versioned/lib/acts_as_versioned.rb	2007-11-27 12:20:36.000000000 +0100
++++ acts_as_versioned_tmp/lib/acts_as_versioned.rb	2007-11-27 12:15:38.000000000 +0100
 @@ -1,5 +1,5 @@
  # Copyright (c) 2005 Rick Olson
 -# 
@@ -149,14 +149,14 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
 +            def self.reloadable? ; false ; end
 +            # find first version before the given version
 +            def self.before(version)
-+              find :first, :order => "`#{original_class.version_column}` desc",
-+                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` < ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
++              find :first, :order => "#{original_class.version_column} desc",
++                :conditions => ["#{original_class.versioned_foreign_key} = ? and #{original_class.version_column} < ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
 +            end
 +
 +            # find first version after the given version.
 +            def self.after(version)
-+              find :first, :order => "`#{original_class.version_column}`",
-+                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` > ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
++              find :first, :order => "#{original_class.version_column}",
++                :conditions => ["#{original_class.versioned_foreign_key} = ? and #{original_class.version_column} > ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
 +            end
 +
 +            def previous
@@ -179,7 +179,7 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
                # find latest version of this record
                def latest
 -                @latest ||= find(:first, :order => 'version desc')
-+                @latest ||= find(:first, :order => "`#{original_class.version_column}` desc")
++                @latest ||= find(:first, :order => "#{original_class.version_column} desc")
                end
              end
 +
@@ -258,17 +258,17 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
 +          end
 +          if last == 0
 +            if self.class.last_version
-+              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{self.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
++              sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.version_column} <> #{self.send(self.class.version_column)} AND #{self.class.versioned_foreign_key} = #{self.id}"
 +            else
-+              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.versioned_foreign_key}` = #{self.id}"
++              sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.versioned_foreign_key} = #{self.id}"
 +            end
 +          else
 +            self.revert_to!(last)
-+            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
++            sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.version_column} <> #{last} AND #{self.class.versioned_foreign_key} = #{self.id}"
 +          end
 +          self.class.versioned_class.connection.execute sql
 +          if last == 0
-+            versions.find(:first, :order => "`#{self.class.version_column}` desc")
++            versions.find(:first, :order => "#{self.class.version_column} desc")
 +          else
 +            self
 +          end
@@ -294,7 +294,7 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
            excess_baggage = send(self.class.version_column).to_i - self.class.max_version_limit
            if excess_baggage > 0
 -            sql = "DELETE FROM #{self.class.versioned_table_name} WHERE version <= #{excess_baggage} AND #{self.class.versioned_foreign_key} = #{self.id}"
-+            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <= #{excess_baggage} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
++            sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.version_column} <= #{excess_baggage} AND #{self.class.versioned_foreign_key} = #{self.id}"
              self.class.versioned_class.connection.execute sql
            end
          end
@@ -303,7 +303,7 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
 +        def find_version(version)
 +          return version if version.is_a?(self.class.versioned_class)
 +          return nil if version.is_a?(ActiveRecord::Base)
-+          find_versions(:conditions => ["`#{version_column}` = ?", version], :limit => 1).first
++          find_versions(:conditions => ["#{version_column} = ?", version], :limit => 1).first
 +        end
 +
 +        # Finds versions of this model.  Takes an options hash like <tt>find</tt>
@@ -412,7 +412,7 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
 -            find_versions(id, 
 -              :conditions => ["#{versioned_foreign_key} = ? AND version = ?", id, version], 
 +            find_versions(id,
-+              :conditions => ["`#{versioned_foreign_key}` = ? AND `#{version_column}` = ?", id, version],
++              :conditions => ["#{versioned_foreign_key} = ? AND #{version_column} = ?", id, version],
                :limit => 1).first
            end
 -        
@@ -420,10 +420,9 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
            # Finds versions of a specific model.  Takes an options hash like <tt>find</tt>
            def find_versions(id, options = {})
              versioned_class.find :all, {
--              :conditions => ["#{versioned_foreign_key} = ?", id],
+               :conditions => ["#{versioned_foreign_key} = ?", id],
 -              :order      => 'version' }.merge(options)
-+              :conditions => ["`#{versioned_foreign_key}` = ?", id],
-+              :order      => "`#{version_column}`" }.merge(options)
++              :order      => "#{version_column}" }.merge(options)
            end
  
            # Returns an array of columns that are versioned.  See non_versioned_columns
@@ -522,9 +521,506 @@ diff -Nur --exclude=.svn acts_as_versioned/lib/acts_as_versioned.rb acts_as_vers
 -ActiveRecord::Base.send :include, ActiveRecord::Acts::Versioned
 \ No newline at end of file
 +ActiveRecord::Base.send :include, ActiveRecord::Acts::Versioned
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department.rb acts_as_versioned_my/test/fixtures/department.rb
+diff -Nur --exclude=.svn acts_as_versioned/test/debug.log acts_as_versioned_tmp/test/debug.log
+--- acts_as_versioned/test/debug.log	1970-01-01 01:00:00.000000000 +0100
++++ acts_as_versioned_tmp/test/debug.log	2007-11-27 12:15:50.000000000 +0100
+@@ -0,0 +1,493 @@
++# Logfile created on Tue Nov 27 12:15:49 +0100 2007 by /
++  [4;36;1mSQL (0.000237)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
++  [4;35;1mSQL (0.026002)[0m   [0mDROP TABLE `pages`[0m
++  [4;36;1mSQL (0.002700)[0m   [0;1mCREATE TABLE `pages` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `version` int(11) DEFAULT NULL, `title` varchar(255) DEFAULT NULL, `body` text DEFAULT NULL, `updated_on` datetime DEFAULT NULL, `author_id` int(11) DEFAULT NULL, `revisor_id` int(11) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.027717)[0m   [0mDROP TABLE `page_versions`[0m
++  [4;36;1mSQL (0.003522)[0m   [0;1mCREATE TABLE `page_versions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `page_id` int(11) DEFAULT NULL, `version` int(11) DEFAULT NULL, `title` varchar(255) DEFAULT NULL, `body` text DEFAULT NULL, `updated_on` datetime DEFAULT NULL, `author_id` int(11) DEFAULT NULL, `revisor_id` int(11) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.004661)[0m   [0mDROP TABLE `authors`[0m
++  [4;36;1mSQL (0.022728)[0m   [0;1mCREATE TABLE `authors` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `page_id` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.002266)[0m   [0mDROP TABLE `locked_pages`[0m
++  [4;36;1mSQL (0.003691)[0m   [0;1mCREATE TABLE `locked_pages` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `lock_version` int(11) DEFAULT NULL, `title` varchar(255) DEFAULT NULL, `type` varchar(255) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.002275)[0m   [0mDROP TABLE `locked_pages_revisions`[0m
++  [4;36;1mSQL (0.003280)[0m   [0;1mCREATE TABLE `locked_pages_revisions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `page_id` int(11) DEFAULT NULL, `lock_version` int(11) DEFAULT NULL, `title` varchar(255) DEFAULT NULL, `version_type` varchar(255) DEFAULT NULL, `updated_at` datetime DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.017605)[0m   [0mDROP TABLE `widgets`[0m
++  [4;36;1mSQL (0.009368)[0m   [0;1mCREATE TABLE `widgets` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `name` varchar(50) DEFAULT NULL, `foo` varchar(255) DEFAULT NULL, `version` int(11) DEFAULT NULL, `updated_at` datetime DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.005907)[0m   [0mDROP TABLE `widget_versions`[0m
++  [4;36;1mSQL (0.004301)[0m   [0;1mCREATE TABLE `widget_versions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `widget_id` int(11) DEFAULT NULL, `name` varchar(50) DEFAULT NULL, `version` int(11) DEFAULT NULL, `updated_at` datetime DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.002094)[0m   [0mDROP TABLE `landmarks`[0m
++  [4;36;1mSQL (0.018769)[0m   [0;1mCREATE TABLE `landmarks` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `name` varchar(255) DEFAULT NULL, `latitude` float DEFAULT NULL, `longitude` float DEFAULT NULL, `version` int(11) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.002304)[0m   [0mDROP TABLE `landmark_versions`[0m
++  [4;36;1mSQL (0.005088)[0m   [0;1mCREATE TABLE `landmark_versions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `landmark_id` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL, `latitude` float DEFAULT NULL, `longitude` float DEFAULT NULL, `version` int(11) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.001924)[0m   [0mDROP TABLE `departments`[0m
++  [4;36;1mSQL (0.020728)[0m   [0;1mCREATE TABLE `departments` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `parent_id` int(11) DEFAULT NULL, `version_a` int(11) DEFAULT NULL, `lft` int(11) DEFAULT NULL, `rgt` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.002153)[0m   [0mDROP TABLE `department_versions`[0m
++  [4;36;1mSQL (0.002810)[0m   [0;1mCREATE TABLE `department_versions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `department_id` int(11) DEFAULT NULL, `version_a` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.002588)[0m   [0mDROP TABLE `department2s`[0m
++  [4;36;1mSQL (0.004267)[0m   [0;1mCREATE TABLE `department2s` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `parent_id` int(11) DEFAULT NULL, `version_a` int(11) DEFAULT NULL, `lft` int(11) DEFAULT NULL, `rgt` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.013616)[0m   [0mDROP TABLE `department2_versions`[0m
++  [4;36;1mSQL (0.015475)[0m   [0;1mCREATE TABLE `department2_versions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `department2_id` int(11) DEFAULT NULL, `version_a` int(11) DEFAULT NULL, `name` varchar(255) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.000000)[0m   [0mMysql::Error: Table 'schema_info' already exists: CREATE TABLE `schema_info` (version int(11))[0m
++  [4;36;1mSQL (0.002487)[0m   [0;1mSHOW FIELDS FROM `schema_info`[0m
++  [4;35;1mSQL (0.000668)[0m   [0mUPDATE schema_info SET version = 0[0m
++  [4;36;1mThing Columns (0.000000)[0m   [0;1mMysql::Error: Table 'acts_as_versioned_plugin_test.things' doesn't exist: SHOW FIELDS FROM `things`[0m
++  [4;35;1mSQL (0.000000)[0m   [0mMysql::Error: Table 'schema_info' already exists: CREATE TABLE `schema_info` (version int(11))[0m
++  [4;36;1mSQL (0.000309)[0m   [0;1mSELECT version FROM schema_info[0m
++Migrating to AddVersionedTables (1)
++  [4;35;1mSQL (0.003944)[0m   [0mCREATE TABLE `things` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `title` text DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;36;1mThing Columns (0.003087)[0m   [0;1mSHOW FIELDS FROM `things`[0m
++  [4;35;1mSQL (0.107816)[0m   [0mALTER TABLE `things` ADD `version` int(11)[0m
++  [4;36;1mSQL (0.003547)[0m   [0;1mCREATE TABLE `thing_versions` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `thing_id` int(11) DEFAULT NULL, `version` int(11) DEFAULT NULL) ENGINE=InnoDB[0m
++  [4;35;1mSQL (0.010292)[0m   [0mALTER TABLE `thing_versions` ADD `title` text DEFAULT NULL[0m
++  [4;36;1mSQL (0.035829)[0m   [0;1mALTER TABLE `thing_versions` ADD `updated_at` datetime[0m
++  [4;35;1mSQL (0.000535)[0m   [0mUPDATE schema_info SET version = 1[0m
++  [4;36;1mSQL (0.000140)[0m   [0;1mBEGIN[0m
++  [4;35;1mThing Create (0.000505)[0m   [0mINSERT INTO `things` (`title`) VALUES('blah blah')[0m
++  [4;36;1mThing::Version Columns (0.002483)[0m   [0;1mSHOW FIELDS FROM `thing_versions`[0m
++  [4;35;1mThing::Version Create (0.000312)[0m   [0mINSERT INTO `thing_versions` (`thing_id`, `updated_at`, `title`, `version`) VALUES(1, '2007-11-27 12:15:50', 'blah blah', 1)[0m
++  [4;36;1mSQL (0.001175)[0m   [0;1mCOMMIT[0m
++  [4;35;1mSQL (0.000388)[0m   [0mSELECT count(*) AS count_all FROM `thing_versions` WHERE (thing_versions.thing_id = 1) [0m
++  [4;36;1mSQL (0.000000)[0m   [0;1mMysql::Error: Table 'schema_info' already exists: CREATE TABLE `schema_info` (version int(11))[0m
++  [4;35;1mSQL (0.000262)[0m   [0mSELECT version FROM schema_info[0m
++Migrating to AddVersionedTables (1)
++  [4;36;1mSQL (0.002143)[0m   [0;1mDROP TABLE `thing_versions`[0m
++  [4;35;1mSQL (0.001977)[0m   [0mDROP TABLE `things`[0m
++  [4;36;1mSQL (0.000419)[0m   [0;1mUPDATE schema_info SET version = 0[0m
++  [4;35;1mSQL (0.000130)[0m   [0mBEGIN[0m
++  [4;36;1mThing Create (0.000000)[0m   [0;1mMysql::Error: Table 'acts_as_versioned_plugin_test.things' doesn't exist: INSERT INTO `things` (`title`) VALUES('blah blah')[0m
++  [4;35;1mSQL (0.000121)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000000)[0m   [0;1mMysql::Error: Table 'schema_info' already exists: CREATE TABLE `schema_info` (version int(11))[0m
++  [4;35;1mSQL (0.000257)[0m   [0mUPDATE schema_info SET version = 0[0m
++  [4;36;1mSQL (0.000000)[0m   [0;1mMysql::Error: Unknown table 'things': DROP TABLE `things`[0m
++  [4;35;1mSQL (0.000000)[0m   [0mMysql::Error: Unknown table 'thing_versions': DROP TABLE `thing_versions`[0m
++  [4;36;1mSQL (0.000185)[0m   [0;1mBEGIN[0m
++  [4;35;1mWidget Columns (0.002831)[0m   [0mSHOW FIELDS FROM `widgets`[0m
++  [4;36;1mWidget Create (0.000335)[0m   [0;1mINSERT INTO `widgets` (`name`, `updated_at`, `foo`, `version`) VALUES('new widget', '2007-11-27 12:15:50', NULL, 1)[0m
++  [4;35;1mWidget::Version Columns (0.003093)[0m   [0mSHOW FIELDS FROM `widget_versions`[0m
++  [4;36;1mWidget::Version Create (0.000465)[0m   [0;1mINSERT INTO `widget_versions` (`name`, `updated_at`, `widget_id`, `version`) VALUES('new widget', '2007-11-27 12:15:50', 1, 1)[0m
++  [4;35;1mSQL (0.000246)[0m   [0mSELECT count(*) AS count_all FROM `widgets` [0m
++  [4;36;1mSQL (0.000213)[0m   [0;1mSELECT count(*) AS count_all FROM `widget_versions` [0m
++  [4;35;1mWidget::Version Update (0.000271)[0m   [0mUPDATE widget_versions SET widget_id = NULL WHERE ((widget_id = 1)) [0m
++  [4;36;1mSQL (0.000156)[0m   [0;1mDELETE FROM widget_versions WHERE widget_id = 1[0m
++  [4;35;1mWidget::Version Load (0.000365)[0m   [0mSELECT * FROM `widget_versions` WHERE (widget_versions.widget_id = 1) ORDER BY version desc, version desc LIMIT 1[0m
++  [4;36;1mWidget Destroy (0.000262)[0m   [0;1m DELETE FROM `widgets`
++ WHERE `id` = 1
++[0m
++  [4;35;1mSQL (0.000183)[0m   [0mSELECT count(*) AS count_all FROM `widgets` [0m
++  [4;36;1mSQL (0.000166)[0m   [0;1mSELECT count(*) AS count_all FROM `widget_versions` [0m
++  [4;35;1mSQL (0.001080)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000127)[0m   [0;1mBEGIN[0m
++  [4;35;1mDepartment Load (0.000325)[0m   [0mSELECT * FROM `departments` WHERE (`departments`.`id` = 1) [0m
++  [4;36;1mDepartment Load (0.000237)[0m   [0;1mSELECT * FROM `departments` WHERE (`departments`.`id` = 2) [0m
++  [4;35;1mDepartment::Version Columns (0.002253)[0m   [0mSHOW FIELDS FROM `department_versions`[0m
++  [4;36;1mSQL (0.000971)[0m   [0;1mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 1) [0m
++  [4;35;1mDepartment Update (0.000429)[0m   [0mUPDATE `departments` SET `rgt` = 2, `version_a` = 2, `lft` = 1, `parent_id` = NULL, `name` = 'Edition2' WHERE `id` = 1[0m
++  [4;36;1mDepartment::Version Create (0.000247)[0m   [0;1mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Edition2', 2, 1)[0m
++  [4;35;1mDepartment::Version Load (0.000374)[0m   [0mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 1) ORDER BY version_a[0m
++  [4;36;1mSQL (0.000224)[0m   [0;1mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 1) [0m
++  [4;35;1mDepartment Update (0.000314)[0m   [0mUPDATE `departments` SET `rgt` = 2, `version_a` = 3, `lft` = 1, `parent_id` = NULL, `name` = 'Edition3' WHERE `id` = 1[0m
++  [4;36;1mDepartment::Version Create (0.000245)[0m   [0;1mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Edition3', 3, 1)[0m
++  [4;35;1mSQL (0.000296)[0m   [0mSELECT count(*) AS count_all FROM `department_versions` WHERE (department_versions.department_id = 1) [0m
++  [4;36;1mSQL (0.000225)[0m   [0;1mDELETE FROM department_versions WHERE version_a <> 3 AND department_id = 1[0m
++  [4;35;1mDepartment::Version Load (0.000322)[0m   [0mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 1) ORDER BY version_a desc, version_a LIMIT 1[0m
++  [4;36;1mDepartment Destroy (0.000193)[0m   [0;1m DELETE FROM `departments`
++ WHERE `id` = 1
++[0m
++  [4;35;1mSQL (0.000185)[0m   [0mSELECT count(*) AS count_all FROM `departments` [0m
++  [4;36;1mSQL (0.000166)[0m   [0;1mSELECT count(*) AS count_all FROM `department_versions` [0m
++  [4;35;1mSQL (0.000265)[0m   [0mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 2) [0m
++  [4;36;1mDepartment Update (0.000229)[0m   [0;1mUPDATE `departments` SET `rgt` = 4, `version_a` = 2, `lft` = 3, `parent_id` = NULL, `name` = 'Press2' WHERE `id` = 2[0m
++  [4;35;1mDepartment::Version Create (0.000184)[0m   [0mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Press2', 2, 2)[0m
++  [4;36;1mDepartment::Version Load (0.000302)[0m   [0;1mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 2) ORDER BY version_a[0m
++  [4;35;1mSQL (0.000178)[0m   [0mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 2) [0m
++  [4;36;1mDepartment Update (0.000210)[0m   [0;1mUPDATE `departments` SET `rgt` = 4, `version_a` = 3, `lft` = 3, `parent_id` = NULL, `name` = 'Press3' WHERE `id` = 2[0m
++  [4;35;1mDepartment::Version Create (0.000176)[0m   [0mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Press3', 3, 2)[0m
++  [4;36;1mSQL (0.000191)[0m   [0;1mSELECT count(*) AS count_all FROM `department_versions` WHERE (department_versions.department_id = 2) [0m
++  [4;35;1mSQL (0.000167)[0m   [0mDELETE FROM department_versions WHERE version_a <> 3 AND department_id = 2[0m
++  [4;36;1mDepartment::Version Load (0.000302)[0m   [0;1mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 2) ORDER BY version_a desc, version_a LIMIT 1[0m
++  [4;35;1mDepartment Destroy (0.000199)[0m   [0m DELETE FROM `departments`
++ WHERE `id` = 2
++[0m
++  [4;36;1mSQL (0.000171)[0m   [0;1mSELECT count(*) AS count_all FROM `departments` [0m
++  [4;35;1mSQL (0.000140)[0m   [0mSELECT count(*) AS count_all FROM `department_versions` [0m
++  [4;36;1mSQL (0.001252)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000298)[0m   [0mBEGIN[0m
++  [4;36;1mDepartment2 Load (0.000377)[0m   [0;1mSELECT * FROM `department2s` WHERE (`department2s`.`id` = 1) [0m
++  [4;35;1mDepartment2 Load (0.000245)[0m   [0mSELECT * FROM `department2s` WHERE (`department2s`.`id` = 2) [0m
++  [4;36;1mDepartment2::Version Columns (0.002377)[0m   [0;1mSHOW FIELDS FROM `department2_versions`[0m
++  [4;35;1mSQL (0.000919)[0m   [0mSELECT max(version_a) AS max_version_a FROM `department2_versions` WHERE (department2_versions.department2_id = 1) [0m
++  [4;36;1mDepartment2 Update (0.000444)[0m   [0;1mUPDATE `department2s` SET `rgt` = 2, `version_a` = 2, `lft` = 1, `parent_id` = NULL, `name` = 'Edition2' WHERE `id` = 1[0m
++  [4;35;1mDepartment2::Version Create (0.000283)[0m   [0mINSERT INTO `department2_versions` (`name`, `department2_id`, `version_a`) VALUES('Edition2', 1, 2)[0m
++  [4;36;1mDepartment2::Version Load (0.000459)[0m   [0;1mSELECT * FROM `department2_versions` WHERE (department2_versions.department2_id = 1) ORDER BY version_a[0m
++  [4;35;1mSQL (0.000318)[0m   [0mSELECT max(version_a) AS max_version_a FROM `department2_versions` WHERE (department2_versions.department2_id = 1) [0m
++  [4;36;1mDepartment2 Update (0.000315)[0m   [0;1mUPDATE `department2s` SET `rgt` = 2, `version_a` = 3, `lft` = 1, `parent_id` = NULL, `name` = 'Edition3' WHERE `id` = 1[0m
++  [4;35;1mDepartment2::Version Create (0.000230)[0m   [0mINSERT INTO `department2_versions` (`name`, `department2_id`, `version_a`) VALUES('Edition3', 1, 3)[0m
++  [4;36;1mSQL (0.000245)[0m   [0;1mSELECT count(*) AS count_all FROM `department2_versions` WHERE (department2_versions.department2_id = 1) [0m
++  [4;35;1mSQL (0.000223)[0m   [0mDELETE FROM department2_versions WHERE department2_id = 1[0m
++  [4;36;1mDepartment2::Version Load (0.000298)[0m   [0;1mSELECT * FROM `department2_versions` WHERE (department2_versions.department2_id = 1) ORDER BY version_a desc, version_a LIMIT 1[0m
++  [4;35;1mDepartment2 Destroy (0.000152)[0m   [0m DELETE FROM `department2s`
++ WHERE `id` = 1
++[0m
++  [4;36;1mSQL (0.000141)[0m   [0;1mSELECT count(*) AS count_all FROM `department2s` [0m
++  [4;35;1mSQL (0.000126)[0m   [0mSELECT count(*) AS count_all FROM `department2_versions` [0m
++  [4;36;1mSQL (0.000183)[0m   [0;1mSELECT max(version_a) AS max_version_a FROM `department2_versions` WHERE (department2_versions.department2_id = 2) [0m
++  [4;35;1mDepartment2 Update (0.000225)[0m   [0mUPDATE `department2s` SET `rgt` = 4, `version_a` = 2, `lft` = 3, `parent_id` = NULL, `name` = 'Press2' WHERE `id` = 2[0m
++  [4;36;1mDepartment2::Version Create (0.000177)[0m   [0;1mINSERT INTO `department2_versions` (`name`, `department2_id`, `version_a`) VALUES('Press2', 2, 2)[0m
++  [4;35;1mDepartment2::Version Load (0.000286)[0m   [0mSELECT * FROM `department2_versions` WHERE (department2_versions.department2_id = 2) ORDER BY version_a[0m
++  [4;36;1mSQL (0.000212)[0m   [0;1mSELECT max(version_a) AS max_version_a FROM `department2_versions` WHERE (department2_versions.department2_id = 2) [0m
++  [4;35;1mDepartment2 Update (0.000203)[0m   [0mUPDATE `department2s` SET `rgt` = 4, `version_a` = 3, `lft` = 3, `parent_id` = NULL, `name` = 'Press3' WHERE `id` = 2[0m
++  [4;36;1mDepartment2::Version Create (0.000169)[0m   [0;1mINSERT INTO `department2_versions` (`name`, `department2_id`, `version_a`) VALUES('Press3', 2, 3)[0m
++  [4;35;1mSQL (0.000185)[0m   [0mSELECT count(*) AS count_all FROM `department2_versions` WHERE (department2_versions.department2_id = 2) [0m
++  [4;36;1mSQL (0.000166)[0m   [0;1mDELETE FROM department2_versions WHERE department2_id = 2[0m
++  [4;35;1mDepartment2::Version Load (0.000231)[0m   [0mSELECT * FROM `department2_versions` WHERE (department2_versions.department2_id = 2) ORDER BY version_a desc, version_a LIMIT 1[0m
++  [4;36;1mDepartment2 Destroy (0.000147)[0m   [0;1m DELETE FROM `department2s`
++ WHERE `id` = 2
++[0m
++  [4;35;1mSQL (0.000138)[0m   [0mSELECT count(*) AS count_all FROM `department2s` [0m
++  [4;36;1mSQL (0.000125)[0m   [0;1mSELECT count(*) AS count_all FROM `department2_versions` [0m
++  [4;35;1mSQL (0.001823)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000373)[0m   [0;1mBEGIN[0m
++  [4;35;1mLockedPage Load (0.000352)[0m   [0mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 1) [0m
++  [4;36;1mLockedPage::LockedPageRevision Columns (0.002402)[0m   [0;1mSHOW FIELDS FROM `locked_pages_revisions`[0m
++  [4;35;1mSQL (0.000934)[0m   [0mSELECT count(*) AS count_all FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1) [0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.000517)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1 AND (title LIKE '%weblog%')) ORDER BY lock_version[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000473)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1 AND (title LIKE '%web%')) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Load (0.000317)[0m   [0;1mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 2) [0m
++  [4;35;1mSpecialLockedPage Columns (0.002218)[0m   [0mSHOW FIELDS FROM `locked_pages`[0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.002140)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 2 AND (title LIKE '%web%')) ORDER BY lock_version[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000368)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1) ORDER BY lock_version[0m
++  [4;36;1mSQL (0.000155)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000256)[0m   [0mBEGIN[0m
++  [4;36;1mAuthor Load (0.000293)[0m   [0;1mSELECT * FROM `authors` WHERE (`authors`.`id` = 1) [0m
++  [4;35;1mAuthor Load (0.000212)[0m   [0mSELECT * FROM `authors` WHERE (`authors`.`id` = 2) [0m
++  [4;36;1mPage Load (0.000244)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mAuthor Load (0.000476)[0m   [0mSELECT authors.* FROM authors INNER JOIN page_versions ON authors.id = page_versions.author_id WHERE ((page_versions.page_id = 1)) ORDER BY name[0m
++  [4;36;1mSQL (0.000142)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000219)[0m   [0mBEGIN[0m
++  [4;36;1mAuthor Load (0.000250)[0m   [0;1mSELECT * FROM `authors` WHERE (`authors`.`id` = 1) [0m
++  [4;35;1mAuthor Load (0.000190)[0m   [0mSELECT * FROM `authors` WHERE (`authors`.`id` = 2) [0m
++  [4;36;1mPage Load (0.000221)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mAuthor Load (0.000528)[0m   [0mSELECT authors.* FROM authors INNER JOIN page_versions ON authors.id = page_versions.revisor_id WHERE ((page_versions.page_id = 1)) ORDER BY name[0m
++  [4;36;1mSQL (0.000119)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000187)[0m   [0mBEGIN[0m
++  [4;36;1mDepartment Load (0.000230)[0m   [0;1mSELECT * FROM `departments` WHERE (`departments`.`id` = 1) [0m
++  [4;35;1mDepartment Load (0.000201)[0m   [0mSELECT * FROM `departments` WHERE (`departments`.`id` = 2) [0m
++  [4;36;1mDepartment::Version Load (0.000301)[0m   [0;1mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 1) ORDER BY version_a desc, version_a LIMIT 1[0m
++  [4;35;1mDepartment::Version Load (0.000241)[0m   [0mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 2) ORDER BY version_a desc, version_a LIMIT 1[0m
++  [4;36;1mSQL (0.000111)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000181)[0m   [0mBEGIN[0m
++  [4;36;1mLockedPage Load (0.000212)[0m   [0;1mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 2) [0m
++  [4;35;1mLockedPage Load (0.000161)[0m   [0mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 2) [0m
++  [4;36;1mSpecialLockedPage Update with optimistic locking (0.000422)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'fresh title', `type` = 'SpecialLockedPage', `lock_version` = 25
++ WHERE id = 2
++ AND `lock_version` = 24
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000246)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', 'SpecialLockedPage', 'fresh title', 25, 2)[0m
++  [4;36;1mSQL (0.000198)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 23 AND page_id = 2[0m
++  [4;35;1mSQL (0.000263)[0m   [0mSELECT count(*) AS count_all FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 2) [0m
++  [4;36;1mSpecialLockedPage Update with optimistic locking (0.000291)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'stale title', `type` = 'SpecialLockedPage', `lock_version` = 25
++ WHERE id = 2
++ AND `lock_version` = 24
++[0m
++  [4;35;1mSQL (0.001158)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000173)[0m   [0;1mBEGIN[0m
++  [4;35;1mDepartment Load (0.000389)[0m   [0mSELECT * FROM `departments` WHERE (`departments`.`id` = 1) [0m
++  [4;36;1mDepartment Load (0.000262)[0m   [0;1mSELECT * FROM `departments` WHERE (`departments`.`id` = 2) [0m
++  [4;35;1mSQL (0.000167)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000132)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage Load (0.000320)[0m   [0mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;36;1mSQL (0.000273)[0m   [0;1mDELETE FROM page_versions WHERE page_id = 1[0m
++  [4;35;1mPage::Version Load (0.000344)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version desc, version LIMIT 1[0m
++  [4;36;1mPage Destroy (0.000229)[0m   [0;1m DELETE FROM `pages`
++ WHERE `id` = 1
++[0m
++  [4;35;1mSQL (0.000206)[0m   [0mSELECT count(*) AS count_all FROM `pages` [0m
++  [4;36;1mPage::Version Columns (0.002564)[0m   [0;1mSHOW FIELDS FROM `page_versions`[0m
++  [4;35;1mSQL (0.001055)[0m   [0mSELECT count(*) AS count_all FROM `page_versions` [0m
++  [4;36;1mSQL (0.002280)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000149)[0m   [0mBEGIN[0m
++  [4;36;1mDepartment Load (0.000339)[0m   [0;1mSELECT * FROM `departments` WHERE (`departments`.`id` = 1) [0m
++  [4;35;1mDepartment Load (0.000228)[0m   [0mSELECT * FROM `departments` WHERE (`departments`.`id` = 2) [0m
++  [4;36;1mSQL (0.000255)[0m   [0;1mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 1) [0m
++  [4;35;1mDepartment Update (0.000336)[0m   [0mUPDATE `departments` SET `rgt` = 2, `version_a` = 2, `lft` = 1, `parent_id` = NULL, `name` = 'Edition2' WHERE `id` = 1[0m
++  [4;36;1mDepartment::Version Create (0.000249)[0m   [0;1mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Edition2', 2, 1)[0m
++  [4;35;1mDepartment::Version Load (0.000372)[0m   [0mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 1) ORDER BY version_a[0m
++  [4;36;1mSQL (0.000186)[0m   [0;1mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 1) [0m
++  [4;35;1mDepartment Update (0.000212)[0m   [0mUPDATE `departments` SET `rgt` = 2, `version_a` = 3, `lft` = 1, `parent_id` = NULL, `name` = 'Edition3' WHERE `id` = 1[0m
++  [4;36;1mDepartment::Version Create (0.000175)[0m   [0;1mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Edition3', 3, 1)[0m
++  [4;35;1mDepartment::Version Load (0.000220)[0m   [0mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 1 AND (version_a = 2)) ORDER BY version_a LIMIT 1[0m
++  [4;36;1mDepartment Update (0.000207)[0m   [0;1mUPDATE `departments` SET `rgt` = 2, `version_a` = 2, `lft` = 1, `parent_id` = NULL, `name` = 'Edition2' WHERE `id` = 1[0m
++  [4;35;1mSQL (0.000170)[0m   [0mDELETE FROM department_versions WHERE version_a <> 2 AND department_id = 1[0m
++  [4;36;1mSQL (0.000174)[0m   [0;1mSELECT count(*) AS count_all FROM `department_versions` WHERE (department_versions.department_id = 1) [0m
++  [4;35;1mSQL (0.000200)[0m   [0mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 2) [0m
++  [4;36;1mDepartment Update (0.000235)[0m   [0;1mUPDATE `departments` SET `rgt` = 4, `version_a` = 2, `lft` = 3, `parent_id` = NULL, `name` = 'Press2' WHERE `id` = 2[0m
++  [4;35;1mDepartment::Version Create (0.000182)[0m   [0mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Press2', 2, 2)[0m
++  [4;36;1mDepartment::Version Load (0.000292)[0m   [0;1mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 2) ORDER BY version_a[0m
++  [4;35;1mSQL (0.000177)[0m   [0mSELECT max(version_a) AS max_version_a FROM `department_versions` WHERE (department_versions.department_id = 2) [0m
++  [4;36;1mDepartment Update (0.000196)[0m   [0;1mUPDATE `departments` SET `rgt` = 4, `version_a` = 3, `lft` = 3, `parent_id` = NULL, `name` = 'Press3' WHERE `id` = 2[0m
++  [4;35;1mDepartment::Version Create (0.000169)[0m   [0mINSERT INTO `department_versions` (`name`, `version_a`, `department_id`) VALUES('Press3', 3, 2)[0m
++  [4;36;1mDepartment::Version Load (0.000284)[0m   [0;1mSELECT * FROM `department_versions` WHERE (department_versions.department_id = 2 AND (version_a = 2)) ORDER BY version_a LIMIT 1[0m
++  [4;35;1mDepartment Update (0.000262)[0m   [0mUPDATE `departments` SET `rgt` = 4, `version_a` = 2, `lft` = 3, `parent_id` = NULL, `name` = 'Press2' WHERE `id` = 2[0m
++  [4;36;1mSQL (0.000206)[0m   [0;1mDELETE FROM department_versions WHERE version_a <> 2 AND department_id = 2[0m
++  [4;35;1mSQL (0.000178)[0m   [0mSELECT count(*) AS count_all FROM `department_versions` WHERE (department_versions.department_id = 2) [0m
++  [4;36;1mSQL (0.024068)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000224)[0m   [0mBEGIN[0m
++  [4;36;1mLockedPage Load (0.000362)[0m   [0;1mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 1) [0m
++  [4;35;1mLockedPage Load (0.000284)[0m   [0mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 2) [0m
++  [4;36;1mSQL (0.000155)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000284)[0m   [0mBEGIN[0m
++  [4;36;1mPage Load (0.000340)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mPage::Version Load (0.000415)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version[0m
++  [4;36;1mPage Update (0.000363)[0m   [0;1mUPDATE `pages` SET `revisor_id` = 2, `version` = 23, `title` = 'Welcome to the weblg', `body` = 'Such a lovely day', `author_id` = 2, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 1[0m
++  [4;35;1mSQL (0.001065)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000303)[0m   [0;1mBEGIN[0m
++  [4;35;1mLockedPage Load (0.000419)[0m   [0mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 1) [0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.000424)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1) ORDER BY lock_version[0m
++  [4;35;1mLockedPage Update (0.000345)[0m   [0mUPDATE `locked_pages` SET `title` = 'Welcome to the weblg', `type` = 'LockedPage', `lock_version` = 23 WHERE `id` = 1[0m
++  [4;36;1mSQL (0.000187)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 21 AND page_id = 1[0m
++  [4;35;1mSQL (0.001023)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000352)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage Load (0.000370)[0m   [0mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;36;1mPage::Version Load (0.000377)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version[0m
++  [4;35;1mPage::Version Load (0.000289)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1 AND (version = 23)) ORDER BY version LIMIT 1[0m
++  [4;36;1mPage Update (0.000333)[0m   [0;1mUPDATE `pages` SET `revisor_id` = 2, `version` = 23, `title` = 'Welcome to the weblg', `body` = 'Such a lovely day', `author_id` = 2, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 1[0m
++  [4;35;1mSQL (0.000985)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000227)[0m   [0;1mBEGIN[0m
++  [4;35;1mLockedPage Load (0.000391)[0m   [0mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 1) [0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.000508)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1) ORDER BY lock_version[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000368)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1 AND (lock_version = 23)) ORDER BY lock_version LIMIT 1[0m
++  [4;36;1mLockedPage Update (0.000324)[0m   [0;1mUPDATE `locked_pages` SET `title` = 'Welcome to the weblg', `type` = 'LockedPage', `lock_version` = 23 WHERE `id` = 1[0m
++  [4;35;1mSQL (0.000197)[0m   [0mDELETE FROM locked_pages_revisions WHERE lock_version <= 21 AND page_id = 1[0m
++  [4;36;1mSQL (0.001044)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000170)[0m   [0mBEGIN[0m
++  [4;36;1mLockedPage Load (0.000407)[0m   [0;1mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 2) [0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000476)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 2) ORDER BY lock_version[0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.000347)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 2 AND (lock_version = 23)) ORDER BY lock_version LIMIT 1[0m
++  [4;35;1mSpecialLockedPage Update (0.000444)[0m   [0mUPDATE `locked_pages` SET `title` = 'So I was thinking!!!', `type` = 'SpecialLockedPage', `lock_version` = 23 WHERE `id` = 2[0m
++  [4;36;1mSQL (0.000247)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 21 AND page_id = 2[0m
++  [4;35;1mSQL (0.001126)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000192)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage Create (0.000261)[0m   [0mINSERT INTO `pages` (`body`, `title`, `revisor_id`, `updated_on`, `version`, `author_id`) VALUES('first body', 'first title', NULL, '2007-11-27 12:15:50', 1, NULL)[0m
++  [4;36;1mPage::Version Create (0.000196)[0m   [0;1mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'first title', NULL, '2007-11-27 12:15:50', 2, 1, NULL)[0m
++  [4;35;1mSQL (0.000283)[0m   [0mSELECT count(*) AS count_all FROM `page_versions` WHERE (page_versions.page_id = 2) [0m
++  [4;36;1mPage::Version Load (0.000275)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 2) ORDER BY version[0m
++  [4;35;1mSQL (0.001425)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000317)[0m   [0;1mBEGIN[0m
++  [4;35;1mLockedPage Create (0.000278)[0m   [0mINSERT INTO `locked_pages` (`title`, `lock_version`, `type`) VALUES('first title', 1, NULL)[0m
++  [4;36;1mLockedPage::LockedPageRevision Create (0.000203)[0m   [0;1mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'first title', 1, 3)[0m
++  [4;35;1mSQL (0.000282)[0m   [0mSELECT count(*) AS count_all FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 3) [0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.000337)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 3) ORDER BY lock_version[0m
++  [4;35;1mSQL (0.000982)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000169)[0m   [0;1mBEGIN[0m
++  [4;35;1mSpecialLockedPage Create (0.000271)[0m   [0mINSERT INTO `locked_pages` (`title`, `lock_version`, `type`) VALUES('first title', 1, 'SpecialLockedPage')[0m
++  [4;36;1mLockedPage::LockedPageRevision Create (0.000205)[0m   [0;1mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', 'SpecialLockedPage', 'first title', 1, 4)[0m
++  [4;35;1mSQL (0.000269)[0m   [0mSELECT count(*) AS count_all FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 4) [0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.000336)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 4) ORDER BY lock_version[0m
++  [4;35;1mSQL (0.000997)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000169)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage Load (0.000413)[0m   [0mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;36;1mSQL (0.000312)[0m   [0;1mSELECT count(*) AS count_all FROM `page_versions` WHERE (page_versions.page_id = 1) [0m
++  [4;35;1mPage::Version Load (0.000367)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version[0m
++  [4;36;1mPage Update (0.000320)[0m   [0;1mUPDATE `pages` SET `revisor_id` = 1, `version` = 24, `title` = 'Welcome to the weblog', `body` = 'Such a lovely day', `author_id` = 1, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 1[0m
++  [4;35;1mPage Update (0.000273)[0m   [0mUPDATE `pages` SET `revisor_id` = 1, `version` = 24, `title` = 'changed', `body` = 'Such a lovely day', `author_id` = 1, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 1[0m
++  [4;36;1mSQL (0.000248)[0m   [0;1mSELECT count(*) AS count_all FROM `page_versions` WHERE (page_versions.page_id = 1) [0m
++  [4;35;1mSQL (0.001038)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000245)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage::Version Load (0.000325)[0m   [0mSELECT * FROM `page_versions` WHERE (`page_versions`.`id` = 2) [0m
++  [4;36;1mPage Load (0.000252)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mPage::Version Load (0.001009)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version LIMIT 1[0m
++  [4;36;1mSQL (0.000164)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000110)[0m   [0mBEGIN[0m
++  [4;36;1mPage::Version Load (0.000315)[0m   [0;1mSELECT * FROM `page_versions` WHERE (`page_versions`.`id` = 1) [0m
++  [4;35;1mPage Load (0.000288)[0m   [0mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;36;1mPage::Version Load (0.000397)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version desc, version LIMIT 1[0m
++  [4;35;1mSQL (0.000146)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000108)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage::Version Load (0.000281)[0m   [0mSELECT * FROM `page_versions` WHERE (`page_versions`.`id` = 1) [0m
++  [4;36;1mPage::Version Load (0.000224)[0m   [0;1mSELECT * FROM `page_versions` WHERE (`page_versions`.`id` = 2) [0m
++  [4;35;1mPage::Version Load (0.000311)[0m   [0mSELECT * FROM `page_versions` WHERE (page_id = 1 and version > 23) ORDER BY version LIMIT 1[0m
++  [4;36;1mPage Load (0.000175)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mPage::Version Load (0.000248)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) AND (page_id = 1 and version > 23) ORDER BY version LIMIT 1[0m
++  [4;36;1mSQL (0.000109)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000172)[0m   [0mBEGIN[0m
++  [4;36;1mPage::Version Load (0.000224)[0m   [0;1mSELECT * FROM `page_versions` WHERE (`page_versions`.`id` = 2) [0m
++  [4;35;1mPage::Version Load (0.000177)[0m   [0mSELECT * FROM `page_versions` WHERE (`page_versions`.`id` = 1) [0m
++  [4;36;1mPage::Version Load (0.000706)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_id = 1 and version < 24) ORDER BY version desc LIMIT 1[0m
++  [4;35;1mPage Load (0.000217)[0m   [0mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;36;1mPage::Version Load (0.000269)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) AND (page_id = 1 and version < 24) ORDER BY version desc LIMIT 1[0m
++  [4;35;1mSQL (0.000108)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000184)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage Load (0.000224)[0m   [0mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;36;1mPage::Version Load (0.000261)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version[0m
++  [4;35;1mLockedPage Load (0.001525)[0m   [0mSELECT * FROM `locked_pages` WHERE (`locked_pages`.`id` = 1) [0m
++  [4;36;1mLockedPage::LockedPageRevision Load (0.000489)[0m   [0;1mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 1) ORDER BY lock_version[0m
++  [4;35;1mSQL (0.000155)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000087)[0m   [0;1mBEGIN[0m
++  [4;35;1mLockedPage Create (0.000238)[0m   [0mINSERT INTO `locked_pages` (`title`, `lock_version`, `type`) VALUES('title', 1, NULL)[0m
++  [4;36;1mLockedPage::LockedPageRevision Create (0.000178)[0m   [0;1mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title', 1, 5)[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000331)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 5) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000300)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'title', `type` = NULL, `lock_version` = 2
++ WHERE id = 5
++ AND `lock_version` = 1
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000282)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 5) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000230)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'updated title', `type` = NULL, `lock_version` = 3
++ WHERE id = 5
++ AND `lock_version` = 2
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000186)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'updated title', 3, 5)[0m
++  [4;36;1mSQL (0.000176)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 1 AND page_id = 5[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000274)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 5) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000228)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'updated title!', `type` = NULL, `lock_version` = 4
++ WHERE id = 5
++ AND `lock_version` = 3
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000183)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'updated title!', 4, 5)[0m
++  [4;36;1mSQL (0.000147)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 2 AND page_id = 5[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000279)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 5) ORDER BY lock_version[0m
++  [4;36;1mSQL (0.001135)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000292)[0m   [0mBEGIN[0m
++  [4;36;1mSQL (0.000155)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000116)[0m   [0mBEGIN[0m
++  [4;36;1mLandmark Load (0.000345)[0m   [0;1mSELECT * FROM `landmarks` WHERE (`landmarks`.`id` = 1) [0m
++  [4;35;1mSQL (0.000159)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000210)[0m   [0;1mBEGIN[0m
++  [4;35;1mLandmark Load (0.000292)[0m   [0mSELECT * FROM `landmarks` WHERE (`landmarks`.`id` = 1) [0m
++  [4;36;1mSQL (0.000148)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000123)[0m   [0mBEGIN[0m
++  [4;36;1mPage Create (0.000331)[0m   [0;1mINSERT INTO `pages` (`body`, `title`, `revisor_id`, `updated_on`, `version`, `author_id`) VALUES(NULL, 'title', NULL, '2007-11-27 12:15:50', 1, NULL)[0m
++  [4;35;1mPage::Version Create (0.000275)[0m   [0mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES(NULL, 'title', NULL, '2007-11-27 12:15:50', 3, 1, NULL)[0m
++  [4;36;1mPage Update (0.000234)[0m   [0;1mUPDATE `pages` SET `revisor_id` = NULL, `version` = 1, `title` = 'title', `body` = NULL, `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 3[0m
++  [4;35;1mSQL (0.000943)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000356)[0m   [0;1mBEGIN[0m
++  [4;35;1mPage Create (0.000258)[0m   [0mINSERT INTO `pages` (`body`, `title`, `revisor_id`, `updated_on`, `version`, `author_id`) VALUES(NULL, 'title', NULL, '2007-11-27 12:15:50', 1, NULL)[0m
++  [4;36;1mPage::Version Create (0.000220)[0m   [0;1mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES(NULL, 'title', NULL, '2007-11-27 12:15:50', 4, 1, NULL)[0m
++  [4;35;1mPage::Version Load (0.000401)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 4) ORDER BY version[0m
++  [4;36;1mPage Update (0.001681)[0m   [0;1mUPDATE `pages` SET `revisor_id` = NULL, `version` = 1, `title` = 'new title', `body` = NULL, `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 4[0m
++  [4;35;1mPage::Version Load (0.000399)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 4) ORDER BY version[0m
++  [4;36;1mSQL (0.000207)[0m   [0;1mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 4) [0m
++  [4;35;1mPage Update (0.000255)[0m   [0mUPDATE `pages` SET `revisor_id` = NULL, `version` = 2, `title` = 'a title', `body` = NULL, `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 4[0m
++  [4;36;1mPage::Version Create (0.000198)[0m   [0;1mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES(NULL, 'a title', NULL, '2007-11-27 12:15:50', 4, 2, NULL)[0m
++  [4;35;1mPage::Version Load (0.000293)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 4) ORDER BY version[0m
++  [4;36;1mSQL (0.004916)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000225)[0m   [0mBEGIN[0m
++  [4;36;1mPage Create (0.000358)[0m   [0;1mINSERT INTO `pages` (`body`, `title`, `revisor_id`, `updated_on`, `version`, `author_id`) VALUES(NULL, 'title', NULL, '2007-11-27 12:15:50', 1, NULL)[0m
++  [4;35;1mPage::Version Create (0.000225)[0m   [0mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES(NULL, 'title', NULL, '2007-11-27 12:15:50', 5, 1, NULL)[0m
++  [4;36;1mPage::Version Load (0.000337)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 5) ORDER BY version[0m
++  [4;35;1mPage Update (0.000287)[0m   [0mUPDATE `pages` SET `revisor_id` = NULL, `version` = 1, `title` = 'a title', `body` = NULL, `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 5[0m
++  [4;36;1mPage::Version Load (0.000287)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 5) ORDER BY version[0m
++  [4;35;1mSQL (0.000202)[0m   [0mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 5) [0m
++  [4;36;1mPage Update (0.000237)[0m   [0;1mUPDATE `pages` SET `revisor_id` = NULL, `version` = 2, `title` = 'b title', `body` = NULL, `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 5[0m
++  [4;35;1mPage::Version Create (0.000216)[0m   [0mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES(NULL, 'b title', NULL, '2007-11-27 12:15:50', 5, 2, NULL)[0m
++  [4;36;1mPage::Version Load (0.000291)[0m   [0;1mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 5) ORDER BY version[0m
++  [4;35;1mSQL (0.001086)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000155)[0m   [0;1mBEGIN[0m
++  [4;35;1mLockedPage Create (0.000284)[0m   [0mINSERT INTO `locked_pages` (`title`, `lock_version`, `type`) VALUES('title', 1, NULL)[0m
++  [4;36;1mLockedPage::LockedPageRevision Create (0.000319)[0m   [0;1mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title', 1, 6)[0m
++  [4;35;1mLockedPage Update with optimistic locking (0.000380)[0m   [0m UPDATE locked_pages
++ SET `title` = 'title1', `type` = NULL, `lock_version` = 2
++ WHERE id = 6
++ AND `lock_version` = 1
++[0m
++  [4;36;1mLockedPage::LockedPageRevision Create (0.000294)[0m   [0;1mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title1', 2, 6)[0m
++  [4;35;1mLockedPage Update with optimistic locking (0.000289)[0m   [0m UPDATE locked_pages
++ SET `title` = 'title2', `type` = NULL, `lock_version` = 3
++ WHERE id = 6
++ AND `lock_version` = 2
++[0m
++  [4;36;1mLockedPage::LockedPageRevision Create (0.000270)[0m   [0;1mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title2', 3, 6)[0m
++  [4;35;1mSQL (0.000239)[0m   [0mDELETE FROM locked_pages_revisions WHERE lock_version <= 1 AND page_id = 6[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000322)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'title0', `type` = NULL, `lock_version` = 4
++ WHERE id = 6
++ AND `lock_version` = 3
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000203)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title0', 4, 6)[0m
++  [4;36;1mSQL (0.000207)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 2 AND page_id = 6[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000336)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 6) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000232)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'title1', `type` = NULL, `lock_version` = 5
++ WHERE id = 6
++ AND `lock_version` = 4
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000189)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title1', 5, 6)[0m
++  [4;36;1mSQL (0.000168)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 3 AND page_id = 6[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000290)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 6) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000220)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'title2', `type` = NULL, `lock_version` = 6
++ WHERE id = 6
++ AND `lock_version` = 5
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000184)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title2', 6, 6)[0m
++  [4;36;1mSQL (0.000167)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 4 AND page_id = 6[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000284)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 6) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000203)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'title3', `type` = NULL, `lock_version` = 7
++ WHERE id = 6
++ AND `lock_version` = 6
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000180)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title3', 7, 6)[0m
++  [4;36;1mSQL (0.000171)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 5 AND page_id = 6[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000374)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 6) ORDER BY lock_version[0m
++  [4;36;1mLockedPage Update with optimistic locking (0.000219)[0m   [0;1m UPDATE locked_pages
++ SET `title` = 'title4', `type` = NULL, `lock_version` = 8
++ WHERE id = 6
++ AND `lock_version` = 7
++[0m
++  [4;35;1mLockedPage::LockedPageRevision Create (0.000185)[0m   [0mINSERT INTO `locked_pages_revisions` (`updated_at`, `version_type`, `title`, `lock_version`, `page_id`) VALUES('2007-11-27 12:15:50', NULL, 'title4', 8, 6)[0m
++  [4;36;1mSQL (0.000169)[0m   [0;1mDELETE FROM locked_pages_revisions WHERE lock_version <= 6 AND page_id = 6[0m
++  [4;35;1mLockedPage::LockedPageRevision Load (0.000354)[0m   [0mSELECT * FROM `locked_pages_revisions` WHERE (locked_pages_revisions.page_id = 6) ORDER BY lock_version[0m
++  [4;36;1mSQL (0.006183)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000545)[0m   [0mBEGIN[0m
++  [4;36;1mPage Create (0.000341)[0m   [0;1mINSERT INTO `pages` (`body`, `title`, `revisor_id`, `updated_on`, `version`, `author_id`) VALUES('first body', 'title', NULL, '2007-11-27 12:15:50', 1, NULL)[0m
++  [4;35;1mPage::Version Create (0.000312)[0m   [0mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title', NULL, '2007-11-27 12:15:50', 6, 1, NULL)[0m
++  [4;36;1mSQL (0.000346)[0m   [0;1mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 6) [0m
++  [4;35;1mPage Update (0.000294)[0m   [0mUPDATE `pages` SET `revisor_id` = NULL, `version` = 2, `title` = 'title', `body` = 'first body', `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 6[0m
++  [4;36;1mPage::Version Create (0.000240)[0m   [0;1mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title', NULL, '2007-11-27 12:15:50', 6, 2, NULL)[0m
++  [4;35;1mPage::Version Load (0.000400)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 6) ORDER BY version[0m
++  [4;36;1mSQL (0.000291)[0m   [0;1mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 6) [0m
++  [4;35;1mPage Update (0.000282)[0m   [0mUPDATE `pages` SET `revisor_id` = NULL, `version` = 3, `title` = 'title', `body` = 'first body', `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 6[0m
++  [4;36;1mPage::Version Create (0.000239)[0m   [0;1mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title', NULL, '2007-11-27 12:15:50', 6, 3, NULL)[0m
++  [4;35;1mSQL (0.000271)[0m   [0mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 6) [0m
++  [4;36;1mPage Update (0.000266)[0m   [0;1mUPDATE `pages` SET `revisor_id` = NULL, `version` = 4, `title` = 'title0', `body` = 'first body', `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 6[0m
++  [4;35;1mPage::Version Create (0.000186)[0m   [0mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title0', NULL, '2007-11-27 12:15:50', 6, 4, NULL)[0m
++  [4;36;1mSQL (0.000217)[0m   [0;1mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 6) [0m
++  [4;35;1mPage Update (0.000221)[0m   [0mUPDATE `pages` SET `revisor_id` = NULL, `version` = 5, `title` = 'title1', `body` = 'first body', `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 6[0m
++  [4;36;1mPage::Version Create (0.000187)[0m   [0;1mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title1', NULL, '2007-11-27 12:15:50', 6, 5, NULL)[0m
++  [4;35;1mSQL (0.000216)[0m   [0mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 6) [0m
++  [4;36;1mPage Update (0.000233)[0m   [0;1mUPDATE `pages` SET `revisor_id` = NULL, `version` = 6, `title` = 'title2', `body` = 'first body', `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 6[0m
++  [4;35;1mPage::Version Create (0.000189)[0m   [0mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title2', NULL, '2007-11-27 12:15:50', 6, 6, NULL)[0m
++  [4;36;1mSQL (0.000215)[0m   [0;1mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 6) [0m
++  [4;35;1mPage Update (0.000211)[0m   [0mUPDATE `pages` SET `revisor_id` = NULL, `version` = 7, `title` = 'title3', `body` = 'first body', `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 6[0m
++  [4;36;1mPage::Version Create (0.000183)[0m   [0;1mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title3', NULL, '2007-11-27 12:15:50', 6, 7, NULL)[0m
++  [4;35;1mSQL (0.000217)[0m   [0mSELECT max(version) AS max_version FROM `page_versions` WHERE (page_versions.page_id = 6) [0m
++  [4;36;1mPage Update (0.000213)[0m   [0;1mUPDATE `pages` SET `revisor_id` = NULL, `version` = 8, `title` = 'title4', `body` = 'first body', `author_id` = NULL, `updated_on` = '2007-11-27 12:15:50' WHERE `id` = 6[0m
++  [4;35;1mPage::Version Create (0.000221)[0m   [0mINSERT INTO `page_versions` (`body`, `title`, `revisor_id`, `updated_on`, `page_id`, `version`, `author_id`) VALUES('first body', 'title4', NULL, '2007-11-27 12:15:50', 6, 8, NULL)[0m
++  [4;36;1mSQL (0.001187)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000296)[0m   [0mBEGIN[0m
++  [4;36;1mPage Load (0.000394)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mPage::Version Load (0.000501)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version[0m
++  [4;36;1mSQL (0.000146)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000120)[0m   [0mBEGIN[0m
++  [4;36;1mSQL (0.000121)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000104)[0m   [0mBEGIN[0m
++  [4;36;1mSQL (0.000114)[0m   [0;1mROLLBACK[0m
++  [4;35;1mSQL (0.000111)[0m   [0mBEGIN[0m
++  [4;36;1mPage Load (0.000325)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mPage::Version Load (0.000338)[0m   [0mSELECT * FROM `page_versions` WHERE (page_versions.page_id = 1) ORDER BY version[0m
++  [4;36;1mPage Load (0.000271)[0m   [0;1mSELECT * FROM `pages` WHERE (`pages`.`id` = 1) [0m
++  [4;35;1mSQL (0.000134)[0m   [0mROLLBACK[0m
++  [4;36;1mSQL (0.000212)[0m   [0;1mBEGIN[0m
++  [4;35;1mWidget Create (0.000278)[0m   [0mINSERT INTO `widgets` (`name`, `updated_at`, `foo`, `version`) VALUES('new widget', '2007-11-27 12:15:50', NULL, 1)[0m
++  [4;36;1mWidget::Version Create (0.000232)[0m   [0;1mINSERT INTO `widget_versions` (`name`, `updated_at`, `widget_id`, `version`) VALUES('new widget', '2007-11-27 12:15:50', 2, 1)[0m
++  [4;35;1mWidget Create (0.000211)[0m   [0mINSERT INTO `widgets` (`name`, `updated_at`, `foo`, `version`) VALUES('new widget', '2007-11-27 12:15:50', NULL, 1)[0m
++  [4;36;1mWidget::Version Create (0.000184)[0m   [0;1mINSERT INTO `widget_versions` (`name`, `updated_at`, `widget_id`, `version`) VALUES('new widget', '2007-11-27 12:15:50', 3, 1)[0m
++  [4;35;1mWidget Create (0.000153)[0m   [0mINSERT INTO `widgets` (`name`, `updated_at`, `foo`, `version`) VALUES('new widget', '2007-11-27 12:15:50', NULL, 1)[0m
++  [4;36;1mWidget::Version Create (0.000151)[0m   [0;1mINSERT INTO `widget_versions` (`name`, `updated_at`, `widget_id`, `version`) VALUES('new widget', '2007-11-27 12:15:50', 4, 1)[0m
++  [4;35;1mSQL (0.000200)[0m   [0mSELECT count(*) AS count_all FROM `widgets` [0m
++  [4;36;1mSQL (0.000142)[0m   [0;1mSELECT count(*) AS count_all FROM `widget_versions` [0m
++  [4;35;1mSQL (0.001566)[0m   [0mROLLBACK[0m
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department.rb acts_as_versioned_tmp/test/fixtures/department.rb
 --- acts_as_versioned/test/fixtures/department.rb	1970-01-01 01:00:00.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/department.rb	2007-11-27 11:03:57.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/department.rb	2007-11-27 11:03:57.000000000 +0100
 @@ -0,0 +1,12 @@
 +class Department < ActiveRecord::Base
 +  acts_as_versioned :if_changed => [:name],
@@ -538,9 +1034,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department.rb acts_as_v
 +  end
 +
 +end
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2.rb acts_as_versioned_my/test/fixtures/department2.rb
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2.rb acts_as_versioned_tmp/test/fixtures/department2.rb
 --- acts_as_versioned/test/fixtures/department2.rb	1970-01-01 01:00:00.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/department2.rb	2007-11-27 11:08:51.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/department2.rb	2007-11-27 11:08:51.000000000 +0100
 @@ -0,0 +1,12 @@
 +class Department2 < ActiveRecord::Base
 +  acts_as_versioned :if_changed => [:name],
@@ -554,9 +1050,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2.rb acts_as_
 +  end
 +
 +end
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2_versions.yml acts_as_versioned_my/test/fixtures/department2_versions.yml
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2_versions.yml acts_as_versioned_tmp/test/fixtures/department2_versions.yml
 --- acts_as_versioned/test/fixtures/department2_versions.yml	1970-01-01 01:00:00.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/department2_versions.yml	2007-11-27 11:14:45.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/department2_versions.yml	2007-11-27 11:14:45.000000000 +0100
 @@ -0,0 +1,11 @@
 +edition:
 +        id: 1
@@ -569,9 +1065,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2_versions.ym
 +        department2_id: 2
 +        version_a: 1
 +        name: Press
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2s.yml acts_as_versioned_my/test/fixtures/department2s.yml
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2s.yml acts_as_versioned_tmp/test/fixtures/department2s.yml
 --- acts_as_versioned/test/fixtures/department2s.yml	1970-01-01 01:00:00.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/department2s.yml	2007-11-27 11:01:23.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/department2s.yml	2007-11-27 11:01:23.000000000 +0100
 @@ -0,0 +1,13 @@
 +edition:
 +        id: 1
@@ -586,9 +1082,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department2s.yml acts_a
 +        lft: 3
 +        rgt: 4
 +        name: Press
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department_versions.yml acts_as_versioned_my/test/fixtures/department_versions.yml
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department_versions.yml acts_as_versioned_tmp/test/fixtures/department_versions.yml
 --- acts_as_versioned/test/fixtures/department_versions.yml	1970-01-01 01:00:00.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/department_versions.yml	2007-11-26 18:46:03.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/department_versions.yml	2007-11-26 18:46:03.000000000 +0100
 @@ -0,0 +1,11 @@
 +edition:
 +        id: 1
@@ -601,9 +1097,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/department_versions.yml
 +        department_id: 2
 +        version_a: 1
 +        name: Press
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/departments.yml acts_as_versioned_my/test/fixtures/departments.yml
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/departments.yml acts_as_versioned_tmp/test/fixtures/departments.yml
 --- acts_as_versioned/test/fixtures/departments.yml	1970-01-01 01:00:00.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/departments.yml	2007-11-26 18:47:53.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/departments.yml	2007-11-26 18:47:53.000000000 +0100
 @@ -0,0 +1,13 @@
 +edition:
 +        id: 1
@@ -618,9 +1114,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/departments.yml acts_as
 +        lft: 3
 +        rgt: 4
 +        name: Press
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/locked_pages_revisions.yml acts_as_versioned_my/test/fixtures/locked_pages_revisions.yml
---- acts_as_versioned/test/fixtures/locked_pages_revisions.yml	2007-11-27 11:58:46.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/locked_pages_revisions.yml	2007-10-31 21:06:11.000000000 +0100
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/locked_pages_revisions.yml acts_as_versioned_tmp/test/fixtures/locked_pages_revisions.yml
+--- acts_as_versioned/test/fixtures/locked_pages_revisions.yml	2007-11-27 12:20:35.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/locked_pages_revisions.yml	2007-10-31 21:06:11.000000000 +0100
 @@ -2,26 +2,26 @@
    id: 1
    page_id: 1
@@ -652,9 +1148,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/locked_pages_revisions.
 -  version: 24
 +  lock_version: 24
    version_type: SpecialLockedPage
-diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/page.rb acts_as_versioned_my/test/fixtures/page.rb
---- acts_as_versioned/test/fixtures/page.rb	2007-11-27 11:58:46.000000000 +0100
-+++ acts_as_versioned_my/test/fixtures/page.rb	2007-10-31 21:06:11.000000000 +0100
+diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/page.rb acts_as_versioned_tmp/test/fixtures/page.rb
+--- acts_as_versioned/test/fixtures/page.rb	2007-11-27 12:20:35.000000000 +0100
++++ acts_as_versioned_tmp/test/fixtures/page.rb	2007-10-31 21:06:11.000000000 +0100
 @@ -10,7 +10,7 @@
        base.belongs_to :author
        base.belongs_to :revisor, :class_name => 'Author'
@@ -684,9 +1180,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/fixtures/page.rb acts_as_version
 -end
 \ No newline at end of file
 +end
-diff -Nur --exclude=.svn acts_as_versioned/test/schema.rb acts_as_versioned_my/test/schema.rb
---- acts_as_versioned/test/schema.rb	2007-11-27 11:58:46.000000000 +0100
-+++ acts_as_versioned_my/test/schema.rb	2007-11-27 11:14:16.000000000 +0100
+diff -Nur --exclude=.svn acts_as_versioned/test/schema.rb acts_as_versioned_tmp/test/schema.rb
+--- acts_as_versioned/test/schema.rb	2007-11-27 12:20:35.000000000 +0100
++++ acts_as_versioned_tmp/test/schema.rb	2007-11-27 11:14:16.000000000 +0100
 @@ -17,12 +17,12 @@
      t.column :author_id, :integer
      t.column :revisor_id, :integer
@@ -754,9 +1250,9 @@ diff -Nur --exclude=.svn acts_as_versioned/test/schema.rb acts_as_versioned_my/t
 +  end
 +
  end
-diff -Nur --exclude=.svn acts_as_versioned/test/versioned_test.rb acts_as_versioned_my/test/versioned_test.rb
---- acts_as_versioned/test/versioned_test.rb	2007-11-27 11:58:46.000000000 +0100
-+++ acts_as_versioned_my/test/versioned_test.rb	2007-11-27 11:44:23.000000000 +0100
+diff -Nur --exclude=.svn acts_as_versioned/test/versioned_test.rb acts_as_versioned_tmp/test/versioned_test.rb
+--- acts_as_versioned/test/versioned_test.rb	2007-11-27 12:20:35.000000000 +0100
++++ acts_as_versioned_tmp/test/versioned_test.rb	2007-11-27 11:44:23.000000000 +0100
 @@ -2,10 +2,28 @@
  require File.join(File.dirname(__FILE__), 'fixtures/page')
  require File.join(File.dirname(__FILE__), 'fixtures/widget')
