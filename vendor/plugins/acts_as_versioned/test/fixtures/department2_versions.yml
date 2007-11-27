@@ -1,0 +1,11 @@
+edition:
+        id: 1
+        department2_id: 1
+        version_a: 1
+        name: Edition
+
+press:
+        id: 2
+        department2_id: 2
+        version_a: 1
+        name: Press
