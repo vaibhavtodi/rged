@@ -13,6 +13,6 @@ postgresql:
 mysql:
   :adapter: mysql
   :host: localhost
-  :username: root
+  :username: rails
   :password:
   :database: acts_as_versioned_plugin_test
