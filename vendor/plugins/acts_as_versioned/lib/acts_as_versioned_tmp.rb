@@ -49,6 +49,21 @@ module ActiveRecord #:nodoc:
     #   page.revert_to(page.versions.last) # using versioned instance
     #   page.title         # => 'hello world'
     #
+    #   page.versions.earliest # efficient query to find the first version
+    #   page.versions.latest   # efficient query to find the most recently created version
+    #
+    #
+    # Simple Queries to page between versions
+    #
+    #   page.versions.before(version)
+    #   page.versions.after(version)
+    #
+    # Access the previous/next versions from the versioned model itself
+    #
+    #   version = page.versions.latest
+    #   version.previous # go back one version
+    #   version.next     # go forward one version
+    #
     # See ActiveRecord::Acts::Versioned::ClassMethods#acts_as_versioned for configuration options
     module Versioned
       CALLBACKS = [:set_new_version, :save_version_on_create, :save_version?, :clear_changed_attributes]
@@ -160,7 +175,7 @@ module ActiveRecord #:nodoc:
 
           cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column,
             :version_column, :max_version_limit, :track_changed_attributes, :version_condition, :version_sequence_name, :non_versioned_columns,
-            :version_association_options
+            :version_association_options, :last_version, :super_class
 
           # legacy
           alias_method :non_versioned_fields,  :non_versioned_columns
@@ -180,13 +195,15 @@ module ActiveRecord #:nodoc:
           self.version_column               = options[:version_column]     || 'version'
           self.version_sequence_name        = options[:sequence_name]
           self.max_version_limit            = options[:limit].to_i
+          self.last_version                 = options[:last_version] || false
+          self.super_class                  = options[:super_class] || ActiveRecord::Base
           self.version_condition            = options[:if] || true
-          self.non_versioned_columns        = [self.primary_key, inheritance_column, version_column, 'lock_version', 'lft', 'rgt', 'parent_id',  versioned_inheritance_column]
+          self.non_versioned_columns        = [self.primary_key, inheritance_column, version_column, 'lock_version', versioned_inheritance_column]
           self.version_association_options  = {
                                                 :class_name  => "#{self.to_s}::#{versioned_class_name}",
                                                 :foreign_key => "#{versioned_foreign_key}",
-                                                :order       => "#{version_column}",
-                                                :dependent   => :delete_all
+                                                :order       => "#{version_column}"
+
                                               }.merge(options[:association_options] || {})
 
           if block_given?
@@ -198,13 +215,49 @@ module ActiveRecord #:nodoc:
             options[:extend] = self.const_get(extension_module_name)
           end
 
+                    # create the dynamic versioned model
+          const_set(versioned_class_name, Class.new(super_class)).class_eval do
+            def self.reloadable? ; false ; end
+            # find first version before the given version
+            def self.before(version)
+              find :first, :order => "`#{original_class.version_column}` desc",
+                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` < ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
+            end
+
+            # find first version after the given version.
+            def self.after(version)
+              find :first, :order => "`#{original_class.version_column}`",
+                :conditions => ["`#{original_class.versioned_foreign_key}` = ? and `#{original_class.version_column}` > ?", version.send(original_class.versioned_foreign_key), version.send("#{original_class.version_column}")]
+            end
+
+            def previous
+              self.class.before(self)
+            end
+
+            def next
+              self.class.after(self)
+            end
+          end
+          
           class_eval do
-            has_many :versions, version_association_options
+            has_many :versions, version_association_options do
+              # finds earliest version of this record
+              def earliest
+                @earliest ||= find(:first)
+              end
+
+              # find latest version of this record
+              def latest
+                @latest ||= find(:first, :order => "`#{original_class.version_column}` desc")
+              end
+            end
+            
             before_save  :set_new_version
             after_create :save_version_on_create
             after_update :save_version
             after_save   :clear_old_versions
             after_save   :clear_changed_attributes
+            before_destroy :reset_version
 
             unless options[:if_changed].nil?
               self.track_changed_attributes = true
@@ -219,11 +272,10 @@ module ActiveRecord #:nodoc:
             include options[:extend] if options[:extend].is_a?(Module)
           end
 
-          # create the dynamic versioned model
-          const_set(versioned_class_name, Class.new(superclass)).class_eval do
-            def self.reloadable? ; false ; end
-          end
 
+
+          versioned_class.cattr_accessor :original_class
+          versioned_class.original_class = self
           versioned_class.set_table_name versioned_table_name
           versioned_class.belongs_to self.to_s.demodulize.underscore.to_sym,
             :class_name  => "::#{self.to_s}",
@@ -236,6 +288,25 @@ module ActiveRecord #:nodoc:
       module ActMethods
         def self.included(base) # :nodoc:
           base.extend ClassMethods
+        end
+
+        def reset_version(last = 0)
+          sql = nil
+         # latest = versions.find(:first, :order => "`#{self.class.version_column}` desc")
+          if last < 0
+            last = 0
+          end
+          if last == 0
+            if self.class.last_version
+              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{self.send(self.class.version_column)} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+            else
+              sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.versioned_foreign_key}` = #{self.id}"
+            end
+          else
+            self.revert_to!(last)
+            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
+          end
+          self.class.versioned_class.connection.execute sql
         end
 
         # Saves a version of the model if applicable
@@ -258,16 +329,16 @@ module ActiveRecord #:nodoc:
           return if self.class.max_version_limit == 0
           excess_baggage = send(self.class.version_column).to_i - self.class.max_version_limit
           if excess_baggage > 0
-            sql = "DELETE FROM #{self.class.versioned_table_name} WHERE #{self.class.version_column} <= #{excess_baggage} AND #{self.class.versioned_foreign_key} = #{self.id}"
+            sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <= #{excess_baggage} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
             self.class.versioned_class.connection.execute sql
           end
         end
 
-        # Finds a specific version of this model.
+              # Finds a specific version of this model.
         def find_version(version)
           return version if version.is_a?(self.class.versioned_class)
           return nil if version.is_a?(ActiveRecord::Base)
-          find_versions(:conditions => ["#{version_column} = ?", version], :limit => 1).first
+          find_versions(:conditions => ["`#{version_column}` = ?", version], :limit => 1).first
         end
 
         # Finds versions of this model.  Takes an options hash like <tt>find</tt>
@@ -328,7 +399,7 @@ module ActiveRecord #:nodoc:
         # Clones a model.  Used when saving a new version or reverting a model's version.
         def clone_versioned_model(orig_model, new_model)
           self.versioned_attributes.each do |key|
-            new_model.send("#{key}=", orig_model.attributes[key]) if orig_model.has_attribute?(key)
+            new_model.send("#{key}=", orig_model.send(key)) if orig_model.has_attribute?(key)
           end
 
           if orig_model.is_a?(self.class.versioned_class)
@@ -376,6 +447,8 @@ module ActiveRecord #:nodoc:
           self.class.without_locking(&block)
         end
 
+        def empty_callback() end #:nodoc:
+
         protected
           # sets the new version before saving, unless you're using optimistic locking.  In that case, let it take care of the version.
           def set_new_version
@@ -400,26 +473,19 @@ module ActiveRecord #:nodoc:
             write_attribute(attr_name, attr_value_for_db)
           end
 
-        private
-          CALLBACKS.each do |attr_name|
-            alias_method "orig_#{attr_name}".to_sym, attr_name
-          end
-
-          def empty_callback() end #:nodoc:
-
         module ClassMethods
           # Finds a specific version of a specific row of this model
           def find_version(id, version)
             find_versions(id,
-              :conditions => ["#{versioned_foreign_key} = ? AND #{version_column} = ?", id, version],
+              :conditions => ["`#{versioned_foreign_key}` = ? AND `#{version_column}` = ?", id, version],
               :limit => 1).first
           end
 
           # Finds versions of a specific model.  Takes an options hash like <tt>find</tt>
           def find_versions(id, options = {})
             versioned_class.find :all, {
-              :conditions => ["#{versioned_foreign_key} = ?", id],
-              :order      => "#{version_column}" }.merge(options)
+              :conditions => ["`#{versioned_foreign_key}` = ?", id],
+              :order      => "`#{version_column}`" }.merge(options)
           end
 
           # Returns an array of columns that are versioned.  See non_versioned_columns
@@ -466,7 +532,6 @@ module ActiveRecord #:nodoc:
           # Rake migration task to drop the versioned table
           def drop_versioned_table
             self.connection.drop_table versioned_table_name
-            self.connection.remove_column table_name, version_column
           end
 
           # Executes the block with the versioning callbacks disabled.
@@ -478,16 +543,17 @@ module ActiveRecord #:nodoc:
           def without_revision(&block)
             class_eval do
               CALLBACKS.each do |attr_name|
+                alias_method "orig_#{attr_name}".to_sym, attr_name
                 alias_method attr_name, :empty_callback
               end
             end
-            result = block.call
+            block.call
+          ensure
             class_eval do
               CALLBACKS.each do |attr_name|
                 alias_method attr_name, "orig_#{attr_name}".to_sym
               end
             end
-            result
           end
 
           # Turns off optimistic locking for the duration of the block

@@ -175,7 +175,7 @@ module ActiveRecord #:nodoc:
 
           cattr_accessor :versioned_class_name, :versioned_foreign_key, :versioned_table_name, :versioned_inheritance_column,
             :version_column, :max_version_limit, :track_changed_attributes, :version_condition, :version_sequence_name, :non_versioned_columns,
-            :version_association_options, :last_version
+            :version_association_options, :last_version, :super_class
 
           # legacy
           alias_method :non_versioned_fields,  :non_versioned_columns
@@ -196,6 +196,7 @@ module ActiveRecord #:nodoc:
           self.version_sequence_name        = options[:sequence_name]
           self.max_version_limit            = options[:limit].to_i
           self.last_version                 = options[:last_version] || false
+          self.super_class                  = options[:super_class] || ActiveRecord::Base
           self.version_condition            = options[:if] || true
           self.non_versioned_columns        = [self.primary_key, inheritance_column, version_column, 'lock_version', versioned_inheritance_column]
           self.version_association_options  = {
@@ -214,40 +215,8 @@ module ActiveRecord #:nodoc:
             options[:extend] = self.const_get(extension_module_name)
           end
 
-          class_eval do
-            has_many :versions, version_association_options do
-              # finds earliest version of this record
-              def earliest
-                @earliest ||= find(:first)
-              end
-
-              # find latest version of this record
-              def latest
-                @latest ||= find(:first, :order => "`#{original_class.version_column}` desc")
-              end
-            end
-            before_save  :set_new_version
-            after_create :save_version_on_create
-            after_update :save_version
-            after_save   :clear_old_versions
-            after_save   :clear_changed_attributes
-            before_destroy :reset_version
-
-            unless options[:if_changed].nil?
-              self.track_changed_attributes = true
-              options[:if_changed] = [options[:if_changed]] unless options[:if_changed].is_a?(Array)
-              options[:if_changed].each do |attr_name|
-                define_method("#{attr_name}=") do |value|
-                  write_changed_attribute attr_name, value
-                end
-              end
-            end
-
-            include options[:extend] if options[:extend].is_a?(Module)
-          end
-
-          # create the dynamic versioned model
-          const_set(versioned_class_name, Class.new(ActiveRecord::Base)).class_eval do
+                    # create the dynamic versioned model
+          const_set(versioned_class_name, Class.new(super_class)).class_eval do
             def self.reloadable? ; false ; end
             # find first version before the given version
             def self.before(version)
@@ -270,6 +239,41 @@ module ActiveRecord #:nodoc:
             end
           end
 
+          class_eval do
+            has_many :versions, version_association_options do
+              # finds earliest version of this record
+              def earliest
+                @earliest ||= find(:first)
+              end
+
+              # find latest version of this record
+              def latest
+                @latest ||= find(:first, :order => "`#{original_class.version_column}` desc")
+              end
+            end
+
+            before_save  :set_new_version
+            after_create :save_version_on_create
+            after_update :save_version
+            after_save   :clear_old_versions
+            after_save   :clear_changed_attributes
+            before_destroy :reset_version
+
+            unless options[:if_changed].nil?
+              self.track_changed_attributes = true
+              options[:if_changed] = [options[:if_changed]] unless options[:if_changed].is_a?(Array)
+              options[:if_changed].each do |attr_name|
+                define_method("#{attr_name}=") do |value|
+                  write_changed_attribute attr_name, value
+                end
+              end
+            end
+
+            include options[:extend] if options[:extend].is_a?(Module)
+          end
+
+
+
           versioned_class.cattr_accessor :original_class
           versioned_class.original_class = self
           versioned_class.set_table_name versioned_table_name
@@ -286,9 +290,10 @@ module ActiveRecord #:nodoc:
           base.extend ClassMethods
         end
 
+        # reset all version if last_version option equal to false or last equal to 0
+        # and keep the current the current_version if last_version equal to true or the version defined by last
         def reset_version(last = 0)
           sql = nil
-          latest = versions.find(:first, :order => "`#{self.class.version_column}` desc")
           if last < 0
             last = 0
           end
@@ -303,7 +308,11 @@ module ActiveRecord #:nodoc:
             sql = "DELETE FROM `#{self.class.versioned_table_name}` WHERE `#{self.class.version_column}` <> #{last} AND `#{self.class.versioned_foreign_key}` = #{self.id}"
           end
           self.class.versioned_class.connection.execute sql
-         # latest
+          if last == 0
+            versions.find(:first, :order => "`#{self.class.version_column}` desc")
+          else
+            self
+          end
         end
 
         # Saves a version of the model if applicable
