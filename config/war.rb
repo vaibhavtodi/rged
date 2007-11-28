@@ -9,4 +9,5 @@ maven_library 'mysql', 'mysql-connector-java', '5.1.5'
 add_gem 'gettext'
 add_gem 'rubyzip'
 add_gem 'jruby-openssl'
+#add_gem 'slave'
 
