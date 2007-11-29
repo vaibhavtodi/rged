@@ -8,20 +8,6 @@ require File.dirname(__FILE__) + '/../lib/java.ecore.importer.jar'
 
 include_class 'JavaEcoreImporter'
 
-#include_class java.io.IOException;
-#include_class java.util.HashMap;
-#include_class java.util.Iterator;
-
-#include_class org.eclipse.emf.common.util.BasicEList;
-#include_class org.eclipse.emf.common.util.EList;
-#include_class org.eclipse.emf.common.util.TreeIterator;
-#include_class org.eclipse.emf.common.util.URI;
-#include_class org.eclipse.emf.ecore.EClass;
-#include_class org.eclipse.emf.ecore.EObject;
-#include_class org.eclipse.emf.ecore.EPackage;
-#include_class org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-
-
 class JREcoreImporter <  JavaEcoreImporter
 
 #  def initializer
