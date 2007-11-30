@@ -1,6 +1,17 @@
 <link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-gray.css"/>
 <script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
+ <style type="text/css"> 
+.progress{
+ 	   width: 1px;
+ 	   height: 16px;
+ 	   color: white;
+ 	   font-size: 12px;
+ 	   overflow: hidden;
+ 	   background-color: #287B7E;
+ 	   padding-left: 5px;
+ 	 }
+</style>
 <script type="text/javascript">
 Ext.onReady(function() {
 Ext.QuickTips.init();
@@ -330,11 +341,26 @@ ctree.getRootNode().expand();
 
 //ctree.on("beforenodedrop", OnBeforeNodeDrop);
 ctree.on("contextmenu", CContextMenu);
+
+
+
 });
+
+function progressPercent(bar, percentage) {
+ 	   document.getElementById(bar).style.width =  parseInt(percentage*2)+"px";
+ 	   document.getElementById(bar).innerHTML= "<div align='center'>"+percentage+"%</div>"
+ 	 }
 
 </script>
 
 <h3><%= _("Department List") %></h3>
+<div id='progressbar' class="progress"></div>
+<form action = "/department/unpredictable_departments" method= "post" >
+<p><%= submit_tag _('Create Departments') %></p>
+</form>
+<br>
+
+
 <div id="tree-div"></div>
 <br>
 <h3><%= _("Countries List") %></h3>

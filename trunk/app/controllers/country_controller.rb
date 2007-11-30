@@ -1,5 +1,17 @@
 class CountryController < ApplicationController
 
+def indexz
+    render :nothing => true
+end
+
+def donez
+    flash[:notice] = _("Your Worker task has completed")
+    MiddleMan.delete_worker(session[:job_key])
+    #render :nothing => true
+    #render :inline => _("Your FooWorker task has completed")
+    render :action => "list"
+end
+  
 def list
   if request.xhr? && params[:node] # json_node
     p_id = params[:node].to_i > 0 ? params[:node] : nil

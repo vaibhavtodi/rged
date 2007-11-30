@@ -1,14 +1,55 @@
 class DepartmentController < ApplicationController
 
   def index
+    #render :nothing => true
     redirect_back_or_default(:controller => 'department', :action => 'list')
   end
 
   # GETs should be safe (see http://www.w3.org/2001/tag/doc/whenToUseGet.html)
   verify :method => :post, :only => [ :destroy, :rename ],
      :redirect_to => { :action => :list }
+  
+  def unpredictable_departments
+    if not MiddleMan.jobs[:create_departments]
+      MiddleMan.new_worker(
+        :class => :department_creating_worker,
+        :job_key => :create_departments,
+        :args => 2
+      )
+    end
+    worker = MiddleMan.worker(:create_departments)
+    logger.info("\033[33m\t# Worker #{worker.jobkey} start at: #{worker.results[:do_work_time].inspect} \033[m")
+    #while (Country.find(worker.id_country) == nil)
+    #  worker.set_id_country(1 + random(Country.count));
+    #end
+    #logger.info("\033[33m Do Work \033[m")
+    #logger.info("\033[33m\tid_country: #{worker.id_country} \033[m")
+    #worker.create_list
+    #worker.delete
+    #worker.progress
+#    if request.xhr?
+#      render :update do |page|
+#        progress_percent = MiddleMan.get_worker(session[:job_key]).progress
+#        logger.info("\033[33m #{progress_percent} \033[m")
+#        page.call('progressPercent', 'progressbar', progress_percent)
+#        page.redirect_to(:controller => 'department', :action => 'done')   if progress_percent >= 100
+#      end
+#    else
+      redirect_to :action => 'index'
+#    end
+  end
+ 
+  def done
+    flash[:notice] = _("Your Worker task has completed")
+    MiddleMan.delete_worker(session[:job_key])
+    render :nothing => true
+    #render :inline => _("Your FooWorker task has completed")
+  #render :action => "list"
+  end   
+  
 
   def list
+         
     if request.xhr? && params[:node] # json_node
       p_id = params[:node].to_i > 0 ? params[:node] : nil
       roots = Department.find(:all, :conditions => {:parent_id => p_id}, :order => 'lft').collect{ |r|
@@ -84,8 +125,6 @@ class DepartmentController < ApplicationController
       end
     else
       if department.save #&& department.reset_version(version + 1)
-        v = department.versions.latest
-        logger.info("\033[33m #{v.toto} \033[m")
         redirect_back_or_default(:controller => 'department', :action => 'list')
         flash[:notice] = _("Department Updated")
       else
