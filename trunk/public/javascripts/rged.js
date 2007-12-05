@@ -14,10 +14,10 @@ Ext.override(Ext.grid.GridPanel, {
 Ext.override(Ext.ux.FileTreePanel, {
 	onNodeDragOver: function(e) {
              if(e.target.disabled || e.dropNode && e.dropNode.parentNode === e.target.parentNode && e.target.isLeaf()) {
-                e.cancel = true;
+		 e.cancel = true;
              }
         },
-        onBeforeNodeDrop: function (e) {
+	    onBeforeNodeDrop: function (e) {
             var s = e.dropNode;
             var d = e.target.leaf ? e.target.parentNode : e.target;
             var oldName = '';
@@ -123,12 +123,12 @@ Rged.prototype =  {
         this.tree.on('beforeopen', this.tree_onDownload, this);
 
     },
- 
+
     tree_onDownload: function(tree, node, mode) {
         window.location = '/directory/download/?file=' + node.id;
         return false;
     },
-    
+
     tree_onClick: function (node, elt) {
         var path = '/';
         if (node.isLeaf())
@@ -167,19 +167,19 @@ Rged.prototype =  {
     menu_onRefresh: function(o, e) {
         this.change_path(this.path);
     },
-    
+
     menu_DropDelete: function(n, dd, e, data){
        if (e.selections)
            this.deleteFile(e.selections[0]);
        else
            this.tree.deleteNode(e.node);
    },
-   
+
    menu_DropRename: function(n, dd, e, data){
        if (e.selections)
            this.renameFile(e.selections[0]);
    },
-   
+
    menu_DropDownload: function(n, dd, e, data){
        if (e.selections)
            this.downloadFile(e.selections[0]);
@@ -193,27 +193,27 @@ Rged.prototype =  {
        this.menu.addButton({
            id: 'rename',
            text: 'Rename',
-           cls: 'x-btn-text-icon menu-rename', 
-           handler: this.menu_onRename, 
+           cls: 'x-btn-text-icon menu-rename',
+           handler: this.menu_onRename,
            scope: this
            });
        this.menu.addButton({
            id: 'delete',
            text: 'Delete',
-            cls: 'x-btn-text-icon menu-delete', 
-            handler: this.menu_onDelete, 
+            cls: 'x-btn-text-icon menu-delete',
+            handler: this.menu_onDelete,
             scope: this});
        this.menu.addButton({
            id: 'download',
-           text: 'Download', 
-           cls: 'x-btn-text-icon menu-download', 
-           handler: this.menu_onDownload, 
+           text: 'Download',
+           cls: 'x-btn-text-icon menu-download',
+           handler: this.menu_onDownload,
            scope: this});
        this.menu.addButton({
            id: 'refresh',
-           text: 'Refresh', 
-           cls: 'x-btn-text-icon menu-refresh', 
-           handler: this.menu_onRefresh, 
+           text: 'Refresh',
+           cls: 'x-btn-text-icon menu-refresh',
+           handler: this.menu_onRefresh,
            scope: this});
        this.textBox = new Ext.form.TextField ({
            cls: 'rged-adress',
@@ -223,7 +223,7 @@ Rged.prototype =  {
        this.menu.addField(this.textBox);
        this.menu.addFill ();
        this.menu.addButton({
-           text: 'Logout', 
+           text: 'Logout',
            cls: 'x-btn-text-icon menu-logout',
            handler: function(o, e) {
                window.location = '/account/logout/';
@@ -234,11 +234,11 @@ Rged.prototype =  {
     // Initilize the global layout
     init_layout: function () {
 //         this.northPanel = new Ext.Panel();
-//         
+//
 //         this.westPanel = new Ext.Panel();
-//            
+//
 //            this.centerPanel = new Ext.Panel();
-            
+
             var mainLayout = new Ext.Viewport({
                 layout:'border',
                 items: [
@@ -248,7 +248,7 @@ Rged.prototype =  {
                 split:false,
                 initialSize: 32,
                 titlebar: false,
-                fitToFrame: true, 
+                fitToFrame: true,
                 closable: false
                 },
                     {
@@ -264,11 +264,11 @@ Rged.prototype =  {
                 useShim: true,
                 autoScroll: true,
                 cmargins: {top:2,bottom:2,right:2,left:2},
-                fitToFrame: true, 
-                closable: false, 
+                fitToFrame: true,
+                closable: false,
                 title: 'Folders'
             },
-            {                     
+            {
                xtype:'panel',
                 region: 'center',
                 titlebar: true,
@@ -278,8 +278,8 @@ Rged.prototype =  {
                 tabPosition: 'top',
                 closeOnTab: true,
                 resizeTabs: true,
-                fitToFrame: true, 
-                autoScroll: true, 
+                fitToFrame: true,
+                autoScroll: true,
                 resizeEl: this.grid
             }
                 ]
@@ -352,32 +352,32 @@ Rged.prototype =  {
                {
                    id: 'icon',
                    header: '<img src="/images/icons/arrow_up.png" width="16" height="18"/>',
-                   width: 25, sortable: false, renderer: icon, dataIndex: 'cls', 
+                   width: 25, sortable: false, renderer: icon, dataIndex: 'cls',
                    fixed : true
                },
                {
                    id:'name',
-                   header: "Name", 
-                   width: 160, 
-                   sortable: true, 
-                   locked:false, 
+                   header: "Name",
+                   width: 160,
+                   sortable: true,
+                   locked:false,
                    dataIndex: 'name',
                    editor: new Ext.grid.GridEditor(new Ext.form.TextField({
                                 allowBlank: false}))},
                 {
-                    header: "Size", 
-                    width: 75, 
-                    sortable: true, 
-                    renderer: size, 
+                    header: "Size",
+                    width: 75,
+                    sortable: true,
+                    renderer: size,
                     dataIndex: 'size'},
                 {
-                    header: "Last Updated", 
-                    width: 85, 
-                    sortable: true, 
-                    renderer: Ext.util.Format.dateRenderer('m/d/Y'), 
+                    header: "Last Updated",
+                    width: 85,
+                    sortable: true,
+                    renderer: Ext.util.Format.dateRenderer('m/d/Y'),
                     dataIndex: 'lastChange'
-                    
-                } 
+
+                }
             ],
             autoHeight:true,
             sm:  new Ext.grid.RowSelectionModel({singleSelect: true}),
@@ -406,8 +406,8 @@ Rged.prototype =  {
         }
         //this.tree.expandPath(path.substrsub, 'path', function (success, node) { if (success) node.select()});
     },
-    
-    
+
+
     grid_onCellClick: function( grid, rowIndex, columnIndex, e )
     {
         var rec = grid.getStore().getAt(rowIndex);
@@ -416,7 +416,7 @@ Rged.prototype =  {
             p = p.substr(0, p.length - 1)
         this.tree.selectPath(p, 'text', function (success, node) { if (success) node.expand() });
     },
-    
+
     //When the user click on the arrox up in the first column
     grid_onHeaderClick: function( grid, columnIndex, e )
     {
@@ -527,7 +527,7 @@ Rged.prototype =  {
                         }
                 }
                 , this
-        );       
+        );
     },
 
     rename: function (newname, oldname) {
@@ -579,7 +579,7 @@ Rged.prototype =  {
                 , this
         );
     },
-    
+
     downloadFile: function(sel) {
         window.location = '/directory/download/?file=' + sel.get('path');
     },
@@ -605,7 +605,7 @@ Rged.prototype =  {
 
 
                     // open
-                    { 
+                    {
                             key: Ext.EventObject.ENTER // F2 key = edit
                             , scope: this
                             , fn: function(key, e) {
@@ -614,7 +614,7 @@ Rged.prototype =  {
                     }}
 
                     // edit
-                   , { 
+                   , {
                             key: 113 // F2 key = edit
                             , scope: this
                             , fn: function(key, e) {
@@ -687,8 +687,8 @@ Rged.prototype =  {
        };
        var ddgrid = new Ext.dd.DropTarget(this.grid.getView().mainBody, {
            ddGroup: 'TreeDD',
-           notifyDrop: function(dd, e, data) 
-           { 
+           notifyDrop: function(dd, e, data)
+           {
                rged.grid_notifyDrop.apply(rged, arguments);
            },
 
@@ -696,17 +696,17 @@ Rged.prototype =  {
            {
               var drop=dd.getDragData(e).selections[0];
               return (drop.data.cls == 'folder')?'x-dd-drop-ok-add':'x-dd-drop-nodrop';
-           } });       
+           } });
     },
-    
-   grid_notifyDrop: function(dd, e, data) 
-   { 
+
+   grid_notifyDrop: function(dd, e, data)
+   {
       var drop=dd.getDragData(e).selections[0];
       var drag=data.selections[0];
       if (drop.data.cls == 'folder')
         this.rename(drop.id + "/" + drag.data.name, drag.id);
    },
-    
+
     init : function() {
        Ext.QuickTips.init();
        this.init_tree();

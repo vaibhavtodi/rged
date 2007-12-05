@@ -1,7 +1,8 @@
 <link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-gray.css"/>
 <script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
- <style type="text/css"> 
+<link rel="stylesheet" type="text/css" href="/stylesheets/filetree.css"/>
+ <style type="text/css">
 .progress{
  	   width: 1px;
  	   height: 16px;
@@ -13,9 +14,11 @@
  	 }
 </style>
 <script type="text/javascript">
+Ext.BLANK_IMAGE_URL = '/javascripts/extjs/resources/images/default/s.gif';
+
 Ext.onReady(function() {
-Ext.QuickTips.init();
-var tree = new Ext.tree.TreePanel({
+	Ext.QuickTips.init();
+	var tree = new Ext.tree.TreePanel({
         el:'tree-div',
         autoHeight:true,
         animate:true,
@@ -25,165 +28,151 @@ var tree = new Ext.tree.TreePanel({
         loader: new Ext.tree.TreeLoader({ dataUrl:'/department/<%= params[:action] %>'})
     });
 
-var cmdCallback= function (options, bSuccess, response) {
-            var o;
-            var showMsg = true;
-            if (true === bSuccess) {
-                o = Ext.decode(response.responseText);
-                if (true === o.success) {
-                } else {
-                        Ext.Msg.alert(this.errorText, o.error);
-                }
-            }
-        };
+	var cmdCallback= function (options, bSuccess, response) {
+    	var o;
+    	var showMsg = true;
+    	if (true === bSuccess) {
+        	o = Ext.decode(response.responseText);
+    		if (true === o.success) {
+    		} else {
+            	Ext.Msg.alert(this.errorText, o.error);
+			}
+		}
+	};
 
-var OnBeforeNodeDrop = function(tree, node, oldParent, newParent, index) {
-      var options = {
-              url: '/department/move/'+node.id
-              , method: 'post'
-              , callback: cmdCallback
-              , params: {id : node.id, parent_id: newParent.id}
-      };
-    if (node.id !== "0")
-      conn = new Ext.data.Connection().request(options);
-    };
+	var OnBeforeNodeDrop = function(tree, node, oldParent, newParent, index) {
+  		var options = {
+      		url: '/department/move/'+node.id
+  			, method: 'post'
+  			, callback: cmdCallback
+  			, params: {id : node.id, parent_id: newParent.id}
+		};
+		if (node.id !== "0")
+			conn = new Ext.data.Connection().request(options);
+	};
 
-var Destroy = function (node, is_all) {
-    var cmdCallback2  = function (options, bSuccess, response) {
-            var o;
-            var showMsg = true;
-            if (true === bSuccess) {
-                o = Ext.decode(response.responseText);
-                if (true === o.success) {
-                    var n = tree.getNodeById(node.id);
-                    n.parentNode.removeChild(n);
-                } else {
-                        Ext.Msg.alert(this.errorText, o.error);
-                }
-            }
-        };
-    Ext.Msg.confirm('<%= _("Remove") %>'
-                , '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
-                , function(response) {
-                        var conn;
-                        // do nothing if answer is not yes
-                        if('yes' !== response) {
-                                return;
-                        }
-                        // answer is yes
-                        else {
-                                // setup request options
-                                options = {
-                                            url: '/department/destroy/'+node.id+'.json'
-                                        , method: 'post'
-                                        , callback: cmdCallback2
-                                        , params: {
-                                                id:node.id
-                                                , name:node.text
-                                                , only_one:is_all
-                                        }
-                                };
-                                // send request
-                               if (node.id !== "0")
-                                    conn = new Ext.data.Connection().request(options);
-                        }
-                }
-                , tree
-        );
-    };
+	var Destroy = function (node, is_all) {
+    	var cmdCallback2  = function (options, bSuccess, response) {
+			var o;
+			var showMsg = true;
+			if (true === bSuccess) {
+				o = Ext.decode(response.responseText);
+				if (true === o.success) {
+    				var n = tree.getNodeById(node.id);
+					n.parentNode.removeChild(n);
+				} else {
+					Ext.Msg.alert(this.errorText, o.error);
+				}
+			}
+		};
+		Ext.Msg.confirm('<%= _("Remove") %>'
+		, '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
+		, function(response) {
+			var conn;
+				if('yes' !== response) {
+                	return;
+    			}
+        		else {
+            		options = {
+                        	url: '/department/destroy/'+node.id+'.json'
+            				, method: 'post'
+            				, callback: cmdCallback2
+            				, params: {
+                    			id:node.id
+                				, name:node.text
+                				, only_one:is_all
+        					}
+    					};
+        				// send request
+       					if (node.id !== "0")
+            				conn = new Ext.data.Connection().request(options);
+					}
+				}
+				, tree
+			);
+	};
+		
+	var NewDepartment = function(node) { window.location="<%= url_for(:controller => 'department', :action => 'new') %>?parent_id=" + node.id };
 
-var NewDepartment = function(node) { window.location="<%= url_for(:controller => 'department', :action => 'new') %>?parent_id=" + node.id };
+	var Show = function (node) { window.location="<%= url_for(:controller => 'department', :action => 'show') %>/" + node.id };
+	var Edit = function (node) { window.location="<%= url_for(:controller => 'department', :action => 'edit') %>/" + node.id };
 
-var Show = function (node) { window.location="<%= url_for(:controller => 'department', :action => 'show') %>/" + node.id }
-var Edit = function (node) { window.location="<%= url_for(:controller => 'department', :action => 'edit') %>/" + node.id }
+	var onContextMenuItem = function(item, e) {
+		// menu item switch
+		switch(item.id) {
+				case 'delete_all':
+					Destroy(item.node, 0);
+				break;
+				case 'delete':
+					Destroy(item.node, 1);
+				break;
+				case 'new':
+					NewDepartment(item.node);
+				break;
+				case 'show':
+					Show(item.node);
+				break;
+				case 'edit':
+					Edit(item.node);
+				break;
+		}; // end of switch(item.id)
+	};
 
-var onContextMenuItem = function(item, e) {
-
-        // menu item switch
-        switch(item.id) {
-                // {{{
-                case 'delete_all':
-                        Destroy(item.node, 0);
-                break;
-                case 'delete':
-                        Destroy(item.node, 1);
-                break;
-                case 'new':
-                        NewDepartment(item.node);
-                break;
-                case 'show':
-                        Show(item.node);
-                break;
-                case 'edit':
-                        Edit(item.node);
-                break;
-
-         }; // end of switch(item.id)
-    };
-
-
-var ContextMenu = function (node, event) {
-    //event.stopEvent();
-    event.preventDefault();
-    contextMenu = new Ext.menu.Menu({
-                    items: [
-                                    // node name we're working with placeholder
-                              { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
-                            , new Ext.menu.Separator({id:'sep-open'})
-                            , { id:'delete'
-                                    , text:'<%= _("Delete") %>'
-                                    , node:node
-                                    , handler:onContextMenuItem
-                            }
-                            , {	id:'delete_all'
-                                    , text:'<%= _("Delete all") %>'
-                                    , node:node
-                                    , handler:onContextMenuItem
-                            }
-                            , {	id:'new'
-                                    , text:'<%= _("New") %>'
-                                    , node:node
-                                    , handler:onContextMenuItem
-                            }
-                            , {	id:'show'
-                                    , text:'<%= _("Show") %>'
-                                    , node:node
-                                    , handler:onContextMenuItem
-                            }
-                            , {	id:'edit'
-                                    , text:'<%= _("Edit") %>'
-                                    , node:node
-                                    , handler:onContextMenuItem
-                            }
-
-                    ]
-            });
-
-  contextMenu.item = node;
-
-  // set menu item text to node text
-  var itemNodename = contextMenu.items.get('nodename');
-  itemNodename.setText(Ext.util.Format.ellipsis(node.text, 25));
-
-  contextMenu.showAt(contextMenu.getEl().getAlignToXY(event.target, 'tl-tl?', [0, 18]));
-  itemNodename.container.setStyle('opacity', 1);
-};
+	var ContextMenu = function (node, event) {
+		//event.stopEvent();
+		event.preventDefault();
+		contextMenu = new Ext.menu.Menu({
+			items: [
+				// node name we're working with placeholder
+				{ id:'nodename', disabled:true, cls:'x-filetree-nodename' }
+				, new Ext.menu.Separator({id:'sep-open'})
+				, { id:'delete'
+					, text:'<%= _("Delete") %>'
+					, node:node
+					,handler:onContextMenuItem
+				}
+				, {	id:'delete_all'
+					, text:'<%= _("Delete all") %>'
+					, node:node
+					, handler:onContextMenuItem
+				}
+				, {	id:'new'
+					, text:'<%= _("New") %>'
+					, node:node
+					, handler:onContextMenuItem
+				}
+				, {	id:'show'
+					, text:'<%= _("Show") %>'
+					, node:node
+					, handler:onContextMenuItem
+				}
+				, {	id:'edit'
+					, text:'<%= _("Edit") %>'
+					, node:node
+					, handler:onContextMenuItem
+				}
+			]
+		});
+		contextMenu.item = node;
+		// set menu item text to node text
+		var itemNodename = contextMenu.items.get('nodename');
+		itemNodename.setText(Ext.util.Format.ellipsis(node.text, 25));
+		contextMenu.showAt(contextMenu.getEl().getAlignToXY(event.target, 'tl-tl?', [0, 18]));
+		itemNodename.container.setStyle('opacity', 1);
+	};
 
 
     // render the tree
-tree.render();
-tree.getRootNode().expand();
+	tree.render();
+	tree.getRootNode().expand();
 
+	tree.on("beforemovenode", OnBeforeNodeDrop);
+	tree.on("contextmenu", ContextMenu);
 
+	//ctree
 
-tree.on("beforemovenode", OnBeforeNodeDrop);
-tree.on("contextmenu", ContextMenu);
-
-
-//ctree
-
-var ctree = new Ext.tree.TreePanel({
-        el:'ctree-div',
+	var ctree = new Ext.tree.TreePanel({
+		el:'ctree-div',
         autoHeight:true,
         animate:true,
         enableDD:true,
@@ -193,51 +182,51 @@ var ctree = new Ext.tree.TreePanel({
     });
 
 
-var DeleteCountry = function (node) {
-    var cmdCallback2  = function (options, bSuccess, response) {
-            var o;
-            var showMsg = true;
-            if (true === bSuccess) {
-                o = Ext.decode(response.responseText);
-                if (true === o.success) {
-                    var n = ctree.getNodeById(node.id);
+	var DeleteCountry = function (node) {
+    	var cmdCallback2  = function (options, bSuccess, response) {
+			var o;
+			var showMsg = true;
+			if (true === bSuccess) {
+				o = Ext.decode(response.responseText);
+				if (true === o.success) {
+					var n = ctree.getNodeById(node.id);
                     n.parentNode.removeChild(n);
                 } else {
                         Ext.Msg.alert(this.errorText, o.error);
                 }
             }
-        };
-    Ext.Msg.confirm('<%= _("Remove") %>'
-                , '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
-                , function(response) {
-                        var conn;
-                        // do nothing if answer is not yes
-                        if('yes' !== response) {
-                                return;
-                        }
-                        // answer is yes
-                        else {
-                                // setup request options
-                                options = {
-                                            url: '/country/delete_country/'+node.id
-                                        , method: 'post'
-                                        , callback: cmdCallback2
-                                        , params: {
-                                                id:node.id
-                                                , name:node.text
-                                        }
-                                };
-                                // send request
-                               if (node.id !== "0")
-                                    conn = new Ext.data.Connection().request(options);
-                        }
-                }
-                , tree
-        );
+		};
+		Ext.Msg.confirm('<%= _("Remove") %>'
+			, '<%= _("Do you really want delete: ") %>' + '<b>' + node.text + '</b>?'
+			, function(response) {
+				var conn;
+				// do nothing if answer is not yes
+				if('yes' !== response) {
+					return;
+				}
+ 				// answer is yes
+				else {
+					// setup request options
+					options = {
+						url: '/country/delete_country/'+node.id
+						, method: 'post'
+						, callback: cmdCallback2
+						, params: {
+							id:node.id
+							, name:node.text
+						}
+					};
+					// send request
+					if (node.id !== "0")
+						conn = new Ext.data.Connection().request(options);
+					}
+				}
+				, tree
+			);
     };
 
 
-var NewCountry = function(node) {
+	var NewCountry = function(node) {
         Ext.Msg.prompt('<%= _("New Country") %>'
                 , '<%= _("Country name ?") %>'
                 , function(response, newname) {
@@ -280,7 +269,7 @@ var NewCountry = function(node) {
     };
 
 
-var ConContextMenuItem = function(item, e) {
+	var ConContextMenuItem = function(item, e) {
         // menu item switch
         switch(item.id) {
                 case 'rename':
@@ -296,10 +285,10 @@ var ConContextMenuItem = function(item, e) {
          }; // end of switch(item.id)
     };
 
-var CContextMenu = function (node, event) {
-    //event.stopEvent();
-    event.preventDefault();
-    contextMenu = new Ext.menu.Menu({
+	var CContextMenu = function (node, event) {
+    	//event.stopEvent();
+    	event.preventDefault();
+    	contextMenu = new Ext.menu.Menu({
                     items: [
                                     // node name we're working with placeholder
                               { id:'nodename', disabled:true, cls:'x-filetree-nodename'}
@@ -322,27 +311,25 @@ var CContextMenu = function (node, event) {
                             }
 
                     ]
-            });
+				});
 
-  contextMenu.item = node;
+				contextMenu.item = node;
 
-  // set menu item text to node text
-  var itemNodename = contextMenu.items.get('nodename');
-  itemNodename.setText(Ext.util.Format.ellipsis(node.text, 25));
+				// set menu item text to node text
+				var itemNodename = contextMenu.items.get('nodename');
+				itemNodename.setText(Ext.util.Format.ellipsis(node.text, 25));
 
-  contextMenu.showAt(contextMenu.getEl().getAlignToXY(event.target, 'tl-tl?', [0, 18]));
-  itemNodename.container.setStyle('opacity', 1);
-};
-
-
-ctree.render();
-ctree.getRootNode().expand();
+				contextMenu.showAt(contextMenu.getEl().getAlignToXY(event.target, 'tl-tl?', [0, 18]));
+				itemNodename.container.setStyle('opacity', 1);
+	};
 
 
-//ctree.on("beforenodedrop", OnBeforeNodeDrop);
-ctree.on("contextmenu", CContextMenu);
+	ctree.render();
+	ctree.getRootNode().expand();
 
 
+	//ctree.on("beforenodedrop", OnBeforeNodeDrop);
+	ctree.on("contextmenu", CContextMenu);
 
 });
 
@@ -360,9 +347,9 @@ function progressPercent(bar, percentage) {
 </form>
 <br>
 
-
 <div id="tree-div"></div>
 <br>
 <h3><%= _("Countries List") %></h3>
 <div id="ctree-div"></div>
+
 
