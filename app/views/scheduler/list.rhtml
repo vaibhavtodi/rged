@@ -1,0 +1,160 @@
+<link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-gray.css"/>
+<script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
+
+<script type="text/javascript">
+Ext.BLANK_IMAGE_URL = '/javascripts/extjs/resources/images/default/s.gif';
+
+Ext.onReady(function() {
+    Ext.QuickTips.init();
+    var border = new Ext.Viewport({
+    	layout:'border',
+    	items:[
+	       {
+      		   region:"center",
+      		   title:"Code of the selected worker: ",
+		   frame:true,
+		   containerScroll: true,
+      		   items:[
+			  {
+			      autoScroll: true,
+        		      xtype:"textarea",
+        		      fieldLabel:"Code",
+        		      name:"CodeValue",
+        		      height:300,
+        		      width:830,
+        		      id:"code_id"
+      			  },
+			  {
+      			      xtype:"panel",
+			      collapsible:true,
+			      buttons:
+				  [
+				   {
+				       id:'submit',
+				       iconCls:'submit-icon',
+				       text:'Submit',
+				       handler: function(){
+				       },
+				       scope: this
+				   }
+				   ],
+			      autoScroll: true,
+			      height:265,
+        		      width:830,
+			      frame:true,
+			      name:'schedule',
+      			      title:"Schedule",
+			      items:[
+				     {
+        				 xtype:"checkbox",
+        				 boxLabel:"Minute",
+        				 name:"checkbox",
+        				 inputValue:"cbvalue",
+					 id:"c_mn"
+				     },
+				     {
+  					 xtype:"combo",
+  					 name:"combovalue",
+  					 hiddenName:"combovalue",
+					 x:120,
+					 y:-15
+				     },
+				     {
+        				 xtype:"checkbox",
+        				 boxLabel:"Hour",
+        				 name:"checkbox",
+        				 inputValue:"cbvalue",
+					 id:"c_h"
+				     },
+				     {
+  					 xtype:"combo",
+  					 name:"combovalue",
+  					 hiddenName:"combovalue",
+					 x:120,
+					 y:-15
+				     },
+				     {
+        				 xtype:"checkbox",
+        				 boxLabel:"Day of Month",
+        				 name:"checkbox",
+        				 inputValue:"cbvalue",
+					 id:"c_dh"
+				     },
+				     {
+  					 xtype:"combo",
+  					 name:"combovalue",
+  					 hiddenName:"combovalue",
+					 x:120,
+					 y:-15
+				     },
+				     {
+        				 xtype:"checkbox",
+        				 boxLabel:"Month",
+        				 name:"checkbox",
+        				 inputValue:"cbvalue",
+					 id:"c_m"
+				     },
+				     {
+  					 xtype:"combo",
+  					 name:"combovalue",
+  					 hiddenName:"combovalue",
+					 x:120,
+					 y:-15
+				     },
+				     {
+        				 xtype:"checkbox",
+        				 boxLabel:"Day of Week",
+        				 name:"checkbox",
+        				 inputValue:"cbvalue",
+					 id:"c_dw"
+				     },
+				     {
+  					 xtype:"combo",
+  					 name:"combovalue",
+  					 hiddenName:"combovalue",
+					 x:120,
+					 y:-15
+				     }
+				     ]
+			  }]
+	       },
+	       {
+		   region:"west",
+		   title:"Workers",
+		   width:200,
+		   collapsible:true,
+		   titleCollapse:true,
+		   buttons:[
+			    {
+				id:'new_worker',
+				iconCls:'submit-icon',
+				text:'+',
+				handler: function(){
+
+				},
+				scope: this
+			    }
+			    ],
+		   items:[
+			  {
+  			      xtype:"panel",
+  			      title:"Auto-scheduled workers",
+  			      frame:true,
+  			      html:"worker 1",
+  			      collapsible:true
+			  },
+			  {
+			      xtype:"panel",
+			      title:"Event triggered workers",
+			      html:"worker 1",
+			      collapsible:true,
+			      frame:true
+			  }
+			  ]
+               }
+	       ]
+    });
+});
+</script>
+

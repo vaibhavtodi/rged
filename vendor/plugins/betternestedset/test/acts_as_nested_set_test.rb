@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/fixtures/mixin'
 require 'pp'
 
 class MixinNestedSetTest < Test::Unit::TestCase
-  fixtures :mixins
+  fixtures :mixins#, :departments, :countries
 
   ##########################################
   # HIGH LEVEL TESTS
