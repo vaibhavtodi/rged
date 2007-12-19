@@ -6,36 +6,95 @@
 Ext.BLANK_IMAGE_URL = '/javascripts/extjs/resources/images/default/s.gif';
 
 Ext.onReady(function() {
-    Ext.QuickTips.init();
+    
+    //Id of the last selected worker
+    var worker_selected_id = "";
+    //listener for selected worker
+    var workers_listener = {
+        render: function(p){
+            p.on({
+                    'focus': function(el) {
+                        worker_selected_id = el.getId();                    
+                    },
+                    'change': function(el, new_value, old_value) {
+                        var w = border.getComponent('panel_id').getComponent('worker_name');
+                        var str = w.value + new_value;
+                        w.setValue(str);
+                        w.setWidth(str.getWidth);
+                    }
+                }       
+          );   
+        }
+    };
+
+    // clear code area
+    var clear_code = function () {
+        var panel_center = border.getComponent('panel_code');
+        panel_center.getComponent('code_id').reset();
+    };
+
+    //Add worker
+    var add_worker = function () {
+       
+        
+    };
+
+    // save worker
+    var save_worker = function () {
+        Ext.Msg.alert("Save worker: " + this.worker_selected_id);
+        if (worker_selected_id != "")
+            {
+                Ext.Msg.alert("Worker selected: " + worker_selected_id);
+                var panel = border.getComponent(worker_selected_id);
+        }
+        Ext.Msg.alert("Save Worker\ncode: \n" + 
+          border.getComponent('code_id'));
+    }
+
+    //Interface
     var border = new Ext.Viewport({
+        id:'border',
     	layout:'border',
+        scope: this,
     	items:[
 	       {
       		   region:"center",
+                   xtype:"panel",
+                   id:'panel_code',
+                   autoScroll: true,
       		   title:"Code of the selected worker: ",
 		   frame:true,
-		   containerScroll: true,
       		   items:[
-			  {
-			      autoScroll: true,
-        		      xtype:"textarea",
-        		      fieldLabel:"Code",
-        		      name:"CodeValue",
-        		      height:300,
-        		      width:830,
-        		      id:"code_id"
+			  {			    
+        		    xtype:"textarea",
+                            id:'code_id',
+                            autoScroll: true,
+        		    height:470,
+        		    width:830
+        		    
       			  },
-			  {
+                          {
+                            xtype:'button',
+                            text:'clear',
+                            id:'clear',
+                            handler: clear_code,
+                            scope: this
+                          }
+                         ]
+                },
+                {
+                    region:"south",
       			      xtype:"panel",
+                              id:'panel_id',
 			      collapsible:true,
+                              collapsed: true,
 			      buttons:
 				  [
 				   {
 				       id:'submit',
 				       iconCls:'submit-icon',
 				       text:'Submit',
-				       handler: function(){
-				       },
+				       handler: save_worker,
 				       scope: this
 				   }
 				   ],
@@ -46,78 +105,44 @@ Ext.onReady(function() {
 			      name:'schedule',
       			      title:"Schedule",
 			      items:[
+                                     {
+                                        xtype:"textfield",
+                                        id:'worker_name',
+                                        readOnly: true,
+                                        value: "Worker selected: "
+                                     },
 				     {
-        				 xtype:"checkbox",
-        				 boxLabel:"Minute",
-        				 name:"checkbox",
-        				 inputValue:"cbvalue",
-					 id:"c_mn"
+                                         <%= get_checkbox('c_mn', 'check_minute', _("Minute")) %>
 				     },
 				     {
-  					 xtype:"combo",
-  					 name:"combovalue",
-  					 hiddenName:"combovalue",
-					 x:120,
-					 y:-15
+                                        <%= get_combox('cb_mn','true',  _("Chose Minute value"), "minute")%>
 				     },
 				     {
-        				 xtype:"checkbox",
-        				 boxLabel:"Hour",
-        				 name:"checkbox",
-        				 inputValue:"cbvalue",
-					 id:"c_h"
+                                         <%= get_checkbox('c_h', 'check_hour', _("Hour")) %>
 				     },
 				     {
-  					 xtype:"combo",
-  					 name:"combovalue",
-  					 hiddenName:"combovalue",
-					 x:120,
-					 y:-15
+                                        <%= get_combox('cb_h','true',  _("Chose Hour value"), "hour")%>
 				     },
 				     {
-        				 xtype:"checkbox",
-        				 boxLabel:"Day of Month",
-        				 name:"checkbox",
-        				 inputValue:"cbvalue",
-					 id:"c_dh"
+                                         <%= get_checkbox('c_wm', 'check_week_month', _("Week of Monk")) %>
 				     },
 				     {
-  					 xtype:"combo",
-  					 name:"combovalue",
-  					 hiddenName:"combovalue",
-					 x:120,
-					 y:-15
+                                        <%= get_combox('cb_wm','false', _("Chose Week of Month"), "week")%>
 				     },
 				     {
-        				 xtype:"checkbox",
-        				 boxLabel:"Month",
-        				 name:"checkbox",
-        				 inputValue:"cbvalue",
-					 id:"c_m"
+                                          <%= get_checkbox('c_m', 'check_month', _("Month")) %>
 				     },
 				     {
-  					 xtype:"combo",
-  					 name:"combovalue",
-  					 hiddenName:"combovalue",
-					 x:120,
-					 y:-15
+                                       <%= get_combox('cb_m','false', _("Chose a Month"),"month")%>
 				     },
 				     {
-        				 xtype:"checkbox",
-        				 boxLabel:"Day of Week",
-        				 name:"checkbox",
-        				 inputValue:"cbvalue",
-					 id:"c_dw"
+                                         <%= get_checkbox('c_dw', 'check_day_month', _("Day of Week")) %>
 				     },
 				     {
-  					 xtype:"combo",
-  					 name:"combovalue",
-  					 hiddenName:"combovalue",
-					 x:120,
-					 y:-15
+                                        <%= get_combox('cb_dw','false', _("Chose Day of Week"),"day")%>
 				     }
 				     ]
-			  }]
+			  
 	       },
 	       {
 		   region:"west",
@@ -130,31 +155,55 @@ Ext.onReady(function() {
 				id:'new_worker',
 				iconCls:'submit-icon',
 				text:'+',
-				handler: function(){
-
-				},
+                                menuAlign:'bl',
+				handler: add_worker,
 				scope: this
 			    }
 			    ],
 		   items:[
 			  {
   			      xtype:"panel",
+                              id:'auto_scheduled',
   			      title:"Auto-scheduled workers",
   			      frame:true,
-  			      html:"worker 1",
-  			      collapsible:true
+                              autoScroll: true,
+  			      collapsible:true,
+                              items:[
+                                {
+                                    xtype:'textfield',
+                                    emptyText:'Name of the worker',
+                                    id:'schedule_worker_nb_',
+                                    selectOnFocus: true,
+                                    listeners: workers_listener
+                                }
+                              ]
 			  },
 			  {
 			      xtype:"panel",
+                              id:'event_woker',
 			      title:"Event triggered workers",
-			      html:"worker 1",
 			      collapsible:true,
-			      frame:true
+			      frame:true,
+                              autoScroll: true,
+                              items:[
+                                {
+                                    xtype:'textfield',
+                                    emptyText:'Name of the worker',
+                                    id:'event_worker_nb_',
+                                    selectOnFocus: true,
+                                    listeners: workers_listener
+                                }
+                              ]
 			  }
 			  ]
                }
 	       ]
     });
+
+   Ext.QuickTips.init();
+
+   // Ext.Msg.alert(border.getComponent());
+
 });
 </script>
 
