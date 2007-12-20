@@ -18,13 +18,13 @@ development:
   url: jdbc:mysql://localhost/rged_development
   database: rged_development
   username: root
-  password:
+  password: amp51destin
   host: localhost
 <% else %>
   adapter: mysql
   database: rged_development
   username: root
-  password:
+  password: amp51destin
   host: localhost
   #socket: /opt/local/var/run/mysql5/mysqld.sock
 <% end %>
