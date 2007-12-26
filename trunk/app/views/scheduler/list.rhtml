@@ -6,24 +6,136 @@
 Ext.BLANK_IMAGE_URL = '/javascripts/extjs/resources/images/default/s.gif';
 
 Ext.onReady(function() {
-    
-    //Id of the last selected worker
-    var worker_selected_id = "";
-    //listener for selected worker
+    Ext.QuickTips.init();
+
+    var worker_id = '';
+
+    var formatDate = function (value){
+        return value ? value.dateFormat('Y/m/d H:i:s O') : '';
+    };
+
     var workers_listener = {
         render: function(p){
             p.on({
-                    'focus': function(el) {
-                        worker_selected_id = el.getId();                    
+                    'cellclick': function(grid, rowIndex, columnIndex, e) {
+                        var record = grid.getStore().getAt(rowIndex);  // Get the Record
+                       // var fieldName = grid.getColumnModel().getDataIndex(columnIndex); // Get field name
+                        
+                        data = record.get('name');
+                        worker_id= record.get('id');
+                        //worker_name = data;
+                        a = border.getComponent('agenda');
+                        a.setTitle('Agenda for Worker: ' + data);
+                        var w = border.getComponent('panel_code').getComponent('code_id');
+                        var cmdCallback= function (options, bSuccess, response) {
+                          var o;
+                          var showMsg = true;
+                          if (true === bSuccess) {
+                                  o = Ext.decode(response.responseText);
+                                  if (true === o.success) {
+                                    w.setValue(o.content);
+                                    a1 = border.getComponent('agenda').getComponent('c').getComponent('f_1');
+                                    a2 = border.getComponent('agenda').getComponent('c').getComponent('f_2')
+                                    if (o.sec != null) {
+                                      a2.getComponent('sec_f').setValue(o.sec);
+                                      a1.getComponent('sec').setValue(true);
+                                    } else {
+                                      a2.getComponent('sec_f').setValue(0);
+                                      a1.getComponent('sec').setValue(false)
+                                    }
+                                    if (o.min != null) {
+                                      a2.getComponent('min_f').setValue(o.min);
+                                      a1.getComponent('min').setValue(true);
+                                    } else {
+                                      a2.getComponent('min_f').setValue(0);
+                                      a1.getComponent('min').setValue(false)
+                                    }
+                                    if (o.hour != null) {
+                                      a2.getComponent('hour_f').setValue(o.hour);
+                                      a1.getComponent('hour').setValue(true);
+                                    } else {
+                                      a2.getComponent('hour_f').setValue(0);
+                                      a1.getComponent('hour').setValue(false)
+                                    }
+                                    if (o.day != null) {
+                                      a2.getComponent('day_f').setValue(o.day);
+                                      a1.getComponent('day').setValue(true);
+                                    } else {
+                                      a2.getComponent('day_f').setValue(1);
+                                      a1.getComponent('day').setValue(false)
+                                    }
+                                    if (o.month != null) {
+                                      a2.getComponent('month_f').setValue(o.month);
+                                      a1.getComponent('month').setValue(true);
+                                    } else {
+                                      a2.getComponent('month_f').setValue(1);
+                                      a1.getComponent('month').setValue(false)
+                                    }
+                                    if (o.weekday != null) {
+                                      a2.getComponent('any_f').setValue(o.weekday);
+                                      a1.getComponent('any').setValue(true);
+                                    } else {
+                                      a2.getComponent('any_f').setValue('Any');
+                                      a1.getComponent('any').setValue(false)
+                                    }
+                                    if (o.year != null) {
+                                      a2.getComponent('year_f').setValue(o.year);
+                                      a1.getComponent('year').setValue(true);
+                                    } else {
+                                      a2.getComponent('year_f').setValue(a2.getComponent('year_f').minValue);
+                                      a1.getComponent('year').setValue(false)
+                                    }
+                                  } else {
+                                  Ext.Msg.alert(this.errorText, o.error);
+                                          }
+                                  }
+                       };
+                       var options = {
+                                url: '/scheduler/load_code'
+                                        , method: 'post'
+                                        , callback: cmdCallback
+                                        , params: {name: data, id: worker_id}
+                       };
+                       conn = new Ext.data.Connection().request(options);
                     },
-                    'change': function(el, new_value, old_value) {
-                        var w = border.getComponent('panel_id').getComponent('worker_name');
-                        var str = w.value + new_value;
-                        w.setValue(str);
-                        w.setWidth(str.getWidth);
+                    'validateedit': function(e) {
+
+                        var name = '';
+                        var date = '';
+                        var old = '';
+                        if (e.field == 'name') {
+                            old = e.originalValue;
+                            name = e.value;
+                            date = formatDate(e.record.get('datetime'));
+                        }
+                        else 
+                           if (e.field == 'datetime') {
+                             old = e.record.get('name');
+                             name = e.record.get('name');
+                             date = formatDate(e.value);
+                           }
+                        var cmdCallback= function (options, bSuccess, response) {
+                          var o;
+                          var showMsg = true;
+                          if (true === bSuccess) {
+                                  o = Ext.decode(response.responseText);
+                                  if (true === o.success) {
+                                  } else {
+                                  Ext.Msg.alert(this.errorText, o.error);
+                                          }
+                                  }
+                       };
+                       var options = {
+                                url: '/scheduler/update'
+                                        , method: 'post'
+                                        , callback: cmdCallback
+                                        , params: {id: e.record.get('id'), old: old, name: name, date: date}
+                       };
+                       if (e.field != 'id')
+                        conn = new Ext.data.Connection().request(options);
                     }
-                }       
-          );   
+                }
+          );
         }
     };
 
@@ -33,10 +145,59 @@ Ext.onReady(function() {
         panel_center.getComponent('code_id').reset();
     };
 
-    //Add worker
-    var add_worker = function () {
-       
-        
+    var save_code = function () {
+       //record = store.getById(worker_id);
+       var panel_center = border.getComponent('panel_code');
+       var code = panel_center.getComponent('code_id').getValue();
+       var cmdCallback= function (options, bSuccess, response) {
+         var o;
+         var showMsg = true;
+         if (true === bSuccess) {
+                  o = Ext.decode(response.responseText);
+                  if (true === o.success) {
+                      
+                  } else {
+                  Ext.Msg.alert(this.errorText, o.error);
+                          }
+                  }
+       };
+       var options = {
+                url: '/scheduler/save'
+                        , method: 'post'
+                        , callback: cmdCallback
+                        ,params: {id: worker_id, code: code}
+       };
+
+       conn = new Ext.data.Connection().request(options);
+
+    }
+
+    //Delete worker
+    var delete_worker = function () {
+        record = store.getById(worker_id);
+        store.remove(record);
+        clear_code();
+       var cmdCallback= function (options, bSuccess, response) {
+         var o;
+         var showMsg = true;
+         if (true === bSuccess) {
+                  o = Ext.decode(response.responseText);
+                  if (true === o.success) {
+                      
+                  } else {
+                  Ext.Msg.alert(this.errorText, o.error);
+                          }
+                  }
+       };
+       var options = {
+                url: '/scheduler/delete'
+                        , method: 'post'
+                        , callback: cmdCallback
+                        ,params: {id: worker_id}
+       };
+
+       conn = new Ext.data.Connection().request(options);
+
     };
 
     // save worker
@@ -47,13 +208,124 @@ Ext.onReady(function() {
                 Ext.Msg.alert("Worker selected: " + worker_selected_id);
                 var panel = border.getComponent(worker_selected_id);
         }
-        Ext.Msg.alert("Save Worker\ncode: \n" + 
+        Ext.Msg.alert("Save Worker\ncode: \n" +
           border.getComponent('code_id'));
-    }
+    };
+
+    // this could be inline, but we want to define the Plant record
+    // type so we can add records dynamically
+    var Worker = Ext.data.Record.create([
+           // the "name" below matches the tag name to read, except "availDate"
+           // which is mapped to the tag "availability"
+           {name: 'name', type: 'string'},
+           {name: 'id', type: 'int'},
+           {name: 'datetime', type: 'date', dateFormat: 'Y/m/d H:i:s O'}
+      ]);
+ 
+    // create the Data Store
+    var store = new Ext.data.Store({
+        // load using HTTP
+        proxy: new Ext.data.HttpProxy({url: 'my_load'}),
+
+        // the return will be XML, so lets set up a reader
+        reader: new Ext.data.JsonReader({
+               // records will have a "worker" tag
+               root: "rows",
+               id: 'id'
+           }, Worker),
+        //loader: new Ext.tree.TreeLoader({ dataUrl:'/scheduler/list'})
+        sortInfo:{field:'name', direction:'ASC'}
+    });
+
+    function save_event() {
+         a = border.getComponent('agenda').getComponent('c').getComponent('f_1');
+         a2 = border.getComponent('agenda').getComponent('c').getComponent('f_2')
+         var secc = '';
+         var min = '';
+         var hour = '';
+         var day = '';
+         var month = '';
+         var any = '';
+         var year = '';
+         if (a.getComponent('sec').getValue())
+            secc = a2.getComponent('sec_f').getValue();
+         if (a.getComponent('min').getValue())
+            min = a2.getComponent('min_f').getValue();
+         if (a.getComponent('hour').getValue())
+            hour = a2.getComponent('hour_f').getValue();
+         if (a.getComponent('day').getValue())
+            day = a2.getComponent('day_f').getValue();
+         if (a.getComponent('month').getValue())
+            month = a2.getComponent('month_f').getValue();
+         if (a.getComponent('any').getValue())
+            any = a2.getComponent('any_f').getValue();
+         if (a.getComponent('year').getValue())
+            year = a2.getComponent('year_f').getValue();
+         var cmdCallback= function (options, bSuccess, response) {
+         var o;
+         var showMsg = true;
+         if (true === bSuccess) {
+                  o = Ext.decode(response.responseText);
+                  if (true === o.success) {
+                      
+                  } else {
+                  Ext.Msg.alert(this.errorText, o.error);
+                          }
+                  }
+       };
+       var options = {
+                url: '/scheduler/set_event'
+                        , method: 'post'
+                        , callback: cmdCallback
+                        ,params: {id: worker_id, sec: secc, min: min, hour: hour, day: day, month: month, any: any, year: year}
+       };
+
+       conn = new Ext.data.Connection().request(options);
+    };
+
+    //add worker
+    function add_worker() {
+       var panel = border.getComponent('workers_panels').getComponent('workers_list');
+       //alert(panel.getId());
+       var cmdCallback= function (options, bSuccess, response) {
+       var o;
+       var showMsg = true;
+       if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    if (panel != null) {
+                      //alert("toto ??");
+                      var w = new Worker({
+                        name: '',
+                        id: o.id,
+                        datetime: ''
+                      });
+                      w.id = o.id;
+                      panel.stopEditing();
+                      var yetCount = store.getCount();
+                      store.insert(yetCount, w);
+                      //  alert("insert Failed");
+                      //store.getAt(yetCount).set("name",'toto');
+                      panel.startEditing(yetCount, 0);
+                    }
+                } else {
+                Ext.Msg.alert(this.errorText, o.error);
+                        }
+                }
+     };
+     var options = {
+              url: '/scheduler/create'
+                      , method: 'post'
+                      , callback: cmdCallback
+                      ,params: {}
+     };
+
+     conn = new Ext.data.Connection().request(options);
+    };
 
     //Interface
     var border = new Ext.Viewport({
-        id:'border',
+        id:'border_id',
     	layout:'border',
         scope: this,
     	items:[
@@ -64,146 +336,207 @@ Ext.onReady(function() {
                    autoScroll: true,
       		   title:"Code of the selected worker: ",
 		   frame:true,
+                   tbar: [{
+                            text:'clear',
+                            id:'clear',
+                            handler: clear_code
+                          },
+                          {
+                            text:'save',
+                            id:'save',
+                            handler: save_code
+                          }
+                         ],
       		   items:[
-			  {			    
+			  {
         		    xtype:"textarea",
                             id:'code_id',
                             autoScroll: true,
         		    height:470,
-        		    width:830
-        		    
-      			  },
-                          {
-                            xtype:'button',
-                            text:'clear',
-                            id:'clear',
-                            handler: clear_code,
-                            scope: this
-                          }
+        		    width:680
+
+      			  }           
                          ]
                 },
-                {
-                    region:"south",
-      			      xtype:"panel",
-                              id:'panel_id',
-			      collapsible:true,
-                              collapsed: true,
-			      buttons:
-				  [
-				   {
-				       id:'submit',
-				       iconCls:'submit-icon',
-				       text:'Submit',
-				       handler: save_worker,
-				       scope: this
-				   }
-				   ],
-			      autoScroll: true,
-			      height:265,
-        		      width:830,
-			      frame:true,
-			      name:'schedule',
-      			      title:"Schedule",
-			      items:[
-                                     {
-                                        xtype:"textfield",
-                                        id:'worker_name',
-                                        readOnly: true,
-                                        value: "Worker selected: "
-                                     },
-				     {
-                                         <%= get_checkbox('c_mn', 'check_minute', _("Minute")) %>
-				     },
-				     {
-                                        <%= get_combox('cb_mn','true',  _("Chose Minute value"), "minute")%>
-				     },
-				     {
-                                         <%= get_checkbox('c_h', 'check_hour', _("Hour")) %>
-				     },
-				     {
-                                        <%= get_combox('cb_h','true',  _("Chose Hour value"), "hour")%>
-				     },
-				     {
-                                         <%= get_checkbox('c_wm', 'check_week_month', _("Week of Monk")) %>
-				     },
-				     {
-                                        <%= get_combox('cb_wm','false', _("Chose Week of Month"), "week")%>
-				     },
-				     {
-                                          <%= get_checkbox('c_m', 'check_month', _("Month")) %>
-				     },
-				     {
-                                       <%= get_combox('cb_m','false', _("Chose a Month"),"month")%>
-				     },
-				     {
-                                         <%= get_checkbox('c_dw', 'check_day_month', _("Day of Week")) %>
-				     },
-				     {
-                                        <%= get_combox('cb_dw','false', _("Chose Day of Week"),"day")%>
-				     }
-				     ]
-			  
-	       },
 	       {
 		   region:"west",
+                   xtype:"panel",
 		   title:"Workers",
-		   width:200,
+                   id:'workers_panels',
+		   width:265,
 		   collapsible:true,
 		   titleCollapse:true,
-		   buttons:[
-			    {
-				id:'new_worker',
-				iconCls:'submit-icon',
-				text:'+',
-                                menuAlign:'bl',
-				handler: add_worker,
-				scope: this
-			    }
-			    ],
 		   items:[
-			  {
-  			      xtype:"panel",
-                              id:'auto_scheduled',
-  			      title:"Auto-scheduled workers",
-  			      frame:true,
+
+			  new Ext.grid.EditorGridPanel({
+  			      id:'workers_list',
                               autoScroll: true,
-  			      collapsible:true,
-                              items:[
+                              store:store,  
+                              listeners: workers_listener,
+                              cm: new Ext.grid.ColumnModel([                               
                                 {
-                                    xtype:'textfield',
-                                    emptyText:'Name of the worker',
-                                    id:'schedule_worker_nb_',
-                                    selectOnFocus: true,
-                                    listeners: workers_listener
+                                   id:'clm_name',
+                                   header: "Worker Name",
+                                   dataIndex: 'name',
+                                   sortable:true,
+                                   width: 120,
+                                   editor:new Ext.form.TextField({
+                                       emptyText:'Name of the worker',
+                                       selectOnFocus: true//,
+                                       //listeners: workers_listener
+                                   })
+                                },{
+                                   header: "Id",
+                                   id:'clm_id',
+                                   sortable:true,
+                                   editable:false,
+                                   dataIndex: 'id',
+                                   hidden:false,
+                                   width: 60,
+                                   editor: new Ext.form.NumberField ({
+                                       allowBlank: false,
+                                       allowNegative: false,
+                                       maxValue: 100000
+                                   })
+                                },{
+                                   header: "Date",
+                                   id:'clm_date',
+                                   dataIndex: 'datetime',
+                                   sortable:true,
+                                   hidden:true,
+                                   width: 110,
+                                   renderer: formatDate,
+                                   editor: new Ext.form.DateField ({
+                                        format: 'Y/m/d H:i:s O',
+                                        minValue: '2007-01-01 00:00:00',
+                                        //disabledDays: [0, 6],
+                                        disabledDaysText: 'Worker not worked in define date'
+                                    })
                                 }
-                              ]
-			  },
-			  {
-			      xtype:"panel",
-                              id:'event_woker',
-			      title:"Event triggered workers",
-			      collapsible:true,
-			      frame:true,
-                              autoScroll: true,
-                              items:[
-                                {
-                                    xtype:'textfield',
-                                    emptyText:'Name of the worker',
-                                    id:'event_worker_nb_',
-                                    selectOnFocus: true,
-                                    listeners: workers_listener
-                                }
-                              ]
-			  }
+                                ]                                                      
+                              ),
+                              width:260,
+                              height:320,
+                              autoExpandColumn:'clm_name',
+                              title:'Workers Panel',
+                              frame:true,
+                              clicksToEdit:1,
+                              tbar: [{
+                                  text: 'Add Worker',
+                                  handler:add_worker
+                              },
+                              {
+                                  text: 'Delete Worker',
+                                  handler:delete_worker
+                              }]
+
+			  })
 			  ]
+               },
+               {
+		   region:"south",
+                   xtype:"panel",
+		   title:"Agenda for Worker: ",
+                   id:'agenda',
+                   height:235,
+                   autoScroll: true,
+		   collapsible:true,
+		   titleCollapse:true,
+                   bodyStyle:'padding:5px 5px 0',
+                   tbar: [{
+                             text: 'Save event',
+                             handler: save_event
+                           }
+                   ],
+		   items:[
+                        {
+                            layout:'column',
+                            id:'c',
+                            items:[
+                              {
+                                width:125,
+                                layout: 'form',
+                                id:'f_1',
+                                items: [
+                                  {
+                                    xtype:'checkbox',
+                                    fieldLabel: 'Second',
+                                    id: 'sec'
+                                  }, 
+                                  {
+                                    xtype:'checkbox',
+                                    fieldLabel: 'Minute',
+                                    id: 'min'
+                                  }, 
+                                  {
+                                    xtype:'checkbox',
+                                    fieldLabel: 'Hour',
+                                    id: 'hour'
+                                  }, 
+                                  {
+                                    xtype:'checkbox',
+                                    fieldLabel: 'Day',
+                                    id: 'day'
+                                  }, 
+                                  {
+                                    xtype:'checkbox',
+                                    fieldLabel: 'Month',
+                                    id: 'month'
+                                  },
+                                  {
+                                    xtype:'checkbox',
+                                    fieldLabel: 'Weekday',
+                                    id: 'any'
+                                  }, 
+                                  {
+                                    xtype:'checkbox',
+                                    fieldLabel: 'Year',
+                                    id: 'year'
+                                  }
+                                ]
+                              },
+                              {
+                                width:245,
+                                layout: 'form',
+                                id:'f_2',
+                                items: [
+                                  {
+                                    <%=get_numberfield('sec_f', 59, 0)%>
+                                  },
+                                  {
+                                    <%=get_numberfield('min_f', 59, 0)%>
+                                  },
+                                  {
+                                    <%=get_numberfield('hour_f', 23, 0)%>
+                                  },
+                                  {
+                                    <%=get_numberfield('day_f', 31, 1)%>
+                                  },
+                                  {
+                                    <%=get_numberfield('month_f', 12, 1)%>
+                                  },
+                                  {
+                                    <%= get_combo('any_f', false, 'weekday', 'day') %>
+                                  },
+                                  {
+                                    xtype:'numberfield',
+                                    id: 'year_f',
+                                    autoHeight:true,
+                                    width:120,
+                                    allowNegative:false,
+                                    minValue:(new Date()).format('Y'),
+                                    minText:"<%=_("The minimum value for this field is ")%>" + (new Date()).format('Y'),
+                                    value:2007
+                                  }
+                                ]
+                              }
+                            ]
+                        }
+                   ]
                }
 	       ]
     });
-
-   Ext.QuickTips.init();
-
-   // Ext.Msg.alert(border.getComponent());
-
+    store.load();
 });
 </script>
 
