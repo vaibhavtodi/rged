@@ -18,7 +18,7 @@ module SchedulerHelper
     "
     xtype:'checkbox',
     fieldLabel:'#{label}',
-    inputValue:'cbvalue',
+    inputValue:'cbvalue',    
     id:'#{id}'\n"
   end
   
@@ -28,6 +28,7 @@ module SchedulerHelper
      id: '#{id}',
      autoHeight:true,
      width:120,
+     hideLabel:true,
      allowNegative:false,
      minValue:#{min},
      maxValue:#{max},"
@@ -45,6 +46,7 @@ module SchedulerHelper
      displayField:'field',
      typeAhead: true,
      mode: 'local',
+     hideLabel:true,
      triggerAction: 'all',
      store:new Ext.data.SimpleStore(
           {

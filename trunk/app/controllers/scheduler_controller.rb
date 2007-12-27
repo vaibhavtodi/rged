@@ -228,8 +228,25 @@ end
     worker = Worker.find(params[:id])
     ret = {}
     name = (worker.name + "Worker").underscore
-    ret[:status] = status(name)
+    ret[:status] = "#{name}:\n\t#{Time.now()}: #{status(name)}\n"
     logger.info("\033[33m Worker #{name} status: #{ret[:status]}\033[m");
+    if true
+      ret[:success] = true
+    else
+      ret[:success] = false
+      ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => worker.name}
+    end
+    render :json => ret.to_json, :layout => false
+  end
+  
+  def get_all_status    
+    ret = {}
+#    name = (worker.name + "Worker").underscore
+   
+    t_response = MiddleMan.query_all_workers
+    running_workers = t_response.map { |key,value| "#{key} = #{value}"}.join('\n,')
+    ret[:status] = running_workers
+    logger.info("\033[33m All status \033[m");
     if true
       ret[:success] = true
     else

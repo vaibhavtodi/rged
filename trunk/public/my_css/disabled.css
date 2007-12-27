@@ -1,0 +1,7 @@
+.x-form-inline-textarea-disabled {
+    color: #000000;
+    cursor: default;
+    opacity: 1.0;
+    -moz-opacity: 1.0;
+    filter: alpha(opacity=100);
+}
