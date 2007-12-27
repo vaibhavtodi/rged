@@ -2,12 +2,12 @@
 # run automatically in a thread. You have access to all of your rails
 # models.  You also get logger and results method inside of this class
 # by default.
-class DepartmentCreatingWorker < BackgrounDRb::Worker::RailsBase
-
+class DepartmentCreatingWorker < BackgrounDRb::MetaWorker
+  set_worker_name :department_creating_worker
   attr_reader :progress, :id_departments, :country_id
 
 
-  def do_work(args)
+  def create(args = nil)
     # This method is called in it's own new thread when you
     # call new worker. args is set to :args
     results[:do_work_time] = Time.now.to_s
@@ -119,4 +119,4 @@ class DepartmentCreatingWorker < BackgrounDRb::Worker::RailsBase
   end
 
 end
-DepartmentCreatingWorker.register
+#DepartmentCreatingWorker.register
