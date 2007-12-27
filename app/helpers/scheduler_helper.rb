@@ -5,8 +5,7 @@ module SchedulerHelper
   attr_reader :day 
 
   
-  @@weekDay = "['Any'], 
-      ['0'], 
+  @@weekDay = "['0'], 
       ['1'], 
       ['2'], 
       ['3'], 
@@ -14,25 +13,6 @@ module SchedulerHelper
       ['5'], 
       ['6'] 
     "  
-  @@week = "['1'],
-            ['2'],
-            ['3'],
-	    ['4'],
-            ['5']"
-  
-  @@month =   "['January'],
-        ['February'],
-	['March'],
-	['April'],
-	['May'],
-	['June'],
-	['July'],
-	['August'],
-	['September'],
-	['October'],
-	['November'],
-	['December']"
-  
   
   def get_checkbox(id, name, label)
     "
@@ -55,16 +35,6 @@ module SchedulerHelper
   end
   
   def get_combo(id, editable, empty, data)
-    tmp = ""
-    case data
-    when "day"
-      tmp = @@weekDay
-    when "week"
-      tmp = @@week
-    when "month"
-      tmp = @@month
-    end
-
     "
      xtype: 'combo',
      id:'#{id}',
@@ -80,7 +50,7 @@ module SchedulerHelper
           {
             fields: ['field'],
             data:[
-                  #{tmp}
+                  #{@@weekDay}
                   ]
           }),
       selectOnFocus:true\n" 

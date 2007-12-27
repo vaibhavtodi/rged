@@ -8,7 +8,7 @@ class SchedulerController < ApplicationController
     if request.xhr?
       workers = {}
       workers['rows'] = Worker.find(:all).collect{ |w|
-          {'name' => w.name, 'id' => w.id, 'datetime' => ''}
+          {'name' => w.name, 'id' => w.id}
       }
       render :json => workers.to_json
     end
@@ -98,12 +98,8 @@ class SchedulerController < ApplicationController
       worker.weekday = params[:any].to_i
       trigger[:create][:trigger_args] += worker.weekday.to_s + " "
     else
-      if !params[:any].blank?
-        worker.weekday = 42
-      else
-        worker.weekday = nil
-        trigger[:create][:trigger_args] += "* "
-      end
+      worker.weekday = nil
+      trigger[:create][:trigger_args] += "* "
     end
     if !params[:year].blank?
       worker.year = params[:year].to_i
@@ -112,9 +108,7 @@ class SchedulerController < ApplicationController
       worker.year = nil
       trigger[:create][:trigger_args] += "*"
     end
-#    trigger[:create][:trigger_args] = trigger[:create][:trigger_args].sub(' ', '')
     if worker.save
-      #logger.info("\033[33m Trigger: #{trigger.inspect} \033[m")
       set_trigger((worker.name + "Worker").underscore, trigger)
       ret[:success] = true
     else
@@ -177,19 +171,15 @@ class SchedulerController < ApplicationController
   def update ()
     ret = {}
     worker = nil
-    logger.info("\033[33m Worker Id: #{params[:id]}, class name: #{params[:date].class}, old: #{params[:old]}, new: #{params[:name]}, date: #{params[:date]}\033[m");
+    logger.info("\033[33m Worker Id: #{params[:id]}, old: #{params[:old]}, new: #{params[:name]}\033[m");
     if params[:id].to_i != 0
       worker  = Worker.find(params[:id].to_i)
     else
       ret[:success] = false
-#      logger.info("\033[33m New Worker File create in libs\033[m");
       ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => params[:id]}
       render :json => ret.to_json, :layout => false
     end
     worker.name = params[:name].camelize
-#    if params[:date] != nil && params[:date] != ''
-#      worker.date = params[:date]#.to_datetime
-#    end
     file_name = get_file_name(params[:old].underscore)
     logger.info("\033[33m File name: #{file_name}\033[m");
     if File.exist?(file_name)
@@ -265,15 +255,15 @@ end
       if yml_file == false || yml_file[:schedules].blank?
         yml_file[:schedules] = {}
       end
-      if !yml_file[:schedules][:"#{name}"].blank?
-        logger.info("\033[33m Schedule Yaml 1 \033[m");
-        yml_file[:schedules][:"#{name}"] = trigger
-      else
-        logger.info("\033[33m Schedule Yaml 3 \033[m");
+#      if !yml_file[:schedules][:"#{name}"].blank?
+#        logger.info("\033[33m Schedule Yaml 1 \033[m");
+#        yml_file[:schedules][:"#{name}"] = trigger
+#      else
+#        logger.info("\033[33m Schedule Yaml 3 \033[m");
         #yml_file = {"schedules" =>{}}
 #        yml_file["schedules"] = yml_file["schedules"] + "#{name}"
         yml_file[:schedules][:"#{name}"] = trigger
-      end
+#      end
       File.open(back_root, "w") do |out|
       YAML.dump(yml_file, out)
       end
