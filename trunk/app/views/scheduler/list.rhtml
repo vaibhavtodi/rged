@@ -10,20 +10,13 @@ Ext.onReady(function() {
 
     var worker_id = '';
 
-    var formatDate = function (value){
-        return value ? value.dateFormat('Y/m/d H:i:s O') : '';
-    };
-
     var workers_listener = {
         render: function(p){
             p.on({
                     'cellclick': function(grid, rowIndex, columnIndex, e) {
-                        var record = grid.getStore().getAt(rowIndex);  // Get the Record
-                       // var fieldName = grid.getColumnModel().getDataIndex(columnIndex); // Get field name
-                        
+                        var record = grid.getStore().getAt(rowIndex);
                         data = record.get('name');
                         worker_id= record.get('id');
-                        //worker_name = data;
                         a = border.getComponent('agenda');
                         a.setTitle('Agenda for Worker: ' + data);
                         var w = border.getComponent('panel_code').getComponent('code_id');
@@ -218,8 +211,7 @@ Ext.onReady(function() {
            // the "name" below matches the tag name to read, except "availDate"
            // which is mapped to the tag "availability"
            {name: 'name', type: 'string'},
-           {name: 'id', type: 'int'},
-           {name: 'datetime', type: 'date', dateFormat: 'Y/m/d H:i:s O'}
+           {name: 'id', type: 'int'}
       ]);
  
     // create the Data Store
@@ -398,20 +390,6 @@ Ext.onReady(function() {
                                        allowNegative: false,
                                        maxValue: 100000
                                    })
-                                },{
-                                   header: "Date",
-                                   id:'clm_date',
-                                   dataIndex: 'datetime',
-                                   sortable:true,
-                                   hidden:true,
-                                   width: 110,
-                                   renderer: formatDate,
-                                   editor: new Ext.form.DateField ({
-                                        format: 'Y/m/d H:i:s O',
-                                        minValue: '2007-01-01 00:00:00',
-                                        //disabledDays: [0, 6],
-                                        disabledDaysText: 'Worker not worked in define date'
-                                    })
                                 }
                                 ]                                                      
                               ),
