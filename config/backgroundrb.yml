@@ -1,11 +1,8 @@
----
-host: localhost
-port: 2000
-worker_dir: lib/workers
-rails_env: development
-pool_size: 5
-acl:
-    deny: all
-    allow: localhost 127.0.0.1
-    order: deny allow
-
+:backgroundrb:
+  :ip: 127.0.0.1
+  :environment: development
+  :port: 2000
+:schedules:
+  :date_time_worker:
+    :create:
+      :trigger_args: 10 * * * * * *
