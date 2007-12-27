@@ -107,7 +107,9 @@ Ext.onReady(function() {
                                   o = Ext.decode(response.responseText);
                                   if (true === o.success) {
                                   } else {
+                                  
                                   Ext.Msg.alert(this.errorText, o.error);
+                                  store.rejectChanges();
                                           }
                                   }
                        };
@@ -159,23 +161,22 @@ Ext.onReady(function() {
                         , callback: cmdCallback
                         ,params: {id: worker_id, code: code}
        };
-
-       conn = new Ext.data.Connection().request(options);
+       if (worker_id != "")
+           conn = new Ext.data.Connection().request(options);
 
     }
 
     //Delete worker
-    var delete_worker = function () {
-        record = store.getById(worker_id);
-        store.remove(record);
-        clear_code();
+    var delete_worker = function () {    
        var cmdCallback= function (options, bSuccess, response) {
          var o;
          var showMsg = true;
          if (true === bSuccess) {
                   o = Ext.decode(response.responseText);
                   if (true === o.success) {
-                      
+                      record = store.getById(worker_id);
+                      store.remove(record);
+                      clear_code();
                   } else {
                   Ext.Msg.alert(this.errorText, o.error);
                           }
@@ -187,21 +188,9 @@ Ext.onReady(function() {
                         , callback: cmdCallback
                         ,params: {id: worker_id}
        };
+       if (worker_id != "")
+         conn = new Ext.data.Connection().request(options);
 
-       conn = new Ext.data.Connection().request(options);
-
-    };
-
-    // save worker
-    var save_worker = function () {
-        Ext.Msg.alert("Save worker: " + this.worker_selected_id);
-        if (worker_selected_id != "")
-            {
-                Ext.Msg.alert("Worker selected: " + worker_selected_id);
-                var panel = border.getComponent(worker_selected_id);
-        }
-        Ext.Msg.alert("Save Worker\ncode: \n" +
-          border.getComponent('code_id'));
     };
 
     // this could be inline, but we want to define the Plant record
@@ -297,8 +286,8 @@ Ext.onReady(function() {
                         , callback: cmdCallback
                         ,params: {id: worker_id}
        };
-
-       conn = new Ext.data.Connection().request(options);
+       if (worker_id != "")
+         conn = new Ext.data.Connection().request(options);
     };
 
     function stop_worker() {
@@ -322,7 +311,8 @@ Ext.onReady(function() {
                         ,params: {id: worker_id}
        };
 
-       conn = new Ext.data.Connection().request(options);
+       if (worker_id != "")
+         conn = new Ext.data.Connection().request(options);
     };
 
     function save_event() {
@@ -368,7 +358,8 @@ Ext.onReady(function() {
                         ,params: {id: worker_id, sec: secc, min: min, hour: hour, day: day, month: month, any: any, year: year}
        };
 
-       conn = new Ext.data.Connection().request(options);
+       if (worker_id != "")
+         conn = new Ext.data.Connection().request(options);
     };
 
     //add worker
@@ -410,58 +401,25 @@ Ext.onReady(function() {
      conn = new Ext.data.Connection().request(options);
     };
 
-    function my_hidden() {
-      a1 = border.getComponent('agenda').getComponent('c').getComponent('f_1');
-      if (o.sec != null) {
-      
-      a1.getComponent('sec').setValue(true);
-      } else {
-      a2.getComponent('sec_f').setValue(0);
-      a1.getComponent('sec').setValue(false)
-      }
-      if (o.min != null) {
-      
-      a1.getComponent('min').setValue(true);
-      } else {
-      
-      a1.getComponent('min').setValue(false)
-      }
-      if (o.hour != null) {
-      
-      a1.getComponent('hour').setValue(true);
-      } else {
-    
-      a1.getComponent('hour').setValue(false)
-      }
-      if (o.day != null) {
-      
-      a1.getComponent('day').setValue(true);
-      } else {
-     
-      a1.getComponent('day').setValue(false)
-      }
-      if (o.month != null) {
-      
-      a1.getComponent('month').setValue(true);
-      } else {
-      
-      a1.getComponent('month').setValue(false)
-      }
-      if (o.weekday != null) {
-      
-      a1.getComponent('any').setValue(true);
-      } else {
-      
-      a1.getComponent('any').setValue(false)
-      }
-      if (o.year != null) {
-      
-      a1.getComponent('year').setValue(true);
-      } else {
-      
-      a1.getComponent('year').setValue(false)
-      }
-    }
+    var set_event_listener = {
+        render: function(p){
+            p.on({
+                    'check': function(check, checked) {
+                        b = border.getComponent('agenda').getTopToolbar().items.get("button_event");
+                        if (worker_id == '')
+                            b.disable();//.disable();
+                        else {
+                            if (b.disabled && checked) 
+                              b.enable();
+                            //else
+                             // if ()
+                              //  b.disable();
+                        }
+                    }
+                  }
+                );
+                }
+    };
 
     //Interface
     var border = new Ext.Viewport({
@@ -492,7 +450,7 @@ Ext.onReady(function() {
         		    xtype:"textarea",
                             id:'code_id',
                             autoScroll: true,
-        		    height:470,
+        		    height:495,
         		    width:680
 
       			  }           
@@ -541,7 +499,7 @@ Ext.onReady(function() {
                                 ]                                                      
                               ),
                               width:260,
-                              height:320,
+                              height:530,
                               autoExpandColumn:'clm_name',
                               title:'Workers Panel',
                               frame:true,
@@ -575,10 +533,13 @@ Ext.onReady(function() {
                    autoScroll: true,
 		   collapsible:true,
 		   titleCollapse:true,
+                   collapsed:true,
                    bodyStyle:'padding:5px 5px 0',
                    tbar: [{
                              text: 'Save event',
-                             handler: save_event
+                             id:'button_event',
+                             handler:save_event
+                             //disabled:my_hidden
                           },
                           {
                              text: 'Status',
@@ -606,6 +567,7 @@ Ext.onReady(function() {
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Second',
+                                    //listeners:set_event_listener,
                                     id: 'sec'
                                   }, 
                                   {
@@ -641,7 +603,7 @@ Ext.onReady(function() {
                                 ]
                               },
                               {
-                                width:130,
+                                width:140,
                                 height:170,
                                 layout: 'form',
                                 id:'f_2',
@@ -678,7 +640,7 @@ Ext.onReady(function() {
                                 ]
                               },
                               {
-                                width:690,
+                                width:680,
                                 height:170,
                                 layout: 'form',
                                 id:'f_3',
@@ -691,7 +653,7 @@ Ext.onReady(function() {
                                     value:'---\n Status: \n---\n\n',
                                     autoScroll: true,
                                     height:168,
-                                    width:688,
+                                    width:678,
                                     hideLabel:true
                                   }
                                 ]

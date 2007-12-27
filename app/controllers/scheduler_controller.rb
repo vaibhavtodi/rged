@@ -172,54 +172,58 @@ class SchedulerController < ApplicationController
   
   def update ()
     ret = {}
-    worker = nil
-    logger.info("\033[33m Worker Id: #{params[:id]}, old: #{params[:old]}, new: #{params[:name]}\033[m");
-    if params[:id].to_i != 0
-      worker  = Worker.find(params[:id].to_i)
-    else
-      ret[:success] = false
-      ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => params[:id]}
-      render :json => ret.to_json, :layout => false
-    end
-    worker.name = params[:name].camelize
     file_name = get_file_name(params[:old].underscore)
-    logger.info("\033[33m File name: #{file_name}\033[m");
-    if File.exist?(file_name)
-      if params[:name] != params[:old]
-        logger.info("\033[33m File #{file_name} rename to #{get_file_name(params[:name].underscore)}\033[m");
-        File.rename(file_name, get_file_name(params[:name].underscore))
-        #file = File.open(get_file_name(params[:name].underscore), mode="a+")
-        #reg = Regexp.new(/class\s*\w*\s*<\s*BackgrounDRb::Worker::RailsBase/);
-        #file.sub(reg, "class #{params[:name].camelize}Worker < BackgroundDRb::Worker::RailsBase");
-        #file.close
-      end
-    else
-      if params[:name] != nil && params[:name] != ""
-        file = File.open(get_file_name(params[:name].underscore), mode="w")
-        file.write(
-"# Put your code that runs your task inside the do_work method it will be
-# run automatically in a thread. You have access to all of your rails
-# models.  You also get logger and results method inside of this class
-# by default.
-class #{params[:name].camelize}Worker < BackgrounDRb::MetaWorker
-  set_worker_name :#{(params[:name].camelize + "Worker").underscore}
-  def create(args = nil)
-    # this method is called, when worker is loaded for the first time
-
-  end
-  # define other methods, that you will invoke from rails.
-end
-"
-        );
-        file.close
-        logger.info("\033[33m New Worker File create in libs\033[m");
-      end
-    end
-    if worker.save
-      ret[:success] = true
-    else
+    file_name_new = get_file_name(params[:name].underscore)
+    
+    logger.info("\033[33m Worker Id: #{params[:id]}, old: #{params[:old]}, new: #{params[:name]}\033[m"); 
+    logger.info("\033[33m File name old: #{file_name}\033[m");
+    logger.info("\033[33m File name new: #{file_name_new}\033[m");
+    
+    if File.exist?(file_name_new)
+      logger.info("\033[33m File name new: #{file_name_new} exist\033[m")
       ret[:success] = false
-      ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => worker.name}
+      ret[:error] = _("%{model} %{name} already exist.")% {:model => _("File"), :name => file_name_new}
+    else
+      if File.exist?(file_name)     
+        if params[:name] != params[:old]
+          logger.info("\033[33m File #{file_name} rename to #{get_file_name(params[:name].underscore)}\033[m");
+          File.rename(file_name, get_file_name(params[:name].underscore))
+        end
+      else
+        if params[:name] != nil && params[:name] != ""
+          file = File.open(file_name_new, mode="w")
+          file.write(
+  "# Put your code that runs your task inside the do_work method it will be
+  # run automatically in a thread. You have access to all of your rails
+  # models.  You also get logger and results method inside of this class
+  # by default.
+  class #{params[:name].camelize}Worker < BackgrounDRb::MetaWorker
+    set_worker_name :#{(params[:name].camelize + "Worker").underscore}
+    def create(args = nil)
+      # this method is called, when worker is loaded for the first time
+      @counter = 0
+      add_periodic_timer(2) { increment_counter }
+    end
+    def increment_counter
+       @counter += 1
+       register_status(@counter)
+    end
+    # define other methods, that you will invoke from rails.
+  end
+  "
+          )
+          file.close
+          logger.info("\033[33m New Worker File create in libs\033[m")
+        end
+      end
+      worker  = Worker.find(params[:id].to_i)
+      worker.name = params[:name].camelize
+      if worker.save
+        ret[:success] = true
+      else
+        ret[:success] = false
+        ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => worker.name}
+      end
     end
     render :json => ret.to_json, :layout => false
   end
@@ -244,9 +248,11 @@ end
 #    name = (worker.name + "Worker").underscore
    
     t_response = MiddleMan.query_all_workers
-    running_workers = t_response.map { |key,value| "#{key} = #{value}"}.join('\n,')
+    running_workers = "All Status:\n" + t_response.map { |key,value| 
+      "\t#{key}:\n\t\t#{Time.now()}: #{value}\n"
+    }.join("")
     ret[:status] = running_workers
-    logger.info("\033[33m All status \033[m");
+    logger.info("\033[33m All status #{t_response.inspect}\033[m");
     if true
       ret[:success] = true
     else
@@ -299,7 +305,6 @@ end
         if worker_dir == nil
           worker_dir = "lib/workers"
         end
-        logger.info("\033[33m BackgroundRb config file: #{worker_dir} Loaoded, #{yml_file.inspect} \033[m")
         file_name = File.join(worker_dir, "/#{name}_worker.rb")
       end
       file_name
@@ -312,7 +317,6 @@ end
       if !File.exist?(back_root)
         File.new(back_root, "w")
       end
-      logger.info("\033[33m Schedule Yaml: #{trigger.inspect}\033[m");
       yml_file = YAML.load(IO.read(back_root))      
       if yml_file == false || yml_file[:schedules].blank?
         yml_file[:schedules] = {}
