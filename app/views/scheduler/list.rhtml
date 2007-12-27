@@ -1,4 +1,5 @@
 <link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-gray.css"/>
+<link id="theme" rel="stylesheet" type="text/css" href="/my_css/disabled.css"/>
 <script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
 
@@ -129,6 +130,12 @@ Ext.onReady(function() {
         var panel_center = border.getComponent('panel_code');
         panel_center.getComponent('code_id').reset();
     };
+    
+    //clear status area
+    function clear_status() {
+        a = border.getComponent('agenda').getComponent('c').getComponent('f_3').getComponent('status_id');
+        a.reset();
+    };
 
     var save_code = function () {
        //record = store.getById(worker_id);
@@ -229,7 +236,8 @@ Ext.onReady(function() {
        if (true === bSuccess) {
                 o = Ext.decode(response.responseText);
                 if (true === o.success) {
-                    
+                    a = border.getComponent('agenda').getComponent('c').getComponent('f_3').getComponent('status_id');
+                    a.setValue(a.getValue() + o.status)
                 } else {
                 Ext.Msg.alert(this.errorText, o.error);
                         }
@@ -241,8 +249,32 @@ Ext.onReady(function() {
                         , callback: cmdCallback
                         ,params: {id: worker_id}
        };
+       if (worker_id != '')
+        conn = new Ext.data.Connection().request(options);
+    };
 
-       conn = new Ext.data.Connection().request(options);
+    function get_all_status() {
+       //record = store.getById(worker_id);
+       var cmdCallback= function (options, bSuccess, response) {
+       var o;
+       var showMsg = true;
+       if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    a = border.getComponent('agenda').getComponent('c').getComponent('f_3').getComponent('status_id');
+                    a.setValue(a.getValue() + o.status)
+                } else {
+                Ext.Msg.alert(this.errorText, o.error);
+                        }
+                }
+       };
+       var options = {
+                url: '/scheduler/get_all_status'
+                        , method: 'post'
+                        , callback: cmdCallback
+                        ,params: {}
+       };
+        conn = new Ext.data.Connection().request(options);
     };
 
     function start_worker() {
@@ -295,7 +327,7 @@ Ext.onReady(function() {
 
     function save_event() {
          a = border.getComponent('agenda').getComponent('c').getComponent('f_1');
-         a2 = border.getComponent('agenda').getComponent('c').getComponent('f_2')
+         a2 = border.getComponent('agenda').getComponent('c').getComponent('f_2');
          var secc = '';
          var min = '';
          var hour = '';
@@ -377,6 +409,59 @@ Ext.onReady(function() {
 
      conn = new Ext.data.Connection().request(options);
     };
+
+    function my_hidden() {
+      a1 = border.getComponent('agenda').getComponent('c').getComponent('f_1');
+      if (o.sec != null) {
+      
+      a1.getComponent('sec').setValue(true);
+      } else {
+      a2.getComponent('sec_f').setValue(0);
+      a1.getComponent('sec').setValue(false)
+      }
+      if (o.min != null) {
+      
+      a1.getComponent('min').setValue(true);
+      } else {
+      
+      a1.getComponent('min').setValue(false)
+      }
+      if (o.hour != null) {
+      
+      a1.getComponent('hour').setValue(true);
+      } else {
+    
+      a1.getComponent('hour').setValue(false)
+      }
+      if (o.day != null) {
+      
+      a1.getComponent('day').setValue(true);
+      } else {
+     
+      a1.getComponent('day').setValue(false)
+      }
+      if (o.month != null) {
+      
+      a1.getComponent('month').setValue(true);
+      } else {
+      
+      a1.getComponent('month').setValue(false)
+      }
+      if (o.weekday != null) {
+      
+      a1.getComponent('any').setValue(true);
+      } else {
+      
+      a1.getComponent('any').setValue(false)
+      }
+      if (o.year != null) {
+      
+      a1.getComponent('year').setValue(true);
+      } else {
+      
+      a1.getComponent('year').setValue(false)
+      }
+    }
 
     //Interface
     var border = new Ext.Viewport({
@@ -470,10 +555,6 @@ Ext.onReady(function() {
                                   handler:delete_worker
                               },
                               {
-                                  text: 'Satus',
-                                  handler:get_status
-                              },
-                              {
                                   text: 'Start',
                                   handler:start_worker
                               },
@@ -498,7 +579,19 @@ Ext.onReady(function() {
                    tbar: [{
                              text: 'Save event',
                              handler: save_event
-                           }
+                          },
+                          {
+                             text: 'Status',
+                             handler: get_status
+                          },
+                          {
+                             text: 'All status',
+                             handler: get_all_status
+                          },
+                          {
+                             text: 'Clear status',
+                             handler: clear_status
+                          }
                    ],
 		   items:[
                         {
@@ -548,7 +641,8 @@ Ext.onReady(function() {
                                 ]
                               },
                               {
-                                width:245,
+                                width:130,
+                                height:170,
                                 layout: 'form',
                                 id:'f_2',
                                 items: [
@@ -576,9 +670,29 @@ Ext.onReady(function() {
                                     autoHeight:true,
                                     width:120,
                                     allowNegative:false,
+                                    hideLabel:true, 
                                     minValue:(new Date()).format('Y'),
                                     minText:"<%=_("The minimum value for this field is ")%>" + (new Date()).format('Y'),
                                     value:2007
+                                  }
+                                ]
+                              },
+                              {
+                                width:690,
+                                height:170,
+                                layout: 'form',
+                                id:'f_3',
+                                items: [
+                                  {
+                                    xtype:"textarea",
+                                    id:'status_id',
+                                    disabled:true,
+                                    disabledClass:'x-form-inline-textarea-disabled',
+                                    value:'---\n Status: \n---\n\n',
+                                    autoScroll: true,
+                                    height:168,
+                                    width:688,
+                                    hideLabel:true
                                   }
                                 ]
                               }
