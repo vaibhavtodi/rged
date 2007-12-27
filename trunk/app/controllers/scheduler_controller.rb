@@ -4,6 +4,7 @@ class SchedulerController < ApplicationController
     redirect_back_or_default(:controller => 'scheduler', :action => 'list')
   end
   
+  #Load the list of workers for the data store
   def my_load
     if request.xhr?
       workers = {}
@@ -14,6 +15,7 @@ class SchedulerController < ApplicationController
     end
   end
   
+  #delete a worker
   def delete
     ret = {}
     worker = Worker.find(params[:id].to_i);
@@ -21,11 +23,8 @@ class SchedulerController < ApplicationController
       file_name = get_file_name(worker.name.underscore)
       if File.exist?(file_name)
         File.delete(file_name);
-        ret[:success] = true
-      else
-        ret[:success] = false
-        ret[:error] = _("%{model} %{name} can not be deleted.")% {:model => _("File"), :name => worker.name}        
       end
+      ret[:success] = true
     else
       ret[:success] = false
       ret[:error] = _("%{model} %{name} can not be deleted.")% {:model => _("Worker"), :name => worker.name}
@@ -39,27 +38,23 @@ class SchedulerController < ApplicationController
     worker.name = '';
 
     if worker.save
-      logger.info("\033[33m New Worker in database: \033[m");
       ret[:id] = worker.id
       ret[:success] = true
     else
       ret[:success] = false
-      ret[:error] = _("%{model} %{name} can not be created.")% {:model => _("Worker"), :name => worker.name}
+      ret[:error] = _("%{model} %{name} can not be created.")% {:model => _("Worker"), :name => ''}
     end
     render :json => ret.to_json, :layout => false
   end
   
   def set_event
     ret = {}
-    logger.info("\033[33m Worker id: #{params[:id]}, Event: \033[m");
-    logger.info("\033[33m \tSec: #{params[:sec]}, Min: #{params[:min]}, Hour: #{params[:hour]}, Day: #{params[:day]}, Month: #{params[:month]}, Weekday: #{params[:any]}, Year: #{params[:year]}\033[m");
     trigger = {}
     trigger[:create] = {
       :trigger_args => nil
       }
     worker = Worker.find(params[:id].to_i)
     if !params[:sec].blank?
-      logger.info("\033[33m  SECONDES: #{params[:sec]}\033[m");
       worker.sec = params[:sec].to_i
       trigger[:create][:trigger_args] = worker.sec.to_s + " "
     else
@@ -147,7 +142,6 @@ class SchedulerController < ApplicationController
         while !file.eof?
           ret[:content] << file.gets
         end
-        logger.info("\033[33m Code Loaded with worker: #{file_name}\033[m");
         file.close
         ret[:success] = true
         worker = Worker.find(params[:id])
@@ -175,18 +169,12 @@ class SchedulerController < ApplicationController
     file_name = get_file_name(params[:old].underscore)
     file_name_new = get_file_name(params[:name].underscore)
     
-    logger.info("\033[33m Worker Id: #{params[:id]}, old: #{params[:old]}, new: #{params[:name]}\033[m"); 
-    logger.info("\033[33m File name old: #{file_name}\033[m");
-    logger.info("\033[33m File name new: #{file_name_new}\033[m");
-    
     if File.exist?(file_name_new)
-      logger.info("\033[33m File name new: #{file_name_new} exist\033[m")
       ret[:success] = false
       ret[:error] = _("%{model} %{name} already exist.")% {:model => _("File"), :name => file_name_new}
     else
       if File.exist?(file_name)     
         if params[:name] != params[:old]
-          logger.info("\033[33m File #{file_name} rename to #{get_file_name(params[:name].underscore)}\033[m");
           File.rename(file_name, get_file_name(params[:name].underscore))
         end
       else
@@ -213,7 +201,6 @@ class SchedulerController < ApplicationController
   "
           )
           file.close
-          logger.info("\033[33m New Worker File create in libs\033[m")
         end
       end
       worker  = Worker.find(params[:id].to_i)
@@ -222,7 +209,7 @@ class SchedulerController < ApplicationController
         ret[:success] = true
       else
         ret[:success] = false
-        ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => worker.name}
+        ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => params[:name].camelize}
       end
     end
     render :json => ret.to_json, :layout => false
@@ -233,7 +220,6 @@ class SchedulerController < ApplicationController
     ret = {}
     name = (worker.name + "Worker").underscore
     ret[:status] = "#{name}:\n\t#{Time.now()}: #{status(name)}\n"
-    logger.info("\033[33m Worker #{name} status: #{ret[:status]}\033[m");
     if true
       ret[:success] = true
     else
@@ -245,14 +231,11 @@ class SchedulerController < ApplicationController
   
   def get_all_status    
     ret = {}
-#    name = (worker.name + "Worker").underscore
-   
     t_response = MiddleMan.query_all_workers
     running_workers = "All Status:\n" + t_response.map { |key,value| 
       "\t#{key}:\n\t\t#{Time.now()}: #{value}\n"
     }.join("")
     ret[:status] = running_workers
-    logger.info("\033[33m All status #{t_response.inspect}\033[m");
     if true
       ret[:success] = true
     else
@@ -267,7 +250,6 @@ class SchedulerController < ApplicationController
     ret = {}
     name = (worker.name + "Worker").underscore
     MiddleMan.delete_worker(:worker => :"#{name}")
-    logger.info("\033[33m Worker #{name} stoped \033[m");
     if true
       ret[:success] = true
     else
@@ -284,7 +266,6 @@ class SchedulerController < ApplicationController
     schedule = get_schedule(name)
     if !schedule.blank?
       MiddleMan.new_worker(:worker => :"#{name}", :schedule => schedule)
-      logger.info("\033[33m Worker #{name} started \033[m")
       ret[:success] = true
     else
       ret[:success] = false
