@@ -4,13 +4,14 @@
 # by default.
 class DepartmentCreatingWorker < BackgrounDRb::MetaWorker
   set_worker_name :department_creating_worker
-  attr_reader :progress, :id_departments, :country_id
+  set_no_auto_load true
+  attr_reader :progress, :id_departments, :country_id, :results
 
 
   def create(args = nil)
     # This method is called in it's own new thread when you
     # call new worker. args is set to :args
-    results[:do_work_time] = Time.now.to_s
+    @results[:do_work_time] = Time.now.to_s
     logger.info("\033[33m Do Work  \033[m")
     @progress = 0
     @id_departments = []

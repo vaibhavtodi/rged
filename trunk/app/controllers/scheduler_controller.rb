@@ -109,7 +109,9 @@ class SchedulerController < ApplicationController
       trigger[:create][:trigger_args] += "*"
     end
     if worker.save
-      set_trigger((worker.name + "Worker").underscore, trigger)
+      if trigger[:create][:trigger_args] != "* * * * * * *"
+        set_trigger((worker.name + "Worker").underscore, trigger)
+      end
       ret[:success] = true
     else
       ret[:success] = false
@@ -202,10 +204,10 @@ class SchedulerController < ApplicationController
 class #{params[:name].camelize}Worker < BackgrounDRb::MetaWorker
   set_worker_name :#{(params[:name].camelize + "Worker").underscore}
   def create(args = nil)
-    # This method is called in it's own new thread when you
-    # call new worker. args is set to :args
+    # this method is called, when worker is loaded for the first time
 
   end
+  # define other methods, that you will invoke from rails.
 end
 "
         );
@@ -218,6 +220,52 @@ end
     else
       ret[:success] = false
       ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => worker.name}
+    end
+    render :json => ret.to_json, :layout => false
+  end
+  
+  def get_status
+    worker = Worker.find(params[:id])
+    ret = {}
+    name = (worker.name + "Worker").underscore
+    ret[:status] = status(name)
+    logger.info("\033[33m Worker #{name} status: #{ret[:status]}\033[m");
+    if true
+      ret[:success] = true
+    else
+      ret[:success] = false
+      ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => worker.name}
+    end
+    render :json => ret.to_json, :layout => false
+  end
+  
+  def stop_worker
+    worker = Worker.find(params[:id])
+    ret = {}
+    name = (worker.name + "Worker").underscore
+    MiddleMan.delete_worker(:worker => :"#{name}")
+    logger.info("\033[33m Worker #{name} stoped \033[m");
+    if true
+      ret[:success] = true
+    else
+      ret[:success] = false
+      ret[:error] = _("%{model} %{name} can not be stoped.")% {:model => _("Worker"), :name => name}
+    end
+    render :json => ret.to_json, :layout => false
+  end
+  
+  def start_worker
+    worker = Worker.find(params[:id])
+    ret = {}
+    name = (worker.name + "Worker").underscore
+    schedule = get_schedule(name)
+    if !schedule.blank?
+      MiddleMan.new_worker(:worker => :"#{name}", :schedule => schedule)
+      logger.info("\033[33m Worker #{name} started \033[m")
+      ret[:success] = true
+    else
+      ret[:success] = false
+      ret[:error] = _("%{model} %{name} can not be started.")% {:model => _("Worker"), :name => name}
     end
     render :json => ret.to_json, :layout => false
   end
@@ -248,25 +296,30 @@ end
         File.new(back_root, "w")
       end
       logger.info("\033[33m Schedule Yaml: #{trigger.inspect}\033[m");
-#      yml_file = {}
-      yml_file = YAML.load(IO.read(back_root))
-      
-        logger.info("\033[33m Schedule Yaml class: #{yml_file.class}\033[m");
+      yml_file = YAML.load(IO.read(back_root))      
       if yml_file == false || yml_file[:schedules].blank?
         yml_file[:schedules] = {}
       end
-#      if !yml_file[:schedules][:"#{name}"].blank?
-#        logger.info("\033[33m Schedule Yaml 1 \033[m");
-#        yml_file[:schedules][:"#{name}"] = trigger
-#      else
-#        logger.info("\033[33m Schedule Yaml 3 \033[m");
-        #yml_file = {"schedules" =>{}}
-#        yml_file["schedules"] = yml_file["schedules"] + "#{name}"
-        yml_file[:schedules][:"#{name}"] = trigger
-#      end
+      yml_file[:schedules][:"#{name}"] = trigger
       File.open(back_root, "w") do |out|
       YAML.dump(yml_file, out)
       end
+    end
+    
+    def get_schedule(name)
+      yml_file = nil
+      require 'pathname'
+      back_root = Pathname.new(RAILS_ROOT).realpath.to_s + "/config/backgroundrb.yml"
+      if File.exist?(back_root)
+        yml_file = YAML.load(IO.read(back_root))
+        yml_file[:schedules][:"#{name}"]
+      else
+        ""
+      end
+    end
+    
+    def status(name)
+      MiddleMan.ask_status(:worker => :"#{name}") 
     end
   
 end

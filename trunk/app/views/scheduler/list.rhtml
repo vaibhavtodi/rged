@@ -68,7 +68,7 @@ Ext.onReady(function() {
                                       a2.getComponent('any_f').setValue(o.weekday);
                                       a1.getComponent('any').setValue(true);
                                     } else {
-                                      a2.getComponent('any_f').setValue('Any');
+                                      a2.getComponent('any_f').setValue(0);
                                       a1.getComponent('any').setValue(false)
                                     }
                                     if (o.year != null) {
@@ -92,21 +92,13 @@ Ext.onReady(function() {
                        conn = new Ext.data.Connection().request(options);
                     },
                     'validateedit': function(e) {
-
                         var name = '';
-                        var date = '';
                         var old = '';
                         if (e.field == 'name') {
                             old = e.originalValue;
                             name = e.value;
-                            date = formatDate(e.record.get('datetime'));
                         }
-                        else 
-                           if (e.field == 'datetime') {
-                             old = e.record.get('name');
-                             name = e.record.get('name');
-                             date = formatDate(e.value);
-                           }
+                        
                         var cmdCallback= function (options, bSuccess, response) {
                           var o;
                           var showMsg = true;
@@ -122,7 +114,7 @@ Ext.onReady(function() {
                                 url: '/scheduler/update'
                                         , method: 'post'
                                         , callback: cmdCallback
-                                        , params: {id: e.record.get('id'), old: old, name: name, date: date}
+                                        , params: {id: e.record.get('id'), old: old, name: name}
                        };
                        if (e.field != 'id')
                         conn = new Ext.data.Connection().request(options);
@@ -229,6 +221,78 @@ Ext.onReady(function() {
         sortInfo:{field:'name', direction:'ASC'}
     });
 
+    function get_status() {
+       //record = store.getById(worker_id);
+       var cmdCallback= function (options, bSuccess, response) {
+       var o;
+       var showMsg = true;
+       if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    
+                } else {
+                Ext.Msg.alert(this.errorText, o.error);
+                        }
+                }
+       };
+       var options = {
+                url: '/scheduler/get_status'
+                        , method: 'post'
+                        , callback: cmdCallback
+                        ,params: {id: worker_id}
+       };
+
+       conn = new Ext.data.Connection().request(options);
+    };
+
+    function start_worker() {
+       //record = store.getById(worker_id);
+       var cmdCallback= function (options, bSuccess, response) {
+       var o;
+       var showMsg = true;
+       if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    
+                } else {
+                Ext.Msg.alert(this.errorText, o.error);
+                        }
+                }
+       };
+       var options = {
+                url: '/scheduler/start_worker'
+                        , method: 'post'
+                        , callback: cmdCallback
+                        ,params: {id: worker_id}
+       };
+
+       conn = new Ext.data.Connection().request(options);
+    };
+
+    function stop_worker() {
+       //record = store.getById(worker_id);
+       var cmdCallback= function (options, bSuccess, response) {
+       var o;
+       var showMsg = true;
+       if (true === bSuccess) {
+                o = Ext.decode(response.responseText);
+                if (true === o.success) {
+                    
+                } else {
+                Ext.Msg.alert(this.errorText, o.error);
+                        }
+                }
+       };
+       var options = {
+                url: '/scheduler/stop_worker'
+                        , method: 'post'
+                        , callback: cmdCallback
+                        ,params: {id: worker_id}
+       };
+
+       conn = new Ext.data.Connection().request(options);
+    };
+
     function save_event() {
          a = border.getComponent('agenda').getComponent('c').getComponent('f_1');
          a2 = border.getComponent('agenda').getComponent('c').getComponent('f_2')
@@ -289,8 +353,7 @@ Ext.onReady(function() {
                       //alert("toto ??");
                       var w = new Worker({
                         name: '',
-                        id: o.id,
-                        datetime: ''
+                        id: o.id
                       });
                       w.id = o.id;
                       panel.stopEditing();
@@ -399,12 +462,24 @@ Ext.onReady(function() {
                               frame:true,
                               clicksToEdit:1,
                               tbar: [{
-                                  text: 'Add Worker',
+                                  text: 'Add',
                                   handler:add_worker
                               },
                               {
-                                  text: 'Delete Worker',
+                                  text: 'Delete',
                                   handler:delete_worker
+                              },
+                              {
+                                  text: 'Satus',
+                                  handler:get_status
+                              },
+                              {
+                                  text: 'Start',
+                                  handler:start_worker
+                              },
+                              {
+                                  text: 'Stop',
+                                  handler:stop_worker
                               }]
 
 			  })
