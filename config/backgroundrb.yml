@@ -4,9 +4,6 @@
   :environment: development
   :port: 2000
 :schedules:
-  :department_creating_worker:
-    :create:
-      :trigger_args: "* * * * * * *"
   :date_time_worker:
-    :create:
-      :trigger_args: 10 * * * * * *
+    :set_log:
+      :trigger_args: */10 * * * * * *
