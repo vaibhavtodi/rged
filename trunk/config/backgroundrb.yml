@@ -1,9 +1,12 @@
 ---
+:schedules:
+  :test_worker:
+    :set_log:
+      :trigger_args: */5 * * * * * *
+  :date_time_worker:
+    :set_log:
+      :trigger_args: "*/10 * * * * * *"
 :backgroundrb:
   :ip: 127.0.0.1
   :environment: development
   :port: 2000
-:schedules:
-  :date_time_worker:
-    :set_log:
-      :trigger_args: */10 * * * * * *
