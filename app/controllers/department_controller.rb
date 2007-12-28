@@ -10,15 +10,16 @@ class DepartmentController < ApplicationController
      :redirect_to => { :action => :list }
   
   def unpredictable_departments
-    if not MiddleMan.jobs[:create_departments]
+    #if MiddleMan.ask_status(:worker => :department_creating_worker) == nil
       MiddleMan.new_worker(
-        :class => :department_creating_worker,
+        :worker => :department_creating_worker,
         :job_key => :create_departments,
-        :args => 2
+        :data => 2,
+        :schedule => { :create_list => { :trigger_args => "* * * * * * *",:data => 2 }}
       )
-    end
-    worker = MiddleMan.worker(:create_departments)
-    logger.info("\033[33m\t# Worker #{worker.jobkey} start at: #{worker.results[:do_work_time].inspect} \033[m")
+    #end
+    worker = MiddleMan.send_request(:worker => :department_creating_worker, :worker_method => :get_results)
+    logger.info("\033[33m\t# Worker #{worker.jobkey} start at: #{worker[:do_work_time].inspect} \033[m")
     #while (Country.find(worker.id_country) == nil)
     #  worker.set_id_country(1 + random(Country.count));
     #end
@@ -41,7 +42,7 @@ class DepartmentController < ApplicationController
  
   def done
     flash[:notice] = _("Your Worker task has completed")
-    MiddleMan.delete_worker(session[:job_key])
+    MiddleMan.delete_worker(:worker => :department_creating_worker, :job_key => :create_departments)
     render :nothing => true
     #render :inline => _("Your FooWorker task has completed")
   #render :action => "list"
