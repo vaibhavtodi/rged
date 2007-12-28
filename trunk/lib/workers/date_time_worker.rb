@@ -19,7 +19,7 @@ class DateTimeWorker < BackgrounDRb::MetaWorker#::RailsBase
   end
   
   def set_log
-    logger.info("\033[33m Do Work  #{Time.now.to_s} \033[m")
+    logger.info("\033[33m #{worker_name} Do Work  #{Time.now.to_s} \033[m")
   end
 
 end

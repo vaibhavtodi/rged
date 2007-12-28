@@ -19,11 +19,13 @@ class SchedulerController < ApplicationController
   def delete
     ret = {}
     worker = Worker.find(params[:id].to_i);
+    name = (worker.name + "Worker").underscore
     if worker.destroy
       file_name = get_file_name(worker.name.underscore)
       if File.exist?(file_name)
         File.delete(file_name);
       end
+      delete_trigger(name)
       ret[:success] = true
     else
       ret[:success] = false
@@ -107,6 +109,61 @@ class SchedulerController < ApplicationController
       if trigger[:create][:trigger_args] != "* * * * * * *"
         set_trigger((worker.name + "Worker").underscore, trigger)
       end
+      ret[:success] = true
+    else
+      ret[:success] = false
+      ret[:error] = _("%{model} %{name} can not be updated.")% {:model => _("Worker"), :name => worker.name}
+    end      
+    render :json => ret.to_json, :layout => false  
+  end
+  
+  def disable_event
+    ret = {}
+    
+    worker = Worker.find(params[:id].to_i)
+    diff = ""
+    if worker.sec == nil
+      diff = "*"
+    else
+      diff = worker.sec.to_s
+    end 
+    if worker.min == nil
+      diff += " *"
+    else
+      diff += " " + worker.min.to_s
+    end
+    if worker.hour == nil
+      diff += " *"
+    else
+      diff += " " + worker.hour.to_s
+    end
+    if worker.day == nil
+      diff += " *"
+    else
+      diff += " " + worker.day.to_s
+    end
+    if worker.month == nil
+      diff += " *"
+    else
+      diff += " " + worker.month.to_s
+    end
+    if worker.weekday == nil
+      diff += " *"
+    else
+      diff += " " + worker.weekday.to_s
+    end
+    if worker.year == nil
+      diff += " *"
+    else
+      diff += " " + worker.year.to_s
+    end
+    if diff == params[:combin]
+      ret[:disable] = true
+    else
+      ret[:disable] = false
+    end
+    if true
+      
       ret[:success] = true
     else
       ret[:success] = false
@@ -231,9 +288,10 @@ class SchedulerController < ApplicationController
   
   def get_all_status    
     ret = {}
+    #master = MasterWorker.new
     t_response = MiddleMan.query_all_workers
-    running_workers = "All Status:\n" + t_response.map { |key,value| 
-      "\t#{key}:\n\t\t#{Time.now()}: #{value}\n"
+    running_workers = "All Status:\n" + t_response.map { |key,value|
+      "\t#{key}:\n\t\t#{Time.now()}: #{status(key)}\n"
     }.join("")
     ret[:status] = running_workers
     if true
@@ -305,6 +363,21 @@ class SchedulerController < ApplicationController
       yml_file[:schedules][:"#{name}"] = trigger
       File.open(back_root, "w") do |out|
       YAML.dump(yml_file, out)
+      end
+    end
+    
+    def delete_trigger(name)
+      yml_file = nil
+      require 'pathname'
+      back_root = Pathname.new(RAILS_ROOT).realpath.to_s + "/config/backgroundrb.yml"
+      if File.exist?(back_root)
+        yml_file = YAML.load(IO.read(back_root))
+        if !yml_file == false && !yml_file[:schedules].blank? && !yml_file[:schedules][:"#{name}"].blank?
+          yml_file[:schedules].delete(:"#{name}")
+          File.open(back_root, "w") do |out|
+          YAML.dump(yml_file, out)
+          end
+        end
       end
     end
     

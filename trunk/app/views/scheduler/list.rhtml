@@ -166,6 +166,23 @@ Ext.onReady(function() {
 
     }
 
+    function clear_event() {
+        a1 = border.getComponent('agenda').getComponent('c').getComponent('f_1')
+        a1.getComponent('sec').setValue(false)
+
+        a1.getComponent('min').setValue(false)
+
+        a1.getComponent('hour').setValue(false)
+
+        a1.getComponent('day').setValue(false)
+
+        a1.getComponent('month').setValue(false)
+
+        a1.getComponent('any').setValue(false)
+
+        a1.getComponent('year').setValue(false)
+    };
+
     //Delete worker
     var delete_worker = function () {    
        var cmdCallback= function (options, bSuccess, response) {
@@ -177,6 +194,10 @@ Ext.onReady(function() {
                       record = store.getById(worker_id);
                       store.remove(record);
                       clear_code();
+                      a = border.getComponent('agenda');
+                      a.setTitle('Agenda for Worker: ');
+                      worker_id = '';
+                      clear_event();
                   } else {
                   Ext.Msg.alert(this.errorText, o.error);
                           }
@@ -379,6 +400,7 @@ Ext.onReady(function() {
                         id: o.id
                       });
                       w.id = o.id;
+                      worker_id = o.id;
                       panel.stopEditing();
                       var yetCount = store.getCount();
                       store.insert(yetCount, w);
@@ -406,15 +428,56 @@ Ext.onReady(function() {
             p.on({
                     'check': function(check, checked) {
                         b = border.getComponent('agenda').getTopToolbar().items.get("button_event");
-                        if (worker_id == '')
-                            b.disable();//.disable();
-                        else {
-                            if (b.disabled && checked) 
-                              b.enable();
-                            //else
-                             // if ()
-                              //  b.disable();
-                        }
+                         a = border.getComponent('agenda').getComponent('c').getComponent('f_1');
+                         a2 = border.getComponent('agenda').getComponent('c').getComponent('f_2');
+                         var sec = '*';
+                         var min = '*';
+                         var hour = '*';
+                         var day = '*';
+                         var month = '*';
+                         var any = '*';
+                         var year = '*';
+                         
+                         if (a.getComponent('sec').getValue())
+                            sec = a2.getComponent('sec_f').getValue();
+                         if (a.getComponent('min').getValue())
+                            min = a2.getComponent('min_f').getValue();
+                         if (a.getComponent('hour').getValue())
+                            hour = a2.getComponent('hour_f').getValue();
+                         if (a.getComponent('day').getValue())
+                            day = a2.getComponent('day_f').getValue();
+                         if (a.getComponent('month').getValue())
+                            month = a2.getComponent('month_f').getValue();
+                         if (a.getComponent('any').getValue())
+                            any = a2.getComponent('any_f').getValue();
+                         if (a.getComponent('year').getValue())
+                            year = a2.getComponent('year_f').getValue();
+                         var combin = sec + ' ' + min+ ' ' + hour+ ' ' + day+ ' ' + month+ ' ' + any+ ' ' + year;
+                         
+                         var cmdCallback= function (options, bSuccess, response) {
+                         var o;
+                         var showMsg = true;
+                         if (true === bSuccess) {
+                                  o = Ext.decode(response.responseText);
+                                  if (true === o.success) {
+                                    if (o.disable)
+                                        b.disable();
+                                    else
+                                        b.enable();
+                                  } else {
+                                  Ext.Msg.alert(this.errorText, o.error);
+                                          }
+                                  }
+                       };
+                       var options = {
+                                url: '/scheduler/disable_event'
+                                        , method: 'post'
+                                        , callback: cmdCallback
+                                        ,params: {id: worker_id,combin: combin}
+                       };
+
+                       if (worker_id != "")
+                         conn = new Ext.data.Connection().request(options);
                     }
                   }
                 );
@@ -538,8 +601,8 @@ Ext.onReady(function() {
                    tbar: [{
                              text: 'Save event',
                              id:'button_event',
-                             handler:save_event
-                             //disabled:my_hidden
+                             handler:save_event,
+                             disabled:true
                           },
                           {
                              text: 'Status',
@@ -567,37 +630,43 @@ Ext.onReady(function() {
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Second',
-                                    //listeners:set_event_listener,
+                                    listeners:set_event_listener,
                                     id: 'sec'
                                   }, 
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Minute',
+                                    listeners:set_event_listener,
                                     id: 'min'
                                   }, 
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Hour',
+                                    listeners:set_event_listener,
                                     id: 'hour'
                                   }, 
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Day',
+                                    listeners:set_event_listener,
                                     id: 'day'
                                   }, 
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Month',
+                                    listeners:set_event_listener,
                                     id: 'month'
                                   },
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Weekday',
+                                    listeners:set_event_listener,
                                     id: 'any'
                                   }, 
                                   {
                                     xtype:'checkbox',
                                     fieldLabel: 'Year',
+                                    listeners:set_event_listener,
                                     id: 'year'
                                   }
                                 ]

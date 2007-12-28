@@ -1,23 +1,24 @@
 # Put your code that runs your task inside the do_work method it will be
 # run automatically in a thread. You have access to all of your rails
-# models.  You also get logger and results method inside of this class
+# models.  You also get logger and result method inside of this class
 # by default.
 class DepartmentCreatingWorker < BackgrounDRb::MetaWorker
   set_worker_name :department_creating_worker
   set_no_auto_load true
-  attr_reader :progress, :id_departments, :country_id, :results
-
-
+  attr_reader :progress, :id_departments, :country_id
+  
+  @@results = {}
   def create(args = nil)
     # This method is called in it's own new thread when you
     # call new worker. args is set to :args
-    @results[:do_work_time] = Time.now.to_s
+   # @@resultss = {}
+    @@results[:do_work_time] = Time.now.to_s
     logger.info("\033[33m Do Work  \033[m")
     @progress = 0
     @id_departments = []
     @departments = []
     @country_id = 0
-
+    
     tmp = []
     Country.find(:all).each { |e|
       tmp << e.id
@@ -32,12 +33,16 @@ class DepartmentCreatingWorker < BackgrounDRb::MetaWorker
     }
 
     logger.info("\033[33m\tcountry_id: #{@country_id} \033[m")
-    create_list(args)
-    results[:departments] = @departments
-    results[:departments].each { |e|
+    #create_list(args)
+    @@results[:departments] = @departments
+    @@results[:departments].each { |e|
     logger.info("\033[33m \tWorker #{@jobkey} Result #{e.inspect()} \033[m")
     }
     self.delete
+  end
+  
+  def get_results
+    @@results
   end
 
   def set_country_id(i)
@@ -64,7 +69,8 @@ class DepartmentCreatingWorker < BackgrounDRb::MetaWorker
     d.country_id = @country_id
     d.name = rand_alphanumeric()
     @progress = @progress + 1
-    d
+    register_status(@progress)
+    
   end
 
   def create_list(args)
