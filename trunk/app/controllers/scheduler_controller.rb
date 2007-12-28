@@ -9,10 +9,32 @@ class SchedulerController < ApplicationController
     if request.xhr?
       workers = {}
       workers['rows'] = Worker.find(:all).collect{ |w|
+          {'name' => w.name}
+      }
+      render :json => workers.to_json
+    end
+  end
+  
+  #Load the list of workers for the data store
+  def progress_load
+    if request.xhr?
+      workers = {}
+      workers['rows'] = Worker.find(:all).collect{ |w|
           {'name' => w.name, 'id' => w.id}
       }
       render :json => workers.to_json
     end
+  end
+  
+  def refresh
+    ret = {}
+    if true
+      ret[:success] = true
+    else
+      ret[:success] = false
+      ret[:error] = _("%{model} %{name} can not be refreshed.")% {:model => _("Monitoring"), :name => ''}
+    end
+    render :json => ret.to_json, :layout => false
   end
   
   #delete a worker

@@ -10,6 +10,7 @@ Ext.onReady(function() {
     Ext.QuickTips.init();
 
     var worker_id = '';
+    var progress_id = '';
 
     var workers_listener = {
         render: function(p){
@@ -221,8 +222,8 @@ Ext.onReady(function() {
            // which is mapped to the tag "availability"
            {name: 'name', type: 'string'},
            {name: 'id', type: 'int'}
-      ]);
- 
+    ]);
+
     // create the Data Store
     var store = new Ext.data.Store({
         // load using HTTP
@@ -484,6 +485,60 @@ Ext.onReady(function() {
                 }
     };
 
+    var Progress = Ext.data.Record.create([
+           // the "name" below matches the tag name to read, except "availDate"
+           // which is mapped to the tag "availability"
+           {name: 'name', type: 'string'},
+           {name: 'progress',v: new Ext.ProgressBar({text:'progressbar'})}
+    ]);
+ 
+    // create the Data Store
+    var progesstore = new Ext.data.Store({
+        // load using HTTP
+        proxy: new Ext.data.HttpProxy({url: 'progress_load'}),
+
+        // the return will be XML, so lets set up a reader
+        reader: new Ext.data.JsonReader({
+               // records will have a "worker" tag
+               root: "rows",
+               id: 'id'
+           }, Progress),
+        //loader: new Ext.tree.TreeLoader({ dataUrl:'/scheduler/list'})
+        sortInfo:{field:'name', direction:'ASC'}
+    });
+
+    function refresh(record) {
+        alert(record.get('progress'));
+    };
+
+    function monitoring() {
+        progesstore.each(refresh);
+    };
+
+    var tab_listeners = {
+        render: function(p){
+            p.on({
+                    'tabchange': function(tab) {
+                        activ_tab = tab.getActiveTab();
+                        if (activ_tab.getId() == 'code_id') {
+                            tab.getTopToolbar().items.get("clear").enable();
+                            tab.getTopToolbar().items.get("save").enable();
+                            tab.getTopToolbar().items.get("refresh").disable();
+                        } else {
+                            tab.getTopToolbar().items.get("clear").disable();
+                            tab.getTopToolbar().items.get("save").disable();
+                            tab.getTopToolbar().items.get("refresh").enable();
+                        }
+                     },
+                     'cellclick': function(grid, rowIndex, columnIndex, e){
+                        var record = grid.getStore().getAt(rowIndex);
+                        progress_id = record.id;
+                     }
+                 }
+                );
+        }
+    };
+
     //Interface
     var border = new Ext.Viewport({
         id:'border_id',
@@ -492,10 +547,10 @@ Ext.onReady(function() {
     	items:[
 	       {
       		   region:"center",
-                   xtype:"panel",
+                   xtype:"tabpanel",
+                   activeTab:1,
                    id:'panel_code',
-                   autoScroll: true,
-      		   title:"Code of the selected worker: ",
+                   autoScroll: true, 		   
 		   frame:true,
                    tbar: [{
                             text:'clear',
@@ -506,17 +561,62 @@ Ext.onReady(function() {
                             text:'save',
                             id:'save',
                             handler: save_code
+                          },
+                          {
+                            text:'refresh',
+                            id:'refresh',
+                            handler: monitoring
                           }
                          ],
+                   listeners:tab_listeners,
       		   items:[
 			  {
         		    xtype:"textarea",
+                            title:"Code of the selected worker: ",
                             id:'code_id',
                             autoScroll: true,
         		    height:495,
         		    width:680
 
-      			  }           
+      			  },
+                          new Ext.grid.EditorGridPanel({
+                            title:"Monitoring",
+                            id:'monitor',
+                            autoScroll: true,
+                            height:495,
+        		    width:680,
+                            store:progesstore,
+                            listeners:tab_listeners,
+                            cm: new Ext.grid.ColumnModel([
+                                {
+                                   id:'m_name',
+                                   header: "Worker Name",
+                                   dataIndex: 'name',
+                                   sortable:true,
+                                   editable:false,
+                                   width: 120,
+                                   editor:new Ext.form.TextField({
+                                       emptyText:'Name of the worker',
+                                       selectOnFocus: true
+                                   })
+                                },
+                                {
+                                   id:'m_progress',
+                                   header: "Progress Bar",
+                                   dataIndex: 'progress',
+                                   editable:false,
+                                   //sortable:true,
+                                   width: 200,
+                                   //editor: {
+                                       //text:'Initializing...',
+                                     //  xtype:'htmleditor',
+                                     //  width:100
+                                       //emptyText:'Name of the worker'
+                                       //selectOnFocus: true
+                                   //}
+                                }
+                            ])
+                          })
                          ]
                 },
 	       {
@@ -528,13 +628,12 @@ Ext.onReady(function() {
 		   collapsible:true,
 		   titleCollapse:true,
 		   items:[
-
 			  new Ext.grid.EditorGridPanel({
   			      id:'workers_list',
                               autoScroll: true,
                               store:store,  
                               listeners: workers_listener,
-                              cm: new Ext.grid.ColumnModel([                               
+                              cm: new Ext.grid.ColumnModel([                              
                                 {
                                    id:'clm_name',
                                    header: "Worker Name",
@@ -734,6 +833,7 @@ Ext.onReady(function() {
 	       ]
     });
     store.load();
+    progesstore.load();
 });
 </script>
 
