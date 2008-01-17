@@ -20,6 +20,10 @@ rged-adress {
 
 .menu-refresh .x-btn-text { 
     background-image: url(../images/icons/arrow_refresh.png); 
+}
+
+.menu-edit .x-btn-text { 
+    background-image: url(../images/icons/edit.png); 
 } 
         
 .menu-download .x-btn-text { 

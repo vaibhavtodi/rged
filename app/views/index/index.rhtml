@@ -11,14 +11,8 @@
 
 	<link rel="stylesheet" type="text/css" href="/stylesheets/filetree.css">
         <link rel="stylesheet" type="text/css" href="/stylesheets/rged.css">
-        <link id="theme" rel="stylesheet" type="text/css" href="/javascripts/extjs/resources/css/xtheme-gray.css">
 	<link rel="shortcut icon" href="/images/icons/mime/page_white_stack.png" type="image/png">
-	<script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
-	<script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
-    <script type="text/javascript" src="/javascripts/Ext.ux.UploadForm.js"></script>
-    <script type="text/javascript" src="/javascripts/Ext.ux.FileTreePanel2.js"></script>
-    <script type="text/javascript" src="/javascripts/rged.js"></script>
-    <script type="text/javascript" src="/javascripts/history.js"></script>
+
 <style type="text/css">
 #acc-ct {
 	width: 240px;
@@ -34,10 +28,63 @@
 .x-dock-panel .x-dock-panel-body {
 	background-color: #ffffc8;
 }
+#class .loading-indicator{
+	font-size:12px;
+	height:18px;
+}
+.loading-indicator {
+    font-size:11px;
+    background-image:url('/javascripts/extjs/resources/images/default/grid/loading.gif');
+    background-repeat: no-repeat;
+    background-position:top left;
+    padding-left:20px;
+	height:18px;
+	text-align:left;
+}
+#loading-mask{
+	position:absolute;
+	left:0;
+	top:0;
+    width:100%;
+    height:100%;
+    z-index:20000;
+    background-color:white;
+}
+#loading{
+	position:absolute;
+	left:45%;
+	top:40%;
+	padding:2px;
+	z-index:20001;
+    height:auto;
+}
+#loading img {
+    margin-bottom:5px;
+}
+#loading .loading-indicator{
+	background:white;
+	color:#555;
+	font:bold 13px tahoma,arial,helvetica;
+	padding:10px;
+	margin:0;
+    text-align:center;
+    height:auto;
+}
 </style>
 </head>
 
 <body>
+  <div id="loading-mask" style=""></div>
+  <div id="loading">
+    <div class="loading-indicator"><img src="javascripts/extjs/resources/images/default/shared/blue-loading.gif" width="32" height="32" style="margin-right:8px;" align="absmiddle"/>Loading...</div>
+  </div>
+	<script type="text/javascript" src="/javascripts/extjs/adapter/ext/ext-base.js"></script>
+	<script type="text/javascript" src="/javascripts/extjs/ext-all-debug.js"></script>
+	<script type="text/javascript" src="/javascripts/edit_area/edit_area_full.js"></script>
+    <script type="text/javascript" src="/javascripts/Ext.ux.UploadForm.js"></script>
+    <script type="text/javascript" src="/javascripts/Ext.ux.FileTreePanel2.js"></script>
+    <script type="text/javascript" src="/javascripts/rged.js"></script>
+    <script type="text/javascript" src="/javascripts/history.js"></script>
     <div id="menu"></div>
     <div id="tree"></div>
     <div id="grid"></div>
