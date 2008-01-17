@@ -135,6 +135,10 @@ Ext.ux.FileTreePanel = function(config) {
 	// open icon
 	this.openIcon = config && config.openIcon ? config.openIcon : 'application_go.png';
 	this.openIcon = this.iconPath + '/' + this.openIcon;
+         
+        // open icon
+	this.editIcon = config && config.openIcon ? config.editIcon : 'edit.png';
+	this.editIcon = this.iconPath + '/' + this.editIcon;
 
 	// open in popup icon
 	this.openPopupIcon = config && config.openPopupIcon ? config.openPopupIcon : 'application_double.png';
@@ -310,6 +314,16 @@ Ext.ux.FileTreePanel = function(config) {
 		, open: true
 
 		// }}}
+                // {{{
+		/**
+		* Fires when click on Edit Node
+		* @event edit
+		* @param {Ext.ux.FileTreePanel} this
+		* @param {AsyncTreeNode} node 
+		*/
+		, edit: true
+
+		// }}}
 		// {{{
 		/**
 			* Fires before node rename
@@ -367,6 +381,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 	, enableNewDir: true
 	, enableRename: true
 	, enableUpload: true
+        , enableEdit: false
 	, errorText: 'Error'
 	, existsText: 'File <b>{0}</b> already exists'
 	, expandText: 'Expand all'
@@ -382,6 +397,7 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 	, openPopupText: 'Open in popup'
 	, openSelfText: 'Open in this window'
 	, openText: 'Open'
+        , editText: 'Edit' 
 	, overwriteText: 'Do you want to overwrite it?'
 	, popupFeatures: 'width=640,height=480,dependent=1,scrollbars=1,resizable=1,toolbar=1'
 	, rarrowKeyName: 'Right Arrow'
@@ -636,6 +652,12 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 						, scope:this
 						, handler:this.onContextMenuItem
 					}
+                                        , {	id:'edit'
+						, text:this.editText
+						, icon:this.editIcon
+						, scope:this
+						, handler:this.onContextMenuItem
+					}
 					, {	id:'delete'
 						, text:this.deleteText + ' (' + this.deleteKeyName + ')'
 						, icon:this.deleteIcon
@@ -704,6 +726,9 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 
 		var itemRename = menu.items.get('rename');
 		itemRename.setDisabled(node === this.root || node.disabled);
+                 
+                var itemEdit = menu.items.get('edit');
+		itemEdit.setDisabled(!(node.isLeaf() && node.attributes.edit != 'none'));
 
 		var itemNewDir = menu.items.get('newdir');
 		itemNewDir.setDisabled(node.isLeaf() ? node.parentNode.disabled : node.disabled);
@@ -720,6 +745,12 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 		// delete
 		if(false === this.enableDelete) {
 			itemDelete.hide();
+		}
+                 
+                // hide/show logic
+		// delete
+		if(false === this.enableEdit) {
+			itemEdit.hide();
 		}
 
 		// newdir
@@ -782,6 +813,11 @@ Ext.extend(Ext.ux.FileTreePanel, Ext.tree.TreePanel, {
 			// {{{
 			case 'rename':
 				treeEditor.triggerEdit(node);
+			break;
+			// }}}
+                        // {{{
+			case 'edit':
+				this.fireEvent('edit', this, node)
 			break;
 			// }}}
 			// {{{

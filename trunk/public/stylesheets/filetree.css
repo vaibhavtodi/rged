@@ -94,6 +94,7 @@
 }
 .file-html .x-tree-node-icon 
 , .file-htm .x-tree-node-icon 
+, .file-phtml .x-tree-node-icon 
 , .file-sgml .x-tree-node-icon 
 , .file-xhtml .x-tree-node-icon 
 , .file-xml .x-tree-node-icon 
@@ -121,7 +122,7 @@
 , .file-wmp .x-tree-node-icon
 , .file-wmv .x-tree-node-icon
 {
-	background-image: url(../images/icons/mime/video.png);
+	background-image: url(../images/icons/mime/film.png);
 }
 .file-ttf .x-tree-node-icon 
 , .file-otf .x-tree-node-icon
@@ -154,7 +155,7 @@
 	background-image: url(../images/icons/mime/source_j.png);
 }
 .file-css .x-tree-node-icon {
-	background-image: url(../images/icons/mime/source_c.png);
+	background-image: url(../images/icons/mime/css.png);
 }
 .file-c .x-tree-node-icon {
 	background-image: url(../images/icons/mime/source_c.png);
@@ -251,7 +252,7 @@
 , .file-wv .x-tree-node-icon
 , .file-wvc .x-tree-node-icon
 {
-	background-image: url(../images/icons/mime/sound.png);
+	background-image: url(../images/icons/mime/music.png);
 }
 .file-asc .x-tree-node-icon
 , .file-cer .x-tree-node-icon

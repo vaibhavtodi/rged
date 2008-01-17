@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" >
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title><%= params[:file] %></title>
+	<script type="text/javascript" src="/javascripts/edit_area/edit_area_full.js"></script>	
+</head>
+<body>
+<form action='/directory/save' method='post'>
+	<fieldset>
+            <input type="hidden" name="filename" value="<%= params[:file] %>"/>
+		<textarea id="file" style="height: 350px; width: 100%;" name="file"></textarea>
+	</fieldset>
+</form>
+<script type="text/javascript">
+      document.getElementById('file').value = "<%= escape_javascript(@file) %>";
+      function save_file(id, value) {
+          var textarea = document.getElementById(id);
+          textarea.value = value;
+          textarea.form.submit ();
+      }
+      editAreaLoader.init({
+              id: "file"	// id of the textarea to transform		
+              , start_highlight: true	// if start with highlight
+              , allow_toggle: false
+              , fullscreen: true
+              , save_callback: "save_file"
+              , toolbar: "save, search, go_to_line, |, undo, redo, |, select_font,|, change_smooth_selection, highlight, reset_highlight, syntax_selection, |, help"
+              ,language: "en"
+              , syntax: "<%= @filetype %>"	
+      });	</script>
+</body>
+</html>

@@ -80,6 +80,9 @@ class DirectoryController < ApplicationController
 
 before_filter :login_required
 
+verify :method => :post, :only => [ :save ],
+     :redirect_to => { :action => :index, :controller => :index }
+
  def home
    os = Platform::OS
    impl = Platform::IMPL
@@ -117,6 +120,17 @@ before_filter :login_required
     protect_dir(dir)
     return dir
   end
+  
+  def can_edit(ext)
+    ext = ext.downcase.tr('.','')
+    if (%w[html htm phtml xml rhtml rxml rjs rb js css php py c java h txt sh sql].include?(ext))
+      'edit_area'
+    #elsif (%w[jpg jpeg gif png].include?(ext)) # add image editor
+    #  'image'
+    else
+        'none'
+    end
+  end
 
   def list
     dir = get_dir(:path)
@@ -136,7 +150,8 @@ before_filter :login_required
                 :size => File.size(dir + filename),
                 :lastChange => File.atime(dir + filename).asctime,
                 :path => dir.sub(self.home, '') + filename,
-                :cls => ((File.directory?(dir + filename)) ? 'folder' : File.extname(filename).sub(".", 'file-'))
+                :edit => can_edit(File.extname(filename)),
+                :cls => ((File.directory?(dir + filename)) ? 'folder' : File.extname(filename).downcase.sub(".", 'file-'))
               }
             rescue
               return_data[:Files][i] = {
@@ -144,7 +159,8 @@ before_filter :login_required
                 :size => 0,
                 :lastChange => '',
                 :path => '',
-                :cls => ''
+                :cls => '',
+                :edit => 'none'
                 }
             end
             i = i + 1
@@ -178,6 +194,7 @@ before_filter :login_required
               :text => filename,
               :path => filename,
               :cls => "folder",
+              :edit => 'none',
               :disabled => readonly,
               :leaf => false
               }
@@ -186,7 +203,8 @@ before_filter :login_required
               :id => dir.sub(self.home, '') + filename,
               :text => filename,
               :path => filename,
-              :cls => File.extname(filename).sub(".", 'file-'),
+              :edit => can_edit(File.extname(filename)),
+              :cls => File.extname(filename).downcase.sub(".", 'file-'),
               :disabled => false,
               :leaf => true
               }
@@ -284,6 +302,36 @@ before_filter :login_required
     end
   end
 
+  def save
+    @filename = get_dir(:filename, false)
+    if (File.exist?(@filename))
+      File.open(@filename, 'w') {|f| f.write(params[:file])}
+    end
+  end
+  
+  def edit
+    @filename = get_dir(:file, false)
+    @filetype = 'basic'
+    @file = ''
+    if (File.exist?(@filename))
+      ext = File.extname(@filename).downcase.tr('.', '')
+      puts ext
+      @filetype = 'html' if (%w[html htm phtml rhtml].include?(ext))
+      @filetype = 'php' if (%w[php php3 php4 php5 php6 inc].include?(ext))
+      @filetype = 'ruby' if (ext == 'rb')
+      @filetype = 'python' if (ext == 'py')
+      @filetype = 'js' if (ext == 'js')
+      @filetype = 'pas' if (ext == 'pas')
+      @filetype = 'sql' if (ext == 'sql')
+      @filetype = 'c' if (ext == 'c' || ext == 'h')
+      @filetype = 'cpp' if (%w[cc cpp hh hpp].include?(ext))
+      @filetype = 'vb' if (ext == 'vb')
+      @filetype = 'xml' if (ext == 'xml')
+      File.open(@filename) {|f| @file = f.read() }
+    end
+    render :layout => false
+  end
+  
   def upload
     dir = get_dir(:path)
     return_data = Hash.new
