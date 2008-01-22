@@ -6,9 +6,11 @@ class AddVersions < ActiveRecord::Migration
       t.column :version_a, :integer
       t.column :name, :string
     end
+    add_column :departments, :version_a, :integer
   end
 
   def self.down
     drop_table :department_versions
+    remove_column :departments, :version_a
   end
 end

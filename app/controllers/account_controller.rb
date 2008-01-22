@@ -18,12 +18,13 @@ class AccountController < ApplicationController
         #if self.current_user != nil
           self.current_user.remember_me
           cookies[:auth_token] = { :value => self.current_user.remember_token , :expires => self.current_user.remember_token_expires_at }
-          session[:user] = User.find_by_id(self.current_user)
+          
        # else
        #   redirect_back_or_default(:controller => 'account', :action => 'login')
        #   flash[:notice] = _("Logged in failed")
        # end
       end
+      session[:user] = User.find_by_id(self.current_user)
       redirect_back_or_default(:controller => 'index', :action => 'index')
       flash[:notice] = _("Logged in successfully")
     else

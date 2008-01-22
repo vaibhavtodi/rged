@@ -157,6 +157,14 @@ Rged.prototype =  {
     menu_onChange: function(field, newval, oldval) {
        this.load_path(newval);
     },
+    
+    // When the TextBox in the menu change
+    combo_onSelect: function(field, record, index) {
+        if (this.depatmentId != record.id) {
+            this.depatmentId = record.id;
+            this.load_path(record.id + '/');
+        }
+    },
 
     menu_onRename: function(o, e) {
         var sel = this.grid.selModel.getSelected();
@@ -243,7 +251,31 @@ Rged.prototype =  {
        this.textBox.on('change', this.menu_onChange, this);
        this.textBox.on('specialkey', this.menu_onSpecialKey, this);
        this.menu.addField(this.textBox);
-       this.menu.addFill ();
+       this.menu.addFill();
+       var store = new Ext.data.Store({
+        proxy: new Ext.data.HttpProxy({
+            url: '/users/list_department/'
+        }),
+        reader: new Ext.data.JsonReader({
+            root: 'rows',
+            totalProperty: 'total',
+            id: 'id'
+        }, [
+            {name: 'id', mapping: 'id'},
+            {name: 'name', mapping: 'name'}
+        ])
+    });
+        this.combo = new Ext.form.ComboBox({
+            store: store,
+            displayField:'name',
+            typeAhead: true,
+            triggerAction: 'all',
+            emptyText:'Select...',
+            editable: false,
+            selectOnFocus:true
+        });
+       this.combo.on('select', this.combo_onSelect, this);
+       this.menu.addField(this.combo);
        this.menu.addButton({
            text: 'Logout',
            cls: 'x-btn-text-icon menu-logout',
@@ -807,13 +839,32 @@ Rged.prototype =  {
     },
 
     change_path: function (path) {
-        this.path = path;
-        this.ds.load ({params: {path: path}});
-        var p = "/root" + path;
-        if (p.substr(p.length - 1, 1) == '/')
-            p = p.substr(0, p.length - 1)
-        this.textBox.setValue(p.substr(5, p.length - 5));
-        this.tree.selectPath(p, 'text', function (success, node) { if (success) node.expand() });
+        if (path.indexOf('/') > 0) {
+            var i = path.indexOf('/');
+            var id = Number(path.substr(0, i));
+            path = path.substr(i);
+            ar p = "/root" + path;
+            if (p.substr(p.length - 1, 1) == '/')
+                p = p.substr(0, p.length - 1)
+            this.textBox.setValue(p.substr(5, p.length - 5));
+            var tree = this.tree;
+            tree.root.removeChild();
+            this.ds.load ({params: {path: path, id: id}, callback: function () {
+                    tree.root.reload(function () {
+                    tree.selectPath(p, 'text', function (success, node) { if (success) node.expand() });
+                });
+            }});
+            
+        }
+        else {
+            this.path = path;
+            var p = "/root" + path;
+            if (p.substr(p.length - 1, 1) == '/')
+                p = p.substr(0, p.length - 1)
+            this.textBox.setValue(p.substr(5, p.length - 5));
+            this.ds.load ({params: {path: path}});
+            this.tree.selectPath(p, 'text', function (success, node) { if (success) node.expand() });
+        }        
     }
 };
 

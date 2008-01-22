@@ -1,0 +1,23 @@
+<h1>Editing user</h1>
+
+<%= error_messages_for :user %>
+
+<% form_tag :action => 'update', :id => @user do |f| %>
+  <%= render :partial => 'form' %>
+
+<div class="info"><label><b>Departement:</b></label><br/>
+<% unless controller.action_name == 'show' %>
+	<%= sub_list_add_link 'Users_departments', 'Add Departement' %>
+<% end %>
+
+<%= sub_list_content 'Users_department', 'user' %>
+<br />
+<%= link_to 'Manage Departement', :controller => 'departments', :action => 'list' %>
+</div>
+  <p>
+    <%= submit_tag _('Edit') %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', :action => 'show', :id => @user.id %> |
+<%= link_to 'Back', :action => 'list' %>

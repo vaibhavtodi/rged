@@ -82,7 +82,7 @@ before_filter :login_required
 
 verify :method => :post, :only => [ :save ],
      :redirect_to => { :action => :index, :controller => :index }
-
+private
  def home
    os = Platform::OS
    impl = Platform::IMPL
@@ -90,9 +90,9 @@ verify :method => :post, :only => [ :save ],
 
    if "#{os}" != "java"
      if "#{os}" =~ /unix/ && "#{impl}" =~ /macosx/ then
-       return "/Users/#{user.login}"
+       dir_home = "/Users/#{user.login}"
      else
-       return "/home/#{user.login}"
+       dir_home = "/home/#{user.login}"
      end
    else
      require 'java'
@@ -100,8 +100,15 @@ verify :method => :post, :only => [ :save ],
      home = "#{System.getenv("HOME")}"
      user_tmp = "#{System.getenv("USER")}"
      home = home.sub(user_tmp, '')
-     return home + user.login
+     dir_home = home + user.login
    end
+    if params[:id]
+      session[:path] = Department.find(params[:id]).path
+    end
+    if !(session[:path])
+      session[:path] = session[:user].users_departments.first.department.path
+    end
+    session[:path] || dir_home
  end
 
  def protect_dir(dir)
@@ -116,7 +123,7 @@ verify :method => :post, :only => [ :save ],
     if rep == true then
       dir += '/' unless dir.ends_with?('/')
     end
-    dir = self.home + dir
+    dir = home() + dir
     protect_dir(dir)
     return dir
   end
@@ -131,7 +138,7 @@ verify :method => :post, :only => [ :save ],
         'none'
     end
   end
-
+public
   def list
     dir = get_dir(:path)
     return_data = Hash.new()
@@ -149,7 +156,7 @@ verify :method => :post, :only => [ :save ],
                 :name => filename,
                 :size => File.size(dir + filename),
                 :lastChange => File.atime(dir + filename).asctime,
-                :path => dir.sub(self.home, '') + filename,
+                :path => dir.sub(home, '') + filename,
                 :edit => can_edit(File.extname(filename)),
                 :cls => ((File.directory?(dir + filename)) ? 'folder' : File.extname(filename).downcase.sub(".", 'file-'))
               }
@@ -190,7 +197,7 @@ verify :method => :post, :only => [ :save ],
         if filename[0,1] != '.' then
           if File.directory?(dir + filename) then
             return_data[i] = {
-              :id => dir.sub(self.home, '') + filename,
+              :id => dir.sub(home, '') + filename,
               :text => filename,
               :path => filename,
               :cls => "folder",
@@ -200,7 +207,7 @@ verify :method => :post, :only => [ :save ],
               }
           else
             return_data[i] = {
-              :id => dir.sub(self.home, '') + filename,
+              :id => dir.sub(home, '') + filename,
               :text => filename,
               :path => filename,
               :edit => can_edit(File.extname(filename)),
