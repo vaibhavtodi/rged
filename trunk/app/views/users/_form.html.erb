@@ -1,0 +1,11 @@
+<h3 align="center" style="margin-bottom:5px;"> <%= _('Sign up Page') %> </h3>
+
+<%= error_messages_for :user %>
+
+<p><label for="login"> <%= _('Login') %> </label><br/>
+<%= text_field :user, :login %></p>
+
+<p><label for="email"> <%= _('Email') %> </label><br/>
+<%= text_field :user, :email %></p>
+
+<br>

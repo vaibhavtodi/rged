@@ -1,0 +1,15 @@
+<% user = users_department %>
+
+<div id="<%= "users_department_#{user.id}" %>">
+	<fieldset>
+                <%= hidden_field 'user[users_department]', :user_id %>
+		<label class="first" for="user_users_department_department_id">
+			Name:
+			<%= select 'user[users_department]', 'department_id', nested_set_options_for_select(Department) %>
+		</label>
+
+		<% unless controller.action_name == 'show' %>
+		 		<%= sub_list_remove_link user, 'Users_department' %>
+  		<% end %>
+	</fieldset>
+</div>

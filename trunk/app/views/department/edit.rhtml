@@ -6,6 +6,9 @@
 <p><label> <%= _('Name') %> </label><br/>
 <%= text_field_tag('name', value = @node.name) %></p>
 
+<p><label> <%= _('Path') %> </label><br/>
+<%= text_field_tag('path', value = @node.path) %></p>
+
 <p><label> <%= _('Country') %> </label><br/>
 <%= text_field_tag('country', value = Country.find(@node.country_id).name) %></p>
 

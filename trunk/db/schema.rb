@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 5) do
+ActiveRecord::Schema.define(:version => 7) do
 
   create_table "countries", :force => true do |t|
     t.string "name"
@@ -24,11 +24,10 @@ ActiveRecord::Schema.define(:version => 5) do
 
   create_table "departments", :force => true do |t|
     t.integer "parent_id"
-    t.integer "country_id"
-    t.integer "version_a"
     t.integer "lft"
     t.integer "rgt"
     t.string  "name"
+    t.string  "path"
   end
 
   create_table "users", :force => true do |t|
@@ -40,6 +39,13 @@ ActiveRecord::Schema.define(:version => 5) do
     t.datetime "updated_at"
     t.string   "remember_token"
     t.datetime "remember_token_expires_at"
+  end
+
+  create_table "users_departments", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "department_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "workers", :force => true do |t|
