@@ -44,7 +44,7 @@ class UsersController < ApplicationController
   def create
     @user = User.new(params[:User])
     success = true
-    success &&= initialize_users_departments(@user)
+    success &&= initialize_users_departments
     success &&= @user.save
     if success
       flash[:notice] = 'User was successfully created.'
