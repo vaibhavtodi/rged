@@ -394,6 +394,7 @@ Rged.prototype =  {
         // create the Grid
         this.grid = new Ext.grid.GridPanel({
             title: 'Files',
+            header: false,
             closable:false,
             store: this.ds,
             columns: [
@@ -843,12 +844,11 @@ Rged.prototype =  {
             var i = path.indexOf('/');
             var id = Number(path.substr(0, i));
             path = path.substr(i);
-            ar p = "/root" + path;
+            var p = "/root" + path;
             if (p.substr(p.length - 1, 1) == '/')
                 p = p.substr(0, p.length - 1)
             this.textBox.setValue(p.substr(5, p.length - 5));
             var tree = this.tree;
-            tree.root.removeChild();
             this.ds.load ({params: {path: path, id: id}, callback: function () {
                     tree.root.reload(function () {
                     tree.selectPath(p, 'text', function (success, node) { if (success) node.expand() });
@@ -869,8 +869,8 @@ Rged.prototype =  {
 };
 
 Ext.onReady(function() {
-    var rged = new Rged ();
-    rged.init ();
+    var rged = new Rged();
+    rged.init();
     Ext.get('loading').remove();
     Ext.get('loading-mask').fadeOut({remove:true});
 });

@@ -1,3 +1,17 @@
+<div class="info"><b> <%= _('Login') %> :</b>
+<%= @user.login %></div>
 
-<%= link_to 'Edit', edit_user_path(@user) %> |
-<%= link_to 'Back', users_path %>
+<div class="info"><b> <%= _('Email') %> :</b>
+<%= @user.email %></div>
+
+<div class="info">
+<b><%= _('Department') %>:</b>
+<ul style="list-style-type: circle; padding-left: 10px;">
+<% @user.users_departments.each do |du| %>
+<li><%= du.department.name %></li>
+<% end %>
+</ul>
+</div>
+<br />
+<%= link_to 'Edit', :action => 'edit', :id => @user %> |
+<%= link_to 'Back', :action => 'list' %>

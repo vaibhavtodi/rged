@@ -31,20 +31,17 @@ module UIEnhancements
             model_class = model.to_s.camelize.constantize
             models = model.pluralize
             
-            define_method("initialize_#{models}(param)") do
+            define_method("initialize_#{models}") do
               success = true
               parent_obj = eval "@#{parent}"
               model_list = parent_obj.send( models )
-              logger.debug param.inspect
-              return success if param[model].nil?
-              
-              param[model].sort.each do |id, values|
+              return success if params[model].nil? 
+              params[model].sort.each do |id, values|
                 obj = send( "find_#{model}", id )
                 if obj.nil?
                   obj = model_class.new( values )
                   obj.send( "#{parent}=", parent_obj )
                   model_list << obj
-                  #obj = model_list.build( values )
                 else
                   obj = model_list.select { |item| item == obj }.first
                   success = obj.update_attributes( values )

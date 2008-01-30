@@ -1,23 +1,32 @@
-<h1><%= _('Listing users') %></h1>
-
-<table>
-  <tr>
-    <th><%= _('Login') %></th>
-    <th><%= _('Email') %></th>
-    <th colspan="3"><%= _('Action') %></th>
+<div id="ext-comp-1001" class="x-panel x-grid-panel">
+<div id="ext-gen7" class="x-panel-header x-unselectable" style="-moz-user-select: none;">
+<span id="ext-gen49" class="x-panel-header-text"><%= _('Listing users') %></span>
+</div>
+<div id="ext-gen8" class="x-panel-bwrap">
+<div id="ext-gen9" class="x-panel-body">
+<div class="x-grid3">
+<table width="100%">
+  <thead >
+  <tr class="x-grid3-hd-row" style="background:#EBF3FD url(/javascripts/extjs/resources/images/default/grid/grid3-hrow-over.gif) repeat-x scroll left bottom;">
+    <th class="x-grid3-hd x-grid3-cell" style="border:1px solid #AACCF6;"><div class="x-grid3-hd-inner x-grid3-hd-1" style="" unselectable="on"><%= _('Login') %></div></th>
+    <th class="x-grid3-hd x-grid3-cell" style="border:1px solid #AACCF6;"><div class="x-grid3-hd-inner x-grid3-hd-1" style="" unselectable="on"><%= _('Email') %></div></th>
+    <th class="x-grid3-hd x-grid3-cell" style="border:1px solid #AACCF6;" colspan="3"><div class="x-grid3-hd-inner x-grid3-hd-1" style="" unselectable="on"><%= _('Action') %></div></th>
   </tr>
-
+  </thead>
 <% for user in @users %>
-  <tr>
-    <td><%= user.login %></td>
-    <td><%= user.email %></td>
-    <td><%= link_to 'Show', :action => :show, :controller => :users, :id => user.id %></td>
-    <td><%= link_to 'Edit', :action => :edit, :controller => :users, :id => user.id %></td>
-    <td><%= link_to 'Destroy', {:action => :delete, :controller => :users, :id => user.id}, :confirm => 'Are you sure?', :method => :delete %></td>
+  <tr class="x-grid3-row-table">
+    <td class="x-grid3-col x-grid3-cell"><%= user.login %></td>
+    <td class="x-grid3-col x-grid3-cell"><%= user.email %></td>
+    <td class="x-grid3-col x-grid3-cell"><%= link_to (image_tag("user.png", :border=>0) + ' ' + _('Show')), :action => :show, :controller => :users, :id => user.id %></td>
+    <td class="x-grid3-col x-grid3-cell"><%= link_to (image_tag("user_edit.png", :border=>0) + ' ' + _('Edit')), :action => :edit, :controller => :users, :id => user.id %></td>
+    <td class="x-grid3-col x-grid3-cell"><%= link_to (image_tag("user_delete.png", :border=>0) + ' ' + _('Delete')), {:action => :delete, :controller => :users, :id => user.id}, :confirm => 'Are you sure?', :method => :delete %></td>
   </tr>
 <% end %>
 </table>
+</div>
+</div>
+</div>
 
 <br />
 
-<%= link_to 'Sign Up', :action => :signup, :controller => :account %>
+<%= link_to (image_tag("user_add.png", :border=>0) + ' Sign Up'), :action => :signup, :controller => :account %>
