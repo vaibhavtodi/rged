@@ -1,0 +1,1 @@
+It's a small DMS (document management system) in ruby and Rails and the ext Javascript library
